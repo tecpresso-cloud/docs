@@ -1,0 +1,27 @@
+---
+title: Vendor References
+description: "Curated vendor documentation with automated freshness checks."
+---
+
+# Vendor References
+
+Curated documentation from key vendors. Freshness is monitored by the
+`check-references.sh` script which runs weekly.
+
+## Reference Sources
+
+| Vendor | Source | Update Method | llms.txt |
+|--------|--------|---------------|----------|
+| cPanel | docs.cpanel.net | Manual + version check | TBD |
+| WHMCS | docs.whmcs.com (Mintlify) | llms.txt when available | Pending |
+| CloudLinux | docs.cloudlinux.com | Manual + version check | TBD |
+| Terraform | registry.terraform.io | GitHub releases API | N/A |
+| AlmaLinux | wiki.almalinux.org | Manual | N/A |
+| SakuraCloud | manual.sakura.ad.jp | Manual + local copy | N/A |
+| Imunify360 | docs.imunify360.com | Manual | TBD |
+
+## Freshness Policy
+
+- **Critical vendors** (cPanel, WHMCS, Terraform): Check weekly
+- **Infrastructure vendors** (CloudLinux, Imunify360): Check monthly
+- **Cloud providers** (GCP, AWS, Azure): Track via Terraform provider releases

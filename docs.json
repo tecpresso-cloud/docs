@@ -1,122 +1,96 @@
 {
   "$schema": "https://mintlify.com/docs.json",
   "theme": "mint",
-  "name": "Mint Starter Kit",
+  "name": "KB Docs",
+  "customDomain": "docs.webhostingm.com",
   "colors": {
-    "primary": "#16A34A",
-    "light": "#07C983",
-    "dark": "#15803D"
+    "primary": "#4F46E5",
+    "light": "#818CF8",
+    "dark": "#3730A3"
   },
   "favicon": "/favicon.svg",
+  "logo": {
+    "dark": "/logo/dark.svg",
+    "light": "/logo/light.svg"
+  },
   "navigation": {
     "tabs": [
       {
-        "tab": "Guides",
+        "tab": "Getting Started",
         "groups": [
           {
-            "group": "Getting started",
+            "group": "Getting Started",
             "pages": [
-              "index",
-              "quickstart",
-              "development"
-            ]
-          },
-          {
-            "group": "Customization",
-            "pages": [
-              "essentials/settings",
-              "essentials/navigation"
-            ]
-          },
-          {
-            "group": "Writing content",
-            "pages": [
-              "essentials/markdown",
-              "essentials/code",
-              "essentials/images",
-              "essentials/reusable-snippets"
-            ]
-          },
-          {
-            "group": "AI tools",
-            "pages": [
-              "ai-tools/cursor",
-              "ai-tools/claude-code",
-              "ai-tools/windsurf"
+              "introduction"
             ]
           }
         ]
       },
       {
-        "tab": "API reference",
+        "tab": "Infrastructure",
         "groups": [
           {
-            "group": "API documentation",
+            "group": "Infrastructure",
             "pages": [
-              "api-reference/introduction"
+              "infrastructure/overview",
+              "infrastructure/gcp",
+              "infrastructure/aws",
+              "infrastructure/azure",
+              "infrastructure/sakuracloud"
             ]
-          },
+          }
+        ]
+      },
+      {
+        "tab": "Vendor References",
+        "groups": [
           {
-            "group": "Endpoint examples",
+            "group": "Vendor References",
             "pages": [
-              "api-reference/endpoint/get",
-              "api-reference/endpoint/create",
-              "api-reference/endpoint/delete",
-              "api-reference/endpoint/webhook"
+              "references/overview",
+              "references/cpanel",
+              "references/whmcs",
+              "references/cloudlinux",
+              "references/terraform"
+            ]
+          }
+        ]
+      },
+      {
+        "tab": "Runbooks",
+        "groups": [
+          {
+            "group": "Runbooks",
+            "pages": [
+              "runbooks/overview",
+              "runbooks/terraform-provider-upgrades",
+              "runbooks/server-deployment",
+              "runbooks/whmcs-deployment"
             ]
           }
         ]
       }
     ],
     "global": {
-      "anchors": [
-        {
-          "anchor": "Documentation",
-          "href": "https://mintlify.com/docs",
-          "icon": "book-open-cover"
-        },
-        {
-          "anchor": "Blog",
-          "href": "https://mintlify.com/blog",
-          "icon": "newspaper"
-        }
-      ]
+      "anchors": []
     }
   },
-  "logo": {
-    "light": "/logo/light.svg",
-    "dark": "/logo/dark.svg"
-  },
   "navbar": {
-    "links": [
-      {
-        "label": "Support",
-        "href": "mailto:hi@mintlify.com"
-      }
-    ],
     "primary": {
       "type": "button",
       "label": "Dashboard",
-      "href": "https://dashboard.mintlify.com"
+      "href": "https://mydashboard.webhostingm.com"
     }
-  },
-  "contextual": {
-    "options": [
-     "copy",
-     "view",
-     "chatgpt",
-     "claude",
-     "perplexity",
-     "mcp",
-     "cursor",
-     "vscode"
-   ]
   },
   "footer": {
     "socials": {
-      "x": "https://x.com/mintlify",
-      "github": "https://github.com/mintlify",
-      "linkedin": "https://linkedin.com/company/mintlify"
+      "github": "https://github.com/tecpresso-cloud"
     }
+  },
+  "search": {
+    "prompt": "Search docs..."
+  },
+  "feedback": {
+    "thumbsRating": true
   }
 }
