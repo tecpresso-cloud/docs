@@ -51,7 +51,8 @@
               "references/cpanel",
               "references/whmcs",
               "references/cloudlinux",
-              "references/terraform"
+              "references/terraform",
+              "references/vultr"
             ]
           }
         ]
