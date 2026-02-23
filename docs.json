@@ -92,5 +92,17 @@
   },
   "feedback": {
     "thumbsRating": true
+  },
+  "seo": {
+    "metatags": {
+      "robots": "noindex, nofollow"
+    }
+  },
+  "errors": {
+    "404": {
+      "redirect": false,
+      "title": "Page not found",
+      "description": "The page you're looking for doesn't exist. Try using the **search bar** above or go back to the [introduction](/introduction)."
+    }
   }
 }
