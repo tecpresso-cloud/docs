@@ -2,3 +2,6 @@ node_modules/
 .mintlify/
 .next/
 .DS_Store
+
+# Terraform doc sync temp files (script cleans up, but just in case)
+/tmp/tf-docs-sync-*

@@ -1,0 +1,787 @@
+# CHANGELOG
+
+## 2.34.2 (2026/02/10)
+
+- sakuracloud_nfs: improve error handling when plan is not found (#1344)
+- tests: restore environment variables after provider schema test (#1345)
+- proxylb: remove unused health_check.port field (#1339)
+- go: bump github.com/sacloud/saclient-go from 0.2.7 to 0.3.0 (#1342)
+- go: bump github.com/sacloud/api-client-go from 0.3.4 to 0.3.5 (#1343)
+- go: bump github.com/sacloud/simplemq-api-go from 0.3.0 to 0.4.0 (#1337)
+- go: bump github.com/sacloud/webaccel-api-go from 1.4.0 to 1.4.1 (#1331)
+- go: bump github.com/sacloud/autoscaler from 0.19.2 to 0.19.3 (#1332)
+- go: bump github.com/goccy/go-yaml from 1.18.0 to 1.19.2 (#1330)
+- go: bump golang.org/x/text from 0.32.0 to 0.33.0 (#1333)
+- ci: bump actions/setup-go from 6.1.0 to 6.2.0 (#1334)
+- ci: bump actions/checkout from 6.0.1 to 6.0.2 (#1335)
+
+## 2.34.1 (2026/01/27)
+
+- go: bump github.com/sacloud/saclient-go from 0.2.6 to 0.2.7 (#1336)
+
+## 2.34.0 (2026/01/13)
+
+- go: bump github.com/sacloud/simplemq-api-go from 0.2.0 to 0.3.0 (#1304)
+- go: bump github.com/sacloud/kms-api-go from 0.2.2 to 0.3.1 (#1325)
+- go: bump github.com/sacloud/secretmanager-api-go from 0.2.1 to 0.3.1 (#1328)
+- go: bump github.com/sacloud/webaccel-api-go from 1.3.0 to 1.4.0 (#1329)
+- Do not set passwords in state from API responses (#1327)
+- go: bump github.com/sacloud/apprun-api-go from 0.5.0 to 0.6.0 (#1324)
+- iaas-service-go v1.21.1 and autoscaler v0.19.2 (#1326)
+- Fix state handling and update schema for sakuracloud_auto_scale (#1319)
+- Fix failing tests with fake and skip unsupported cases (#1323)
+- docs: added important notice about v2 and v3 (#1320)
+- go: bump github.com/sacloud/api-client-go from 0.3.3 to 0.3.4 (#1317)
+- ci: bump actions/checkout from 6.0.0 to 6.0.1 (#1310)
+- Use current profile when no profile name is specified (#1315)
+- feat: SAKURA_* env vars (#1312)
+- feat: sakuracloud_database: continuous_backup, disk_encryption, monitoring_suite (#1311)
+
+## 2.33.0 (2025/12/09)
+
+- go 1.25 (#1309) 
+- use tf5server directly (#1303)
+- sakuracloud_apprun_application: API v1.2.0 (#1302)
+
+## 2.32.0 (2025/12/04)
+
+- fix typo in README.md (#1300)
+- e2e: replace placeholder SSH public key with a valid formatted key(#1301)
+- ci: bump actions/setup-go from 5.5.0 to 6.1.0 (#1298)
+- ci: bump actions/checkout from 5.0.0 to 6.0.0 (#1297)
+- go: bump golang.org/x/crypto from 0.43.0 to 0.45.0 (#1295)
+- go: bump github.com/quic-go/quic-go from 0.54.0 to 0.54.1(#1290)
+- feat: monitoring_suite - dns,gslb,proxylb,simple_monitor,vpc_router (#1296)
+- go: bump github.com/cloudflare/circl from 1.3.7 to 1.6.1(#1260)
+ 
+## 2.31.2 (2025/11/06)
+
+- iaas-service-go v1.18.1 (#1294)
+- iaas-service-go v1.17.0 - update ostype (#1293)
+
+## 2.31.1 (2025/10/21)
+
+- エンハンスドDB: Import対応 (#1292)
+
+## 2.31.0 (2025/10/17)
+
+- server: 高火力VRT対応 (#1291)
+- disk: KMSキーを用いたディスク暗号化/BYOK対応 (#1289)
+
+## 2.30.0 (2025/09/26)
+
+- AppRun: components.envの差分対応 (#1234/#1286)
+- AppRun: API v1.1.0対応 (#1287)
+- ゾーンのis1c対応
+
+## 2.29.1 (2025/09/02)
+
+- webaccelリソースでのDomainが設定されておらずエラーになる問題の修正 (#1278)
+
+## 2.29.0 (2025/08/04)
+
+- KMSの追加 (#1272)
+- シークレットマネージャの追加 (#1273)
+- コンテナレジストリでユーザの順番に依存してプランが変わってしまう問題の修正 (#1275)
+
+## 2.28.1 (2025/07/08)
+
+- SSH公開鍵が反映されない問題を修正 (#1269)
+- ディスク修正機能のパスワードポリシー変更を適用 (#1268)
+- シンプルMQのクライアントを更新してエラーハンドリングの改善 (#1265)
+
+## 2.28.0 (2025/06/23)
+
+- シンプルMQの追加 (#1256)
+- SSH公開鍵生成機能の取り下げ (#1262)
+- update golangci-lint to v2 (#1259)
+- Go 用のテンプレートパラメータのようなものが examples と docs に残っていたので修正 (#1264)
+
+## 2.27.0 (2025/06/09)
+
+- resource_webaccel および resource_webaccel_activation を実装 (#1250)
+- go: bump golang.org/x/net from 0.33.0 to 0.38.0 (#1242)
+- iaas-api-go v1.15.0 (#1245)
+- Update GitHub Actions matrix to use Ubuntu 24.04 (#1244)
+- sakuracloud_apprun_application: set ForceNew: true for name (#1235)
+- go: bump golang.org/x/net from 0.25.0 to 0.33.0 (#1230)
+- go: bump github.com/sacloud/autoscaler from 0.15.5 to 0.16.1 (#1197)
+- update: iaas-api-go v1.14.0 (#1229)
+
+## 2.26.1 (2025/02/13)
+
+- ContainerRegistry:beta #1225
+- enable CHANGELOG: #1226
+- sakuracloud_apprun_application: added status and public_url #1212
+- go: bump golang.org/x/crypto from 0.23.0 to 0.31.0 #1205
+
+## 2.26.0 (2024/12/16)
+
+- AppRun対応のドキュメント作成 #1206
+- AppRunのenvをTypeSetに変更 #1203
+- Daily Integration Testにおいて、AppRunはFakeModeの場合はテストをスキップする #1202
+- AppRun対応 #1200
+- go: bump golang.org/x/net from 0.18.0 to 0.23.0 #1156
+- go: bump github.com/hashicorp/go-retryablehttp from 0.7.5 to 0.7.7 #1194
+- go: bump github.com/stretchr/testify from 1.9.0 to 1.10.0 #1186
+- GoReleaser v2 #1195
+- ci: bump goreleaser/goreleaser-action from 5 to 6 #1168
+- go: bump google.golang.org/protobuf from 1.31.0 to 1.33.0 #1154
+- fix: 一部のテストケースをAcceptance Testでのみ実行するように修正 #1191
+- docs: exampleでのデフォルト値をより汎用的な用途向けに修正 #1189
+- Fix error when updating server-connected disk #1128
+- リソース名長エラーを修正 #1181
+
+## 2.25.5 (2024/10/29)
+
+- sakuracloud_proxylb_acmeのimport時のバグを修正 #1174
+- sakuracloud_packet_filter_rulesのimportができないバグを修正 #1175
+- ParallelTest() -> Test() #1176
+- GSLBのヘルスチェックでプロトコルがHTTP/HTTPSの場合にポートの指定ができない不具合修正 #1180
+- ELBのACME証明書自動更新が無効になる不具合修正 #1178
+
+## 2.25.4 (2024/6/10)
+
+- sakuracloud_cdrom: 20GB対応 #1169
+- ウェブアクセラレータ ACL機能 #1166
+- sakuracloud_disk: encryption_algorithmにデフォルト値を指定 #1167
+- ディスクのインポート修正 #1165
+- ディスク暗号化機能の対応 #1161
+- update dependencies - sacloud/makefile v0.0.8 #1150
+
+
+## 2.25.3 (2024/2/26)
+
+- パッケージのダウングレード #1146
+
+## 2.25.2 (2024/2/14)
+
+- Fix: sakuracloud_proxylb: backend_http_keep_aliveとsyslogのデフォルト値/空の場合の挙動を修正 #1144
+- private_key: sensitive=true #1142
+- sakuracloud_proxylb: プラン変更で再作成される問題を修正 #1141
+- sakuracloud_proxylb_acme: BackendHttpKeepAliveの設定が引き継がれない問題を修正 #1135
+
+## 2.25.1 (2023/12/18)
+
+- Update CHANGELOG #1122, 1123
+- github.com/sacloud/autoscaler v0.15.5 #1121
+- go: bump github.com/sacloud/iaas-service-go from 1.9.2-0.20230808054001-efad52d748d4 to 1.9.2 #1119
+- go: bump github.com/sacloud/webaccel-api-go from 1.1.5 to 1.1.6 #1118
+- ci: bump actions/setup-go from 4 to 5 #1115
+- ドキュメント更新：ELBリクエストヘッダによる振り分けルール #1114
+- Improve CI #1113
+- go: bump github.com/hashicorp/terraform-plugin-sdk/v2 from 2.27.0 to 2.30.0 #1112
+
+## 2.25.0 (2023/11/20)
+
+- ELBリクエストヘッダによる振り分けルール対応  #1110
+- go: bump github.com/hashicorp/terraform-plugin-go from 0.16.0 to 0.19.0 #1105 by dependabot bot was closed 4 days ago
+- ロードバランサの受け入れテストをデフォルトでスキップ #1099
+- go 1.21 #1094
+- Fix: サーバプラン変更テスト時のパラメータ指定誤りを修正 #1093
+- AMDプランのテストを環境変数指定時のみに限定 #1092
+- AMDプラン #1090
+- go: bump golang.org/x/text from 0.10.0 to 0.12.0 #1089
+- オートスケールのdays_of_weekをrequiredに変更 #1085
+
+## 2.24.1 (2023/06/09)
+
+- iaas-api-go v1.11.1 - モバイルゲートウェイの電源APIの修正 #1073
+
+## 2.24.0 (2023/05/26)
+
+- エンハンスドDBでのタイプ/リージョン/接続元ネットワーク指定 #1070
+- sacloud/autoscaler@v0.15.3 #1071
+
+## 2.23.2 (2023/04/26)
+
+- validate disk_edit_parameter.hostname #1064
+
+## 2.23.1 (2023/04/20)
+
+- go: bump github.com/goccy/go-yaml from 1.10.1 to 1.11.0 #1056
+- update dependencies #1060
+- sacloud/iaas-service-go@v1.8.1 #1061
+- sacloud/iaas-service-go@v1.8.2 #1062
+
+## 2.23.0 (2023-03-30)
+
+- sacloud/autoscaler v0.15.1 #1053
+- fix: http_backend_keep_aliveのスキーマ修正 - Computed:true #1052
+- go: bump github.com/goccy/go-yaml from 1.10.0 to 1.10.1 #1051
+- fix: http_backend_keep_aliveのスキーマ修正 - デフォルト値の除去 #1050
+- iaas-api-go v1.9.1 #1049
+- go: bump github.com/hashicorp/terraform-plugin-go from 0.14.3 to 0.15.0 #1048
+- go: bump github.com/sacloud/webaccel-api-go from 1.1.4 to 1.1.5 #1047
+- iaas-api-go v1.9 #1046
+- go: bump github.com/hashicorp/terraform-plugin-sdk/v2 #1041
+- ci: bump actions/setup-go from 3 to 4 #1039
+
+## 2.22.2 (2023-03-17)
+
+FEATURES:
+
+- sacloud/autoscaler v0.14.1 #1038
+
+MISC:
+
+- マネージドPKIのテストをON/OFF可能に #1036
+- go 1.20 #1037
+- go: bump github.com/stretchr/testify from 1.8.1 to 1.8.2 #1034
+- go: bump github.com/sacloud/iaas-service-go from 1.6.0 to 1.6.1 #1033
+- go: bump github.com/goccy/go-yaml from 1.9.8 to 1.10.0 #1035
+
+## 2.22.1 (2023-02-08)
+
+FIXES:
+
+- fix: sakuracloud_simple_monitor: verify_sniの反映誤りを修正 #1019
+
+MISC:
+
+- go: bump github.com/sacloud/iaas-api-go from 1.8.0 to 1.8.1
+- go: bump github.com/sacloud/iaas-api-go from 1.8.1 to 1.8.3
+
+
+## 2.22.0 (2023-01-19)
+
+FEATURES:
+
+- ELB: source_ips #1011
+
+MISC:
+
+- e2e: is1a -> is1b #1006 , #1007
+- copyright: 2023 #1009
+
+IMPROVEMENTS:
+
+- go: bump github.com/goccy/go-yaml from 1.9.7 to 1.9.8 #1004
+- go: bump github.com/hashicorp/terraform-plugin-mux from 0.7.0 to 0.8.0 #1005
+- go: bump golang.org/x/text from 0.5.0 to 0.6.0 #1008
+- go: bump github.com/hashicorp/terraform-plugin-go from 0.14.2 to 0.14.3  #1010
+
+## 2.21.0 (2022-12-20)
+
+FEATURES
+
+- iaas-api-go v1.7.0 #1000
+  - オートスケールのトラフィック量トリガー
+  - VPCルータでのDHグループ指定
+
+IMPROVEMENTS:
+
+- iaas-api-go v1.7.1 #1003
+- go: bump github.com/goccy/go-yaml from 1.9.6 to 1.9.7 #991
+- go: bump golang.org/x/text from 0.4.0 to 0.5.0 #993
+- go: bump github.com/sacloud/packages-go from 0.0.6 to 0.0.7 #996
+- ci: bump goreleaser/goreleaser-action from 3 to 4 #997
+
+
+## 2.20.1 (2022-12-05)
+
+FEATURES
+
+- iaas-api-go v1.6.2(MIRACLE LINUX9対応) #991
+
+FIXES
+
+- iaas-api-go v1.6.1 #989
+
+IMPROVEMENTS:
+
+- SDK/Frameworkで共通利用するfunc類をinternal配下に切り出し #981
+- go: bump github.com/goccy/go-yaml from 1.9.5 to 1.9.6 #978
+- go: bump github.com/hashicorp/terraform-plugin-sdk/v2 from 2.24.0 to 2.24.1 #982
+- go: bump github.com/sacloud/autoscaler from 0.11.1 to 0.11.2 #984
+- go: bump github.com/hashicorp/terraform-plugin-go from 0.14.1 to 0.14.2 #987
+
+
+DOCS:
+
+- docs: Terraform Plugin Frameworkの扱いの方針変更 #980
+
+## 2.20.0 (2020-10-26)
+
+FEATURES:
+
+- sakuracloud_database: RDBMSのバージョン指定機能 #975
+
+IMPROVEMENTS:
+
+- go: bump github.com/sacloud/iaas-service-go from 1.3.2 to 1.4.0 #977
+
+## 2.19.4 (2022-10-19)
+
+IMPROVEMENTS:
+
+- SAKURACLOUD_ZONES環境変数をサポート #974
+- go: bump github.com/sacloud/iaas-api-go from 1.4.1 to 1.5.1 #970
+- go: bump github.com/hashicorp/terraform-plugin-sdk/v2 from 2.23.0 to 2.24.0 #969
+- go: bump golang.org/x/text from 0.3.8 to 0.4.0 #973
+
+## 2.19.3 (2022-10-12)
+
+FIXES:
+
+- fix: プロファイルからの値がうまく読み込めないことがある問題を修正 #967
+
+## 2.19.2 (2022-10-11)
+
+FEATURES:
+
+  - sacloud/autoscaler v0.11.1 #964
+  - sakuracloud_auto_scale: GA #965
+
+
+## 2.19.1 (2022-10-06)
+
+IMPROVEMENTS:
+
+  - go 1.19 #957
+  - sacloud/makefile v0.0.7 #958
+
+## 2.19.0 (2022-09-30)
+
+Note:
+- sakuracloud_archiveのos_typeで指定できる値が変更されています。指定できる値の詳細はsakuracloud_archiveのドキュメントを参照ください。
+- このバージョンからCHANGELOGの形式を変更します
+
+FEATURES:
+- iaas-api-go v1.4.0 - OSType更新 #955
+
+IMPROVEMENTS:
+
+- go: bump github.com/hashicorp/terraform-plugin-sdk/v2 from 2.21.0 to 2.23.0 #951
+
+## 2.18.0 (2022-08-22)
+
+このバージョンからterraform-plugin-muxによるTerraform Plugin SDK/Framework両方への対応が行われています(GH-932)。
+現時点ではFrameworkを利用するリソースはありませんが、今後追加されるリソースはFrameworkを用いて実装されます。
+
+FEATURES:
+
+  - sakuracloud_vpc_router: スケジュールメンテナンス機能 [GH-948] (@yamamoto-febc)
+  - sakuracloud_vpc_router: サイト間VPNパラメータ [GH-943] (@yamamoto-febc)
+  - 各データソースのfilter.conditionで完全一致/部分一致のどちらで検索するか指定可能にする [GH-942] (@yamamoto-febc)
+
+IMPROVEMENTS:
+
+  - オートスケーラーのテスト改善 [GH-930] (@yamamoto-febc)
+  - オートスケーラーのテスト改善 [GH-927] (@yamamoto-febc)
+  - エンハンスドロードバランサでの証明書取得待ち処理の改善 [GH-925] (@yamamoto-febc)
+  - Let's Encryptのレートリミットエラー回避対応 [GH-928] (@yamamoto-febc)
+  - VPCルータ作成直後に値が参照できない問題を修正 [GH-939] (@yamamoto-febc)
+
+DEVELOPMENTS:
+
+  - iaas-service-go@v1.3.1 [GH-946] (@yamamoto-febc)
+  - go: bump github.com/hashicorp/terraform-plugin-sdk/v2 from 2.20.0 to 2.21.0 [GH-940] (@dependabot)
+  - go: bump github.com/sacloud/webaccel-api-go from 1.1.2 to 1.1.3 [GH-936] (@dependabot)
+  - crazy-max/ghaction-import-gpg@v5でのパラメータ名変更対応 [GH-935] (@yamamoto-febc)
+  - terraform-plugin-mux対応 [GH-932] (@yamamoto-febc)
+  - go: bump github.com/sacloud/packages-go from 0.0.3 to 0.0.4 [GH-922] (@dependabot)
+  - go: bump github.com/hashicorp/terraform-plugin-sdk/v2 from 2.18.0 to 2.19.0 [GH-923] (@dependabot)
+  - iaas-api-go@v1.2 [GH-917] (@yamamoto-febc)
+  - sacloud/go-template@v0.0.5 [GH-913 , GH-916] (@yamamoto-febc)
+  - sacloud/go-template@v0.0.2 [GH-902] (@yamamoto-febc)
+  - go: bump github.com/hashicorp/terraform-plugin-sdk/v2 from 2.17.0 to 2.18.0 [GH-910] (@dependabot)
+  - go: bump github.com/stretchr/testify from 1.7.1 to 1.7.5 [GH-903] (@dependabot)
+  - go: bump github.com/sacloud/iaas-service-go from 1.1.2 to 1.1.3 [GH-905] (@dependabot)
+  - go: bump github.com/sacloud/api-client-go from 0.1.0 to 0.2.0 [GH-906] (@dependabot)
+  - go: bump github.com/goccy/go-yaml from 1.8.9 to 1.9.5 [GH-907] (@dependabot)
+  - go: bump github.com/hashicorp/terraform-plugin-sdk/v2 from 2.10.1 to 2.17.0 [GH-904] (@dependabot)
+
+DOCS:
+  - docs: Terraform Plugin Frameworkへの対応方針 [GH-931] (@yamamoto-febc)
+
+## 2.17.1 (2022-06-06)
+
+FIXES:
+  - sakuracloud_proxylb_acmeでruleが反映されない問題を修正 [GH-901] (@yamamoto-febc)
+
+DOCS:
+   - yamlencodeからjsonencodeへ変更 [GH-900] (@yamamoto-febc)
+
+## 2.17.0 (2022-06-03)
+
+FEATURES:
+
+  - AutoScale [GH-895] (@yamamoto-febc)
+  - iaas-api-go/v1.1.2 [GH-896] (@yamamoto-febc)
+  - sakuracloud_vpc_router: supports netmask /29 [GH-897] (@yamamoto-febc)
+
+IMPROVEMENTS:
+
+  - iaas-api-go v1.1.1 [GH-894] (@yamamoto-febc)
+  - github.com/hashicorp/hc-install v0.3.2 [GH-892] (@yamamoto-febc)
+  - switch to iaas-service-go [GH-891] (@yamamoto-febc)
+
+MISC:
+
+  - docs: misc updates [GH-898] (@yamamoto-febc)
+
+## 2.16.2 (2022-02-18)
+
+FEATURES:
+
+  - sakuracloud_dns: upgrade MaxItems to 2000 [GH-889] (@yamamoto-febc)
+
+## 2.16.1 (2022-01-27)
+
+MISC:
+  - Upgrade dependencies - github.com/hashicorp/terraform-plugin-sdk v2.10.1 [GH-887] (@yamamoto-febc)
+  - libsacloud v2.32.1 - Removed some os-types: freebsd and coreos [GH-886] (@yamamoto-febc)
+
+## 2.16.0 (2021-12-27)
+
+FEATURES:
+
+- vpc_router: dns_forwarding [GH-881] (@yamamoto-febc)
+- simple_monitor: retry [GH-880] (@yamamoto-febc)
+
+IMPROVEMENTS:
+
+- fix broken test - TestAccSakuraCloudDataSourceCDROM_basic [GH-883] (@yamamoto-febc)
+- Remove centos8 from examples [GH-882] (@yamamoto-febc)
+- libsacloud v2.31 [GH-879] (@yamamoto-febc)
+- libsacloud v2.30.0 - PostgreSQL 13 [GH-878] (@yamamoto-febc)
+
+Note: `data.sakuracloud_archive#os_type`:  `centos8` has been removed.
+
+## 2.15.0 (2021-12-08)
+
+FEATURES:
+
+- simple_monitor: verify_sni [GH-877] (@yamamoto-febc)
+
+IMPROVEMENTS:
+
+- Upgrade dependencies - libsacloud [GH-876] (@yamamoto-febc)
+- Update dependencies - terraform-plugin-sdk/v2 v2.9.0 [GH-875] (@yamamoto-febc)
+- Update dependencies - terraform-plugin-sdk/v2 v2.8.0 [GH-873] (@yamamoto-febc)
+- Go 1.17 [GH-872] (@yamamoto-febc)
+- Update dependencies- github.com/sacloud/libsacloud/v2 v2.28.0 [GH-871] (@yamamoto-febc)
+
+## 2.14.2 (2021-10-25)
+
+FIXES:
+
+  * libsacloud v2.27.1 [GH-870] (@yamamoto-febc)
+
+MISC:
+
+  * Skip local router tests in acceptance test [GH-867] (@yamamoto-febc)
+
+## 2.14.1 (2021-10-14)
+
+FEATURES
+
+  - libsacloud v2.27 - miracle linux [GH-866] (@yamamoto-febc)
+
+## 2.14.0 (2021-10-08)
+
+FEATURES
+
+  - GPU plan [GH-865] (@yamamoto-febc)
+
+## 2.13.0 (2021-10-05)
+
+FEATURES
+
+  - Managed PKI [GH-862] (@yamamoto-febc)
+  - ELB: Proxy Protocol v2 [GH-857] (@yamamoto-febc)
+  - libsacloud v2.25.1 - debian11 [GH-860] (@yamamoto-febc)
+  - simple_monitor: ftp/ftps [GH-861] (@yamamoto-febc)
+
+MISC:
+  - libsacloud v2.26.0 [GH-864] (@yamamoto-febc)
+  - Update docs: user_data [GH-858] (@yamamoto-febc)
+
+## 2.12.0 (2021-08-19)
+
+FEATURES:
+  - cloud-init [GH-856] (@yamamoto-febc)
+
+## 2.11.0 (2021-07-30)
+
+FEATURES:
+  - Support @previous-id tags for server/internet/proxylb [GH-855] (@yamamoto-febc)
+
+## 2.10.2 (2021-07-26)
+
+FIXES
+
+  - libsacloud v2.21.1 [GH-854] (@yamamoto-febc)
+
+## 2.10.1 (2021-07-19)
+
+FIXES
+
+- libsacloud v2.20.1 [GH-852] (@yamamoto-febc)
+
+## 2.10.0 (2021-07-09)
+
+FEATURES
+
+- Enhanced Database [GH-847] by @yamamoto-febc
+- SimpleMonitor: timeout [GH-850] by @yamamoto-febc
+- ELB: supports syslog block and ssl_policy field [GH-849] by @yamamoto-febc
+
+MISC
+
+- libsacloud v2.20.0 [GH-851] by @yamamoto-febc
+- Update dev env [GH-848] by @yamamoto-febc
+
+## 2.9.3 (2021-06-29)
+
+IMPROVEMENTS
+
+- Terraform Plugin SDK v2.7.0 [GH-840] (@yamamoto-febc)
+- Rename flag from -debuggable to -debug [GH-844] (@yamamoto-febc)
+
+FIXES
+
+- Moved default size setting from the schema definition section [GH-843] (@yamamoto-febc)
+
+
+## 2.9.2 (2021-06-24)
+
+- Fix zone name attribute of DNS [GH-838] (@chibiegg)
+
+## 2.9.1 (2021-06-21)
+
+- fixed gzip misconfiguration [GH-837] (@yamamoto-febc)
+
+## 2.9.0 (2021-06-15)
+
+- LoadBalancer: Increased VIP limit to 20 [GH-835] (@yamamoto-febc)
+- VPCRouter: WireGuard server [GH-834] (@yamamoto-febc)
+- ELB: extending rule-based-balancing [GH-831] (@yamamoto-febc)
+- libsacloud v2.19.1 [GH-834] (@yamamoto-febc)
+- libsacloud v2.19.0 [GH-829] (@yamamoto-febc)
+
+## 2.8.4(2021-05-02)
+
+* Remove bucket_object resources [GH-818] (@yamamoto-febc)
+* sakuracloud_proxylb_acme: subject_alt_names [GH-819] (@yamamoto-febc)
+* Fixes CI problems [GH-821 , GH-823] (@yamamoto-febc)
+  - github.com/hashicorp/terraform-plugin-sdk v2.6.1
+* libsacloud v2.18.1 [GH-825] (@yamamoto-febc)
+
+## 2.8.3(2021-04-12)
+
+FEATURES:
+
+  * simple_monitor: contains_string & proxylb: gzip [GH-814] (@yamamoto-febc)
+  * libsacloud v2.17 [GH-814] (@yamamoto-febc)
+
+## 2.8.2(2021-04-01)
+
+FEATURES:
+
+  * simple_monitor: http2 [GH-813] (@yamamoto-febc)
+
+## 2.8.1(2021-03-26)
+
+FIXES:
+
+  * Fixed parameter handling for server plan change operation [GH-812] (@yamamoto-febc)
+
+DOCS:
+
+  * Fix packet_filter examples [GH-811] (@tokibi)
+
+## 2.8.0(2021-03-22)
+
+ENHANCEMENTS:
+
+  * **Terraform Plugin SDK v2** [GH-807] (@yamamoto-febc)
+
+FEATURES:
+
+  * sakuracloud_server: ssh_keys [GH-805] (@yamamoto-febc)
+  * sakuracloud_sim: Sentitive:true [GH-802] (@yamamoto-febc)
+
+IMPROVEMENTS:
+
+  * Added some rules for tfproviderlint [GH-809] (@yamamoto-febc)
+  * upgrade dependencies - libsacloud to v2.14.1 - added internet plans [GH-806],[GH-799] (@yamamoto-febc)
+  * darwin/arm64 [GH-800] (@yamamoto-febc)
+
+## 2.7.1 (2021-02-17)
+
+* libsacloud v2.13 [GH-796] (@yamamoto-febc)
+
+## 2.7.0 (2021-01-16)
+
+* VPCRouter version [GH-795] (@yamamoto-febc)
+* Added support for parameters blocks in sakuracloud_database [GH-794] (@yamamoto-febc)
+* libsacloud v2.11.0 [GH-793] (@yamamoto-febc)
+
+## 2.6.0 (2021-01-05)
+
+* Update copyright [GH-792] (@yamamoto-febc)
+* WebAccelerator [GH-791] (@yamamoto-febc)
+* libsacloud v2.9 [GH-790] (@yamamoto-febc)
+
+## 2.5.4 (2020-11-19)
+
+* libsacloud v2.8.10 [GH-786] (@yamamoto-febc)
+
+## 2.5.3 (2020-10-27)
+
+* libsacloud v2.8.6 [GH-783] (@yamamoto-febc)
+
+## 2.5.2 (2020-10-23)
+
+*　libsacloud v2.8.5 [GH-781] (@yamamoto-febc)
+
+## 2.5.1 (2020-10-21)
+
+* libsacloud v2.8.4 [GH-779] (@yamamoto-febc)
+* Use d.Id() for building error message [GH-774] (@yamamoto-febc)
+
+## 2.5.0 (2020-09-30)
+
+FEATURES
+
+* ESME [GH-772] (@yamamoto-febc)
+* libsacloud v2.8.1 [GH-771] (@yamamoto-febc)
+
+IMPROVEMENTS
+
+* Use d.Id() for building error message [GH-774] (@yamamoto-febc)
+
+MISC
+
+* Remove Dockerfile [GH-773] (@yamamoto-febc)
+
+## 2.4.1 (2020-09-17)
+
+FEATURES
+
+* Add default_zone to provider config [GH-769] (@higebu)
+
+## 2.4.0 (2020-08-20)
+
+FEATURES
+
+* tk1b zone (libsacloud v2.7.0) [GH-767] (@yamamoto-febc)
+
+IMPROVEMENTS
+
+* Skip acc tests for the object storage when env is not set [GH-762] (@yamamoto-febc)
+
+## 2.3.6 (2020-08-11)
+
+FIXES
+
+* Fix error handling at VPCRouter [GH-757] (@yamamoto-febc)
+* Use libsacloud v2.6.4 [GH-754] (@yamamoto-febc)
+* Fix time comparison method - use time#Equal() [GH-753] (@yamamoto-febc)
+* Use libsacloud v2.6.3  [GH-751] (@yamamoto-febc)
+
+DOCS
+
+* docs: Terraform v0.13 [GH-758] (@yamamoto-febc)
+
+## 2.3.5 (2020-06-19)
+
+* Update dependencies - libsacloud v2.6.1 [GH-748] (@yamamoto-febc)
+
+## 2.3.4 (2020-06-16)
+
+* ProxyLB: supports anycast [GH-747] (@yamamoto-febc)
+
+## 2.3.3 (2020-05-18)
+
+Note: Publishing in the Terraform Registry is supported this version and later.
+see http://registry.terraform.io/providers/sacloud/sakuracloud/
+
+FEATURES
+
+* Support for publishing in the Terraform Registry [GH-744] (@yamamoto-febc)
+
+FIXES
+
+* Fixes plan changing of ProxyLB [GH-745] (@yamamoto-febc)
+
+## 2.3.2 (2020-05-15)
+
+* This is an experimental release for testing publishing to the Terraform registry. Don't use this in a production environment.
+
+## 2.3.1 (2020-04-24)
+
+FIXES
+
+* Modify how to determine whether to pass disk_edit_parameter to ServerBuilder [GH-737] (@yamamoto-febc)
+
+MISC
+
+* Fix broken CI - install golangci-lint via install script [GH-735] (@yamamoto-febc)
+
+## 2.3.0 (2020-04-20)
+
+* Startup Script Parameters [GH-731] (@yamamoto-febc)
+    * libsacloud v2.5.1
+* libsacloud v2.5.2 - improve error messages [GH-733] (@yamamoto-febc)
+
+## 2.2.0 (2020-03-17)
+
+FEATURES
+
+* Add sakuracloud_archive_share resource [GH-728] (@yamamoto-febc)
+* Supports transferred/shared archives [GH-727] (@yamamoto-febc)
+    * libsacloud v2.4.1
+
+IMPROVEMENTS
+
+* Set ID to state even if got error from builders [GH-726] (@yamamoto-febc)
+* libsacloud v2.3.0 - MariaDB 10.4 [GH-724]
+
+## 2.1.2 (2020-03-10)
+
+* Remove deletion waiter [GH-713] (@yamamoto-febc)
+* libsacloud v2.1.7 [GH-713] (@yamamoto-febc)
+* Go 1.14 [GH-712] (@yamamoto-febc)
+* Fix wrong error message [GH-718] (@yamamoto-febc)
+* libsacloud v2.1.8 to avoid marshal JSON error at SIM [GH-714] (@yamamoto-febc)
+* libsacloud v2.1.9 [GH-723] (@yamamoto-febc)
+
+## 2.1.1 (2020-02-28)
+
+IMPROVEMENS/FIXES
+
+* tfproviderlint v0.10.0 [GH-708] (@yamamoto-febc)
+* libsacloud v2.1.4 [GH-708] (@yamamoto-febc)
+* Upgrade libsacloud to v2.1.5 [GH-709] (@yamamoto-febc)
+
+## 2.1.0 (2020-02-14)
+
+FEATURES
+
+* Container Registry: VirtualDomain/User permission [GH-704] (@yamamoto-febc)
+* PostgreSQL 12.1 [GH-704] (@yamamoto-febc)
+
+IMPROVEMENTS
+
+* Terraform Plugin SDK v1.7.0 [GH-703] (@yamamoto-febc)
+* tfproviderlint v0.9.0 [GH-698] (@yamamoto-febc)
+
+## 2.0.1 (2020-02-06)
+
+FIXES
+
+* libsacloud v2.0.2 [GH-697] @yamamoto-febc
+
+IMPROVEMENTS
+
+* terraform-plugin-sdk v1.6.0 and tfproviderlint v0.9.0 [GH-698] @yamamoto-febc
+* Use libsacloud v2.0.1 [GH-696] @yamamoto-febc
+
+## 2.0.0 (2020-01-31)
+
+NOTES:
+
+* Initial release of v2.0
