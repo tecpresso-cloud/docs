@@ -85,6 +85,13 @@ resource "google_discovery_engine_search_engine" "agentspace_basic" {
   industry_vertical           = "GENERIC"
   app_type                    = "APP_TYPE_INTRANET"
   search_engine_config {
+    search_tier               = "SEARCH_TIER_STANDARD"
+    required_subscription_tier = "SUBSCRIPTION_TIER_ENTERPRISE"
+    search_add_ons            = ["SEARCH_ADD_ON_LLM"]
+  }
+  features = {
+    "agent-sharing-without-admin-approval" = "FEATURE_STATE_ON"
+    "disable-agent-sharing"                = "FEATURE_STATE_OFF"
   }
   knowledge_graph_config {
   }
@@ -138,6 +145,10 @@ The following arguments are supported:
   This is the application type this engine resource represents.
   The supported values: 'APP_TYPE_UNSPECIFIED', 'APP_TYPE_INTRANET'.
 
+* `disable_analytics` -
+  (Optional)
+  Whether to disable analytics for searches performed on this engine.
+
 * `features` -
   (Optional)
   A map of the feature config for the engine to opt in or opt out of features.
@@ -167,6 +178,12 @@ The following arguments are supported:
   The search feature tier of this engine. Defaults to SearchTier.SEARCH_TIER_STANDARD if not specified.
   Default value is `SEARCH_TIER_STANDARD`.
   Possible values are: `SEARCH_TIER_STANDARD`, `SEARCH_TIER_ENTERPRISE`.
+
+* `required_subscription_tier` -
+  (Optional)
+  The required subscription tier of this engine.
+  They cannot be modified after engine creation. If the required subscription tier is search, user with higher license tier like assist can still access the standalone app associated with this engine.
+  Possible values are: `SUBSCRIPTION_TIER_UNSPECIFIED`, `SUBSCRIPTION_TIER_SEARCH`, `SUBSCRIPTION_TIER_SEARCH_AND_ASSISTANT`, `SUBSCRIPTION_TIER_FRONTLINE_WORKER`, `SUBSCRIPTION_TIER_AGENTSPACE_STARTER`, `SUBSCRIPTION_TIER_AGENTSPACE_BUSINESS`, `SUBSCRIPTION_TIER_ENTERPRISE`, `SUBSCRIPTION_TIER_ENTERPRISE_EMERGING`, `SUBSCRIPTION_TIER_EDU`, `SUBSCRIPTION_TIER_EDU_PRO`, `SUBSCRIPTION_TIER_EDU_EMERGING`, `SUBSCRIPTION_TIER_EDU_PRO_EMERGING`, `SUBSCRIPTION_TIER_FRONTLINE_STARTER`.
 
 * `search_add_ons` -
   (Optional)

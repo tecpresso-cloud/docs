@@ -1,9 +1,9 @@
 # SakuraCloud Terraform Provider - Synced Docs
 
 **Provider:** `sacloud/terraform-provider-sakuracloud`
-**Version:** v2.34.2
-**Synced:** 2026-02-23 22:26 UTC
-**Source:** https://github.com/sacloud/terraform-provider-sakuracloud/releases/tag/v2.34.2
+**Version:** v2.35.0
+**Synced:** 2026-03-20 01:39 UTC
+**Source:** https://github.com/sacloud/terraform-provider-sakuracloud/releases/tag/v2.35.0
 **Doc files:** 83
 
 ## Directory Structure

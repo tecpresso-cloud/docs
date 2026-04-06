@@ -1,9 +1,9 @@
 # Vultr Terraform Provider - Synced Docs
 
 **Provider:** `vultr/terraform-provider-vultr`
-**Version:** v2.29.1
-**Synced:** 2026-02-23 22:26 UTC
-**Source:** https://github.com/vultr/terraform-provider-vultr/releases/tag/v2.29.1
+**Version:** v2.30.1
+**Synced:** 2026-03-20 01:39 UTC
+**Source:** https://github.com/vultr/terraform-provider-vultr/releases/tag/v2.30.1
 **Doc files:** 72
 
 ## Directory Structure
