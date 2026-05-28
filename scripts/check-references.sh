@@ -8,6 +8,9 @@
 
 set -euo pipefail
 
+# Script directory for resolving paths to provider .synced-version files.
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
@@ -56,14 +59,29 @@ check_llmstxt() {
   fi
 }
 
+# Read locally-synced provider version from its .synced-version marker file
+# (auto-written by sync-terraform-docs.sh on each run). Returns "NOT_SYNCED"
+# if the marker is missing, which causes the comparison against upstream to
+# report STALE.
+get_local_version() {
+  local provider="$1"
+  local sync_version_file="${SCRIPT_DIR}/../terraform-providers/${provider}/.synced-version"
+  if [[ -f "$sync_version_file" ]]; then
+    tr -d ' \t\n\r' < "$sync_version_file"
+  else
+    echo "NOT_SYNCED"
+  fi
+}
+
 echo "--- Terraform Providers ---"
-# Update these versions after each upgrade
-check_github_release "hashicorp/terraform-provider-google" "Google Provider" "7.15.0"
-check_github_release "hashicorp/terraform-provider-azurerm" "Azure Provider" "4.57.0"
-check_github_release "hashicorp/terraform-provider-aws" "AWS Provider" "6.27.0"
-check_github_release "sacloud/terraform-provider-sakuracloud" "SakuraCloud Provider" "2.34.0"
-check_github_release "cloudflare/terraform-provider-cloudflare" "Cloudflare Provider" "5.11.0"
-check_github_release "vultr/terraform-provider-vultr" "Vultr Provider" "2.29.1"
+# Local versions are read dynamically from each provider's .synced-version
+# file (written by sync-terraform-docs.sh on each sync). No manual edits here.
+check_github_release "hashicorp/terraform-provider-google" "Google Provider" "$(get_local_version google)"
+check_github_release "hashicorp/terraform-provider-azurerm" "Azure Provider" "$(get_local_version azurerm)"
+check_github_release "hashicorp/terraform-provider-aws" "AWS Provider" "$(get_local_version aws)"
+check_github_release "sacloud/terraform-provider-sakuracloud" "SakuraCloud Provider" "$(get_local_version sakuracloud)"
+check_github_release "cloudflare/terraform-provider-cloudflare" "Cloudflare Provider" "$(get_local_version cloudflare)"
+check_github_release "vultr/terraform-provider-vultr" "Vultr Provider" "$(get_local_version vultr)"
 echo ""
 
 echo "--- Vendor llms.txt Availability ---"
