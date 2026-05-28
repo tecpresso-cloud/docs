@@ -27,12 +27,10 @@ A health source resource specifies the source resources and the health
 aggregation policy applied to the source resources to determine the
 aggregated health status.
 
-~> **Warning:** This resource is in beta, and should be used with the terraform-provider-google-beta provider.
-See [Provider Versions](../guides/provider_versions.html.markdown) for more details on beta resources.
 
 To get more information about RegionHealthSource, see:
 
-* [API documentation](https://cloud.google.com/compute/docs/reference/rest/beta/regionHealthSources)
+* [API documentation](https://cloud.google.com/compute/docs/reference/rest/v1/regionHealthSources)
 * How-to Guides
     * [Health checks overview](https://cloud.google.com/load-balancing/docs/health-check-concepts)
 
@@ -41,14 +39,12 @@ To get more information about RegionHealthSource, see:
 
 ```hcl
 resource "google_compute_region_health_aggregation_policy" "hap" {
-  provider    = google-beta
   name        = "test-health-source-hap"
   description = "health aggregation policy for health source"
   region      = "us-central1"
 }
 
 resource "google_compute_health_check" "default" {
-  provider = google-beta
   name     = "test-health-source-hc"
   http_health_check {
     port = 80
@@ -56,7 +52,6 @@ resource "google_compute_health_check" "default" {
 }
 
 resource "google_compute_region_backend_service" "default" {
-  provider              = google-beta
   name                  = "test-health-source-bs"
   region                = "us-central1"
   health_checks         = [google_compute_health_check.default.id]
@@ -64,7 +59,6 @@ resource "google_compute_region_backend_service" "default" {
 }
 
 resource "google_compute_region_health_source" "example_test_health_source" {
-  provider                  = google-beta
   name                      = "test-health-source"
   description               = "Example health source basic"
   region                    = "us-central1"
@@ -128,6 +122,12 @@ The following arguments are supported:
 * `project` - (Optional) The ID of the project in which the resource belongs.
     If it is not provided, the provider project is used.
 
+* `deletion_policy` - (Optional) Whether Terraform will be prevented from destroying the resource. Defaults to DELETE.
+	When a 'terraform destroy' or 'terraform apply' would delete the resource,
+	the command will fail if this field is set to "PREVENT" in Terraform state.
+	When set to "ABANDON", the command will remove the resource from Terraform
+	management without updating or deleting the resource in the API.
+	When set to "DELETE", deleting the resource is allowed.
 
 
 ## Attributes Reference
@@ -169,6 +169,18 @@ RegionHealthSource can be imported using any of these accepted formats:
 * `{{region}}/{{name}}`
 * `{{name}}`
 
+In Terraform v1.12.0 and later, use an [`identity` block](https://developer.hashicorp.com/terraform/language/resources/identities) to import RegionHealthSource using identity values. For example:
+
+```tf
+import {
+  identity = {
+    region = "<-required value->"
+    name = "<-required value->"
+    project = "<-optional value->"
+  }
+  to = google_compute_region_health_source.default
+}
+```
 
 In Terraform v1.5.0 and later, use an [`import` block](https://developer.hashicorp.com/terraform/language/import) to import RegionHealthSource using one of the formats above. For example:
 

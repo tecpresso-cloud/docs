@@ -806,6 +806,12 @@ The following arguments are supported:
   Page.transition_routes.trigger_fulfillment.conditional_cases
   If not specified, the agent's default language is used. Many languages are supported. Note: languages must be enabled in the agent before they can be used.
 
+* `deletion_policy` - (Optional) Whether Terraform will be prevented from destroying the resource. Defaults to DELETE.
+	When a 'terraform destroy' or 'terraform apply' would delete the resource,
+	the command will fail if this field is set to "PREVENT" in Terraform state.
+	When set to "ABANDON", the command will remove the resource from Terraform
+	management without updating or deleting the resource in the API.
+	When set to "DELETE", deleting the resource is allowed.
 
 
 <a name="nested_entry_fulfillment"></a>The `entry_fulfillment` block supports:
@@ -2132,6 +2138,17 @@ Page can be imported using any of these accepted formats:
 * `{{parent}}/pages/{{name}}`
 * `{{parent}}/{{name}}`
 
+In Terraform v1.12.0 and later, use an [`identity` block](https://developer.hashicorp.com/terraform/language/resources/identities) to import Page using identity values. For example:
+
+```tf
+import {
+  identity = {
+    name = "<-optional value->"
+    parent = "<-optional value->"
+  }
+  to = google_dialogflow_cx_page.default
+}
+```
 
 In Terraform v1.5.0 and later, use an [`import` block](https://developer.hashicorp.com/terraform/language/import) to import Page using one of the formats above. For example:
 

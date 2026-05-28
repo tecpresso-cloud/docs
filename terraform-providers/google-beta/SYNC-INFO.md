@@ -1,10 +1,10 @@
 # Google Beta Terraform Provider - Synced Docs
 
 **Provider:** `hashicorp/terraform-provider-google-beta`
-**Version:** v7.24.0
-**Synced:** 2026-03-20 01:36 UTC
-**Source:** https://github.com/hashicorp/terraform-provider-google-beta/releases/tag/v7.24.0
-**Doc files:** 1523
+**Version:** v7.34.0
+**Synced:** 2026-05-28 00:02 UTC
+**Source:** https://github.com/hashicorp/terraform-provider-google-beta/releases/tag/v7.34.0
+**Doc files:** 1583
 
 ## Directory Structure
 

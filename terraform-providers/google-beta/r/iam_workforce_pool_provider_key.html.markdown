@@ -99,6 +99,12 @@ The following arguments are supported:
   The ID to use for the key, which becomes the final component of the resource name. This value must be 4-32 characters, and may contain the characters [a-z0-9-].
 
 
+* `deletion_policy` - (Optional) Whether Terraform will be prevented from destroying the resource. Defaults to DELETE.
+	When a 'terraform destroy' or 'terraform apply' would delete the resource,
+	the command will fail if this field is set to "PREVENT" in Terraform state.
+	When set to "ABANDON", the command will remove the resource from Terraform
+	management without updating or deleting the resource in the API.
+	When set to "DELETE", deleting the resource is allowed.
 
 
 <a name="nested_key_data"></a>The `key_data` block supports:
@@ -166,6 +172,19 @@ WorkforcePoolProviderKey can be imported using any of these accepted formats:
 * `locations/{{location}}/workforcePools/{{workforce_pool_id}}/providers/{{provider_id}}/keys/{{key_id}}`
 * `{{location}}/{{workforce_pool_id}}/{{provider_id}}/{{key_id}}`
 
+In Terraform v1.12.0 and later, use an [`identity` block](https://developer.hashicorp.com/terraform/language/resources/identities) to import WorkforcePoolProviderKey using identity values. For example:
+
+```tf
+import {
+  identity = {
+    location = "<-required value->"
+    workforcePoolId = "<-required value->"
+    providerId = "<-required value->"
+    keyId = "<-required value->"
+  }
+  to = google_iam_workforce_pool_provider_key.default
+}
+```
 
 In Terraform v1.5.0 and later, use an [`import` block](https://developer.hashicorp.com/terraform/language/import) to import WorkforcePoolProviderKey using one of the formats above. For example:
 

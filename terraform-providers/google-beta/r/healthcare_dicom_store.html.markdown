@@ -167,6 +167,12 @@ The following arguments are supported:
   streamConfigs is an array, so you can specify multiple BigQuery destinations. You can stream metadata from a single DICOM store to up to five BigQuery tables in a BigQuery dataset.
   Structure is [documented below](#nested_stream_configs).
 
+* `deletion_policy` - (Optional) Whether Terraform will be prevented from destroying the resource. Defaults to DELETE.
+	When a 'terraform destroy' or 'terraform apply' would delete the resource,
+	the command will fail if this field is set to "PREVENT" in Terraform state.
+	When set to "ABANDON", the command will remove the resource from Terraform
+	management without updating or deleting the resource in the API.
+	When set to "DELETE", deleting the resource is allowed.
 
 
 <a name="nested_notification_config"></a>The `notification_config` block supports:
@@ -232,6 +238,17 @@ DicomStore can be imported using any of these accepted formats:
 * `{{dataset}}/dicomStores/{{name}}`
 * `{{dataset}}/{{name}}`
 
+In Terraform v1.12.0 and later, use an [`identity` block](https://developer.hashicorp.com/terraform/language/resources/identities) to import DicomStore using identity values. For example:
+
+```tf
+import {
+  identity = {
+    name = "<-required value->"
+    dataset = "<-required value->"
+  }
+  to = google_healthcare_dicom_store.default
+}
+```
 
 In Terraform v1.5.0 and later, use an [`import` block](https://developer.hashicorp.com/terraform/language/import) to import DicomStore using one of the formats above. For example:
 

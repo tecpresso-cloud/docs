@@ -98,6 +98,35 @@ resource "google_migration_center_preference_set" "default" {
   }
 }
 ```
+<div class = "oics-button" style="float: right; margin: 0 0 -15px">
+  <a href="https://console.cloud.google.com/cloudshell/open?cloudshell_git_repo=https%3A%2F%2Fgithub.com%2Fterraform-google-modules%2Fdocs-examples.git&cloudshell_image=gcr.io%2Fcloudshell-images%2Fcloudshell%3Alatest&cloudshell_print=.%2Fmotd&cloudshell_tutorial=.%2Ftutorial.md&cloudshell_working_dir=preference_set_compute_engine_preferences_disk_type&open_in_editor=main.tf" target="_blank">
+    <img alt="Open in Cloud Shell" src="//gstatic.com/cloudssh/images/open-btn.svg" style="max-height: 44px; margin: 32px auto; max-width: 100%;">
+  </a>
+</div>
+## Example Usage - Preference Set Compute Engine Preferences Disk Type
+
+
+```hcl
+resource "google_migration_center_preference_set" "default" {
+  location          = "us-central1"
+  preference_set_id = "preference-set-test"
+  description       = "Terraform integration test description"
+  display_name      = "Terraform integration test display"
+  virtual_machine_preferences {
+    sizing_optimization_strategy = "SIZING_OPTIMIZATION_STRATEGY_SAME_AS_SOURCE"
+    target_product = "COMPUTE_MIGRATION_TARGET_PRODUCT_COMPUTE_ENGINE"
+    compute_engine_preferences {
+      license_type = "LICENSE_TYPE_BRING_YOUR_OWN_LICENSE"
+      machine_preferences {
+        allowed_machine_series {
+          code = "C3"
+        }
+      }
+      persistent_disk_type = "PERSISTENT_DISK_TYPE_SSD"
+    }
+  }
+}
+```
 
 ## Argument Reference
 
@@ -129,6 +158,12 @@ The following arguments are supported:
 * `project` - (Optional) The ID of the project in which the resource belongs.
     If it is not provided, the provider project is used.
 
+* `deletion_policy` - (Optional) Whether Terraform will be prevented from destroying the resource. Defaults to DELETE.
+	When a 'terraform destroy' or 'terraform apply' would delete the resource,
+	the command will fail if this field is set to "PREVENT" in Terraform state.
+	When set to "ABANDON", the command will remove the resource from Terraform
+	management without updating or deleting the resource in the API.
+	When set to "DELETE", deleting the resource is allowed.
 
 
 <a name="nested_virtual_machine_preferences"></a>The `virtual_machine_preferences` block supports:
@@ -182,6 +217,11 @@ The following arguments are supported:
 * `license_type` -
   (Optional)
   License type to consider when calculating costs for virtual machine insights and recommendations. If unspecified, costs are calculated based on the default licensing plan. Possible values: `LICENSE_TYPE_UNSPECIFIED`, `LICENSE_TYPE_DEFAULT`, `LICENSE_TYPE_BRING_YOUR_OWN_LICENSE`
+
+* `persistent_disk_type` -
+  (Optional)
+  Persistent disk type to use. If unspecified (default), all types are considered, based on available usage data.
+  Possible values are: `PERSISTENT_DISK_TYPE_STANDARD`, `PERSISTENT_DISK_TYPE_BALANCED`, `PERSISTENT_DISK_TYPE_SSD`.
 
 
 <a name="nested_virtual_machine_preferences_compute_engine_preferences_machine_preferences"></a>The `machine_preferences` block supports:
@@ -276,6 +316,18 @@ PreferenceSet can be imported using any of these accepted formats:
 * `{{project}}/{{location}}/{{preference_set_id}}`
 * `{{location}}/{{preference_set_id}}`
 
+In Terraform v1.12.0 and later, use an [`identity` block](https://developer.hashicorp.com/terraform/language/resources/identities) to import PreferenceSet using identity values. For example:
+
+```tf
+import {
+  identity = {
+    location = "<-required value->"
+    preferenceSetId = "<-required value->"
+    project = "<-optional value->"
+  }
+  to = google_migration_center_preference_set.default
+}
+```
 
 In Terraform v1.5.0 and later, use an [`import` block](https://developer.hashicorp.com/terraform/language/import) to import PreferenceSet using one of the formats above. For example:
 

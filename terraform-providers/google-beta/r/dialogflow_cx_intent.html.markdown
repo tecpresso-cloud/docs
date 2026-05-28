@@ -144,6 +144,12 @@ The following arguments are supported:
   Intent.training_phrases.parts.text
   If not specified, the agent's default language is used. Many languages are supported. Note: languages must be enabled in the agent before they can be used.
 
+* `deletion_policy` - (Optional) Whether Terraform will be prevented from destroying the resource. Defaults to DELETE.
+	When a 'terraform destroy' or 'terraform apply' would delete the resource,
+	the command will fail if this field is set to "PREVENT" in Terraform state.
+	When set to "ABANDON", the command will remove the resource from Terraform
+	management without updating or deleting the resource in the API.
+	When set to "DELETE", deleting the resource is allowed.
 * `is_default_welcome_intent` - (Optional) Marks this as the [Default Welcome Intent](https://cloud.google.com/dialogflow/cx/docs/concept/intent#welcome) for an agent. When you create an agent, a Default Welcome Intent is created automatically.
 The Default Welcome Intent cannot be deleted; deleting the `google_dialogflow_cx_intent` resource does nothing to the underlying GCP resources.
 
@@ -243,6 +249,17 @@ Intent can be imported using any of these accepted formats:
 * `{{parent}}/intents/{{name}}`
 * `{{parent}}/{{name}}`
 
+In Terraform v1.12.0 and later, use an [`identity` block](https://developer.hashicorp.com/terraform/language/resources/identities) to import Intent using identity values. For example:
+
+```tf
+import {
+  identity = {
+    name = "<-optional value->"
+    parent = "<-optional value->"
+  }
+  to = google_dialogflow_cx_intent.default
+}
+```
 
 In Terraform v1.5.0 and later, use an [`import` block](https://developer.hashicorp.com/terraform/language/import) to import Intent using one of the formats above. For example:
 

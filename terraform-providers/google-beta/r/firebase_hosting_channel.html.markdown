@@ -109,6 +109,12 @@ The following arguments are supported:
   duration past the time of the request. A duration in seconds with up to nine fractional
   digits, terminated by 's'. Example: "86400s" (one day).
 
+* `deletion_policy` - (Optional) Whether Terraform will be prevented from destroying the resource. Defaults to DELETE.
+	When a 'terraform destroy' or 'terraform apply' would delete the resource,
+	the command will fail if this field is set to "PREVENT" in Terraform state.
+	When set to "ABANDON", the command will remove the resource from Terraform
+	management without updating or deleting the resource in the API.
+	When set to "DELETE", deleting the resource is allowed.
 
 
 ## Attributes Reference
@@ -146,6 +152,17 @@ Channel can be imported using any of these accepted formats:
 * `sites/{{site_id}}/channels/{{channel_id}}`
 * `{{site_id}}/{{channel_id}}`
 
+In Terraform v1.12.0 and later, use an [`identity` block](https://developer.hashicorp.com/terraform/language/resources/identities) to import Channel using identity values. For example:
+
+```tf
+import {
+  identity = {
+    site_id = "<-required value->"
+    channel_id = "<-required value->"
+  }
+  to = google_firebase_hosting_channel.default
+}
+```
 
 In Terraform v1.5.0 and later, use an [`import` block](https://developer.hashicorp.com/terraform/language/import) to import Channel using one of the formats above. For example:
 

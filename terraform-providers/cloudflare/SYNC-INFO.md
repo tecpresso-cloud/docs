@@ -1,10 +1,10 @@
 # Cloudflare Terraform Provider - Synced Docs
 
 **Provider:** `cloudflare/terraform-provider-cloudflare`
-**Version:** v5.17.0
-**Synced:** 2026-02-23 22:26 UTC
-**Source:** https://github.com/cloudflare/terraform-provider-cloudflare/releases/tag/v5.17.0
-**Doc files:** 574
+**Version:** v5.19.1
+**Synced:** 2026-05-28 00:03 UTC
+**Source:** https://github.com/cloudflare/terraform-provider-cloudflare/releases/tag/v5.19.1
+**Doc files:** 630
 
 ## Directory Structure
 

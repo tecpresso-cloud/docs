@@ -424,7 +424,7 @@ resource "google_datastream_stream" "stream5" {
 ```hcl
 resource "google_sql_database_instance" "instance" {
     name                = "sql-server"
-    database_version    = "SQLSERVER_2019_STANDARD"
+    database_version    = "SQLSERVER_2022_STANDARD"
     region              = "us-central1"
     root_password       = "root-password"
     deletion_protection = true
@@ -532,7 +532,7 @@ resource "google_datastream_stream" "default" {
 ```hcl
 resource "google_sql_database_instance" "instance" {
     name                = "sql-server"
-    database_version    = "SQLSERVER_2019_STANDARD"
+    database_version    = "SQLSERVER_2022_STANDARD"
     region              = "us-central1"
     root_password       = "root-password"
     deletion_protection = true
@@ -1655,6 +1655,12 @@ The following arguments are supported:
 * `project` - (Optional) The ID of the project in which the resource belongs.
     If it is not provided, the provider project is used.
 
+* `deletion_policy` - (Optional) Whether Terraform will be prevented from destroying the resource. Defaults to DELETE.
+	When a 'terraform destroy' or 'terraform apply' would delete the resource,
+	the command will fail if this field is set to "PREVENT" in Terraform state.
+	When set to "ABANDON", the command will remove the resource from Terraform
+	management without updating or deleting the resource in the API.
+	When set to "DELETE", deleting the resource is allowed.
 * `desired_state` - (Optional) Desired state of the Stream. Set this field to `RUNNING` to start the stream,
 `NOT_STARTED` to create the stream without starting and `PAUSED` to pause
 the stream from a `RUNNING` state.
@@ -2693,7 +2699,8 @@ Possible values: NOT_STARTED, RUNNING, PAUSED. Default: NOT_STARTED
 * `file_rotation_interval` -
   (Optional)
   The maximum duration for which new events are added before a file is closed and a new file is created.
-  A duration in seconds with up to nine fractional digits, terminated by 's'. Example: "3.5s". Defaults to 900s.
+  Values within the range of 15-60 seconds are allowed.
+  A duration in seconds with up to nine fractional digits, terminated by 's'. Example: "3.5s".
 
 * `avro_file_format` -
   (Optional)
@@ -3475,6 +3482,18 @@ Stream can be imported using any of these accepted formats:
 * `{{project}}/{{location}}/{{stream_id}}`
 * `{{location}}/{{stream_id}}`
 
+In Terraform v1.12.0 and later, use an [`identity` block](https://developer.hashicorp.com/terraform/language/resources/identities) to import Stream using identity values. For example:
+
+```tf
+import {
+  identity = {
+    streamId = "<-required value->"
+    location = "<-required value->"
+    project = "<-optional value->"
+  }
+  to = google_datastream_stream.default
+}
+```
 
 In Terraform v1.5.0 and later, use an [`import` block](https://developer.hashicorp.com/terraform/language/import) to import Stream using one of the formats above. For example:
 

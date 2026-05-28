@@ -107,7 +107,7 @@ resource "google_ces_agent" "ces_child_agent" {
   instruction = "You are a helpful assistant for this example."
 
   model_settings {
-    model       = "gemini-2.5-flash-001"
+    model       = "gemini-3.0-flash-001"
     temperature = 0.5
   }
 
@@ -152,7 +152,7 @@ resource "google_ces_agent" "ces_agent_basic" {
   instruction = "You are a helpful assistant for this example."
 
   model_settings {
-    model       = "gemini-2.5-flash-001"
+    model       = "gemini-3.0-flash-001"
     temperature = 0.5
   }
 
@@ -244,7 +244,7 @@ resource "google_ces_agent" "ces_agent_remote_dialogflow_agent" {
   display_name = "my-agent"
 
   model_settings {
-    model       = "gemini-1.5-flash"
+    model       = "gemini-3.0-flash-001"
     temperature = 0.5
   }
 
@@ -252,6 +252,58 @@ resource "google_ces_agent" "ces_agent_remote_dialogflow_agent" {
     agent = "projects/example/locations/us/agents/fake-agent"
     flow_id = "fake-flow"
     environment_id = "fake-env"
+    input_variable_mapping = {
+        "example" : 1
+    }
+    output_variable_mapping = {
+        "example" : 1
+    }
+  }
+}
+```
+<div class = "oics-button" style="float: right; margin: 0 0 -15px">
+  <a href="https://console.cloud.google.com/cloudshell/open?cloudshell_git_repo=https%3A%2F%2Fgithub.com%2Fterraform-google-modules%2Fdocs-examples.git&cloudshell_image=gcr.io%2Fcloudshell-images%2Fcloudshell%3Alatest&cloudshell_print=.%2Fmotd&cloudshell_tutorial=.%2Ftutorial.md&cloudshell_working_dir=ces_agent_remote_dialogflow_agent_interruption&open_in_editor=main.tf" target="_blank">
+    <img alt="Open in Cloud Shell" src="//gstatic.com/cloudssh/images/open-btn.svg" style="max-height: 44px; margin: 32px auto; max-width: 100%;">
+  </a>
+</div>
+## Example Usage - Ces Agent Remote Dialogflow Agent Interruption
+
+
+```hcl
+resource "google_ces_app" "ces_app_for_agent" {
+  app_id       = "app-id"
+  location     = "us"
+  description  = "App used as parent for CES Agent example"
+  display_name = "my-app"
+
+  language_settings {
+    default_language_code       = "en-US"
+    supported_language_codes    = ["es-ES", "fr-FR"]
+    enable_multilingual_support = true
+    fallback_action             = "escalate"
+  }
+
+  time_zone_settings {
+    time_zone = "America/Los_Angeles"
+  }
+}
+
+resource "google_ces_agent" "ces_agent_remote_dialogflow_agent_interruption" {
+  agent_id     = "agent-id"
+  location     = "us"
+  app          = google_ces_app.ces_app_for_agent.app_id
+  display_name = "my-agent"
+
+  model_settings {
+    model       = "gemini-3.0-flash-001"
+    temperature = 0.5
+  }
+
+  remote_dialogflow_agent {
+    agent                                  = "projects/example/locations/us/agents/fake-agent"
+    flow_id                                = "fake-flow"
+    environment_id                         = "fake-env"
+    respect_response_interruption_settings = true
     input_variable_mapping = {
         "example" : 1
     }
@@ -389,6 +441,12 @@ The following arguments are supported:
 * `project` - (Optional) The ID of the project in which the resource belongs.
     If it is not provided, the provider project is used.
 
+* `deletion_policy` - (Optional) Whether Terraform will be prevented from destroying the resource. Defaults to DELETE.
+	When a 'terraform destroy' or 'terraform apply' would delete the resource,
+	the command will fail if this field is set to "PREVENT" in Terraform state.
+	When set to "ABANDON", the command will remove the resource from Terraform
+	management without updating or deleting the resource in the API.
+	When set to "DELETE", deleting the resource is allowed.
 
 
 <a name="nested_after_agent_callbacks"></a>The `after_agent_callbacks` block supports:
@@ -524,6 +582,10 @@ The following arguments are supported:
   variables names to be sent back to the CES agent after the Dialogflow
   agent execution ends.
 
+* `respect_response_interruption_settings` -
+  (Optional)
+  Indicates whether to respect the message-level interruption settings configured in the Dialogflow agent. * If false: all response messages from the Dialogflow agent follow the app-level barge-in settings. * If true: only response messages with [`allow_playback_interruption`](https://docs.cloud.google.com/dialogflow/cx/docs/reference/rpc/google.cloud.dialogflow.cx.v3#text) set to true will be interruptable, all other messages follow the app-level barge-in settings.
+
 <a name="nested_toolsets"></a>The `toolsets` block supports:
 
 * `toolset` -
@@ -580,6 +642,19 @@ Agent can be imported using any of these accepted formats:
 * `{{project}}/{{location}}/{{app}}/{{name}}`
 * `{{location}}/{{app}}/{{name}}`
 
+In Terraform v1.12.0 and later, use an [`identity` block](https://developer.hashicorp.com/terraform/language/resources/identities) to import Agent using identity values. For example:
+
+```tf
+import {
+  identity = {
+    name = "<-optional value->"
+    location = "<-required value->"
+    app = "<-required value->"
+    project = "<-optional value->"
+  }
+  to = google_ces_agent.default
+}
+```
 
 In Terraform v1.5.0 and later, use an [`import` block](https://developer.hashicorp.com/terraform/language/import) to import Agent using one of the formats above. For example:
 

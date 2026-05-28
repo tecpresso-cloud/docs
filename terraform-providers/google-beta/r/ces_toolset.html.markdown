@@ -469,6 +469,9 @@ resource "google_ces_toolset" "ces_toolset_mcp_service_agent_id_token_auth_confi
 
   mcp_toolset {
     server_address = "https://api.example.com/mcp/"
+    custom_headers = {
+      "X-Custom-Header" = "$context.variables.my_variable"
+    }
     tls_config {
         ca_certs {
           display_name="example"
@@ -640,6 +643,12 @@ The following arguments are supported:
 * `project` - (Optional) The ID of the project in which the resource belongs.
     If it is not provided, the provider project is used.
 
+* `deletion_policy` - (Optional) Whether Terraform will be prevented from destroying the resource. Defaults to DELETE.
+	When a 'terraform destroy' or 'terraform apply' would delete the resource,
+	the command will fail if this field is set to "PREVENT" in Terraform state.
+	When set to "ABANDON", the command will remove the resource from Terraform
+	management without updating or deleting the resource in the API.
+	When set to "DELETE", deleting the resource is allowed.
 
 
 <a name="nested_open_api_toolset"></a>The `open_api_toolset` block supports:
@@ -849,6 +858,14 @@ The following arguments are supported:
   client should trust.
   Structure is [documented below](#nested_mcp_toolset_tls_config).
 
+* `custom_headers` -
+  (Optional)
+  The custom headers to send in the request to the MCP server. The values
+  must be in the format `$context.variables.<name_of_variable>` and can be
+  set in the session variables. See
+  https://docs.cloud.google.com/customer-engagement-ai/conversational-agents/ps/tool/open-api#openapi-injection
+  for more details.
+
 
 <a name="nested_mcp_toolset_api_authentication"></a>The `api_authentication` block supports:
 
@@ -1033,6 +1050,19 @@ Toolset can be imported using any of these accepted formats:
 * `{{project}}/{{location}}/{{app}}/{{toolset_id}}`
 * `{{location}}/{{app}}/{{toolset_id}}`
 
+In Terraform v1.12.0 and later, use an [`identity` block](https://developer.hashicorp.com/terraform/language/resources/identities) to import Toolset using identity values. For example:
+
+```tf
+import {
+  identity = {
+    location = "<-required value->"
+    app = "<-required value->"
+    toolsetId = "<-required value->"
+    project = "<-optional value->"
+  }
+  to = google_ces_toolset.default
+}
+```
 
 In Terraform v1.5.0 and later, use an [`import` block](https://developer.hashicorp.com/terraform/language/import) to import Toolset using one of the formats above. For example:
 

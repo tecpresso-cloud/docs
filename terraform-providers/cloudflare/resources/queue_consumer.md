@@ -2,12 +2,18 @@
 page_title: "cloudflare_queue_consumer Resource - Cloudflare"
 subcategory: ""
 description: |-
-  
+  Accepted Permissions
+  Queues ReadQueues WriteWorkers Scripts ReadWorkers Scripts Write
 ---
 
 # cloudflare_queue_consumer (Resource)
 
+Accepted Permissions
 
+- `Queues Read`
+- `Queues Write`
+- `Workers Scripts Read`
+- `Workers Scripts Write`
 
 ## Example Usage
 
@@ -15,8 +21,9 @@ description: |-
 resource "cloudflare_queue_consumer" "example_queue_consumer" {
   account_id = "023e105f4ecef8ad9ca31a8372d0c353"
   queue_id = "023e105f4ecef8ad9ca31a8372d0c353"
-  dead_letter_queue = "example-queue"
   script_name = "my-consumer-worker"
+  type = "worker"
+  dead_letter_queue = "example-queue"
   settings = {
     batch_size = 50
     max_concurrency = 10
@@ -24,7 +31,6 @@ resource "cloudflare_queue_consumer" "example_queue_consumer" {
     max_wait_time_ms = 5000
     retry_delay = 10
   }
-  type = "worker"
 }
 ```
 
@@ -33,21 +39,21 @@ resource "cloudflare_queue_consumer" "example_queue_consumer" {
 
 ### Required
 
-- `account_id` (String) A Resource identifier.
 - `queue_id` (String) A Resource identifier.
+- `type` (String) Available values: "worker", "http_pull".
 
 ### Optional
 
+- `account_id` (String) A Resource identifier.
 - `dead_letter_queue` (String)
 - `script_name` (String) Name of a Worker
 - `settings` (Attributes) (see [below for nested schema](#nestedatt--settings))
-- `type` (String) Available values: "worker", "http_pull".
 
 ### Read-Only
 
 - `consumer_id` (String) A Resource identifier.
 - `created_on` (String)
-- `script` (String) Name of a Worker
+- `queue_name` (String)
 
 <a id="nestedatt--settings"></a>
 ### Nested Schema for `settings`

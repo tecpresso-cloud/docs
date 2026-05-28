@@ -80,6 +80,40 @@ resource "google_pubsub_topic" "recognition_result_notification_profile" {
   name = "recognition-result-notification"
 }
 ```
+<div class = "oics-button" style="float: right; margin: 0 0 -15px">
+  <a href="https://console.cloud.google.com/cloudshell/open?cloudshell_git_repo=https%3A%2F%2Fgithub.com%2Fterraform-google-modules%2Fdocs-examples.git&cloudshell_image=gcr.io%2Fcloudshell-images%2Fcloudshell%3Alatest&cloudshell_print=.%2Fmotd&cloudshell_tutorial=.%2Ftutorial.md&cloudshell_working_dir=dialogflow_conversation_profile_beta_bidi&open_in_editor=main.tf" target="_blank">
+    <img alt="Open in Cloud Shell" src="//gstatic.com/cloudssh/images/open-btn.svg" style="max-height: 44px; margin: 32px auto; max-width: 100%;">
+  </a>
+</div>
+## Example Usage - Dialogflow Conversation Profile Beta Bidi
+
+
+```hcl
+resource "google_dialogflow_conversation_profile" "bidi_profile" {
+  provider = google-beta
+  display_name = "dialogflow-profile-bidi"
+  location     = "europe-west1"
+  language_code = "en-US"
+  use_bidi_streaming = true
+  automated_agent_config {
+    agent = google_ces_app.ces_app_for_agent.id
+  }
+  sip_config {
+    allow_virtual_agent_interaction = true
+    create_conversation_on_the_fly = true
+  }
+}
+
+resource "google_ces_app" "ces_app_for_agent" {
+  provider = google-beta
+  app_id = "app-id"
+  location = "us"
+  display_name = "my-app"
+  time_zone_settings {
+    time_zone = "America/Los_Angeles"
+  }
+}
+```
 
 ## Argument Reference
 
@@ -92,8 +126,12 @@ The following arguments are supported:
 
 * `location` -
   (Required)
-  desc
+  The location of the conversation profile.
 
+
+* `use_bidi_streaming` -
+  (Optional, [Beta](../guides/provider_versions.html.markdown))
+  Optional. Whether to use the bidi streaming API in telephony integration for the conversation profile.
 
 * `automated_agent_config` -
   (Optional)
@@ -149,6 +187,11 @@ The following arguments are supported:
   Configuration for Text-to-Speech synthesization. If agent defines synthesization options as well, agent settings overrides the option here.
   Structure is [documented below](#nested_tts_config).
 
+* `sip_config` -
+  (Optional, [Beta](../guides/provider_versions.html.markdown))
+  Configuration for SIP.
+  Structure is [documented below](#nested_sip_config).
+
 * `new_recognition_result_notification_config` -
   (Optional)
   Optional. Configuration for publishing transcription intermediate results. Event will be sent in format of ConversationEvent. If configured, the following information will be populated as ConversationEvent Pub/Sub message attributes: - "participant_id" - "participantRole" - "message_id"
@@ -157,6 +200,12 @@ The following arguments are supported:
 * `project` - (Optional) The ID of the project in which the resource belongs.
     If it is not provided, the provider project is used.
 
+* `deletion_policy` - (Optional) Whether Terraform will be prevented from destroying the resource. Defaults to DELETE.
+	When a 'terraform destroy' or 'terraform apply' would delete the resource,
+	the command will fail if this field is set to "PREVENT" in Terraform state.
+	When set to "ABANDON", the command will remove the resource from Terraform
+	management without updating or deleting the resource in the API.
+	When set to "DELETE", deleting the resource is allowed.
 
 
 <a name="nested_automated_agent_config"></a>The `automated_agent_config` block supports:
@@ -190,7 +239,7 @@ The following arguments are supported:
 
 * `message_analysis_config` -
   (Optional)
-  desc
+  Configuration for analyzing conversation messages.
   Structure is [documented below](#nested_human_agent_assistant_config_message_analysis_config).
 
 
@@ -314,7 +363,7 @@ The following arguments are supported:
 
 * `sections` -
   (Optional)
-  he customized sections chosen to return when requesting a summary of a conversation.
+  The customized sections chosen to return when requesting a summary of a conversation.
   Structure is [documented below](#nested_human_agent_assistant_config_human_agent_suggestion_config_feature_configs_query_config_sections).
 
 * `dialogflow_query_source` -
@@ -350,7 +399,7 @@ The following arguments are supported:
 
 * `agent` -
   (Required)
-  he name of a Dialogflow virtual agent used for end user side intent detection and suggestion. Format: projects/<Project ID>/locations/<Location ID>/agent.
+  The name of a Dialogflow virtual agent used for end user side intent detection and suggestion. Format: projects/<Project ID>/locations/<Location ID>/agent.
 
 * `human_agent_side_config` -
   (Optional)
@@ -489,7 +538,7 @@ The following arguments are supported:
 
 * `sections` -
   (Optional)
-  he customized sections chosen to return when requesting a summary of a conversation.
+  The customized sections chosen to return when requesting a summary of a conversation.
   Structure is [documented below](#nested_human_agent_assistant_config_end_user_suggestion_config_feature_configs_query_config_sections).
 
 * `knowledge_base_query_source` -
@@ -549,7 +598,7 @@ The following arguments are supported:
 
 * `agent` -
   (Required)
-  he name of a Dialogflow virtual agent used for end user side intent detection and suggestion. Format: projects/<Project ID>/locations/<Location ID>/agent.
+  The name of a Dialogflow virtual agent used for end user side intent detection and suggestion. Format: projects/<Project ID>/locations/<Location ID>/agent.
 
 * `human_agent_side_config` -
   (Optional)
@@ -646,7 +695,7 @@ The following arguments are supported:
 * `audio_encoding` -
   (Optional)
   Audio encoding of the audio content to process.
-  Possible values are: `AUDIO_ENCODING_UNSPECIFIED`, `AUDIO_ENCODING_LINEAR_16`, `AUDIO_ENCODING_FLAC`, `AUDIO_ENCODING_MULAW`, `AUDIO_ENCODING_AMR`, `AUDIO_ENCODING_AMR_WB`, `AUDIO_ENCODING_OGG_OPUS`, `AUDIOENCODING_SPEEX_WITH_HEADER_BYTE`.
+  Possible values are: `AUDIO_ENCODING_UNSPECIFIED`, `AUDIO_ENCODING_LINEAR_16`, `AUDIO_ENCODING_FLAC`, `AUDIO_ENCODING_MULAW`, `AUDIO_ENCODING_AMR`, `AUDIO_ENCODING_AMR_WB`, `AUDIO_ENCODING_OGG_OPUS`, `AUDIO_ENCODING_SPEEX_WITH_HEADER_BYTE`.
 
 * `sample_rate_hertz` -
   (Optional)
@@ -662,7 +711,7 @@ The following arguments are supported:
 
 * `use_timeout_based_endpointing` -
   (Optional)
-  Use timeout based endpointing, interpreting endpointer sensitivy as seconds of timeout value.
+  Use timeout based endpointing, interpreting endpointer sensitivity as seconds of timeout value.
 
 <a name="nested_tts_config"></a>The `tts_config` block supports:
 
@@ -699,6 +748,36 @@ The following arguments are supported:
   The preferred gender of the voice.
   Possible values are: `SSML_VOICE_GENDER_UNSPECIFIED`, `SSML_VOICE_GENDER_MALE`, `SSML_VOICE_GENDER_FEMALE`, `SSML_VOICE_GENDER_NEUTRAL`.
 
+<a name="nested_sip_config"></a>The `sip_config` block supports:
+
+* `create_conversation_on_the_fly` -
+  (Optional)
+  Asks Dialogflow Telephony to create the conversation provided in the SIP header on the fly when the call comes in.
+
+* `inactive_start` -
+  (Optional)
+  Starts the conversation with inactive SDP directives
+
+* `max_audio_recording_duration` -
+  (Optional)
+  Max duration for audio recording. Overrides the default value of 15 min. Max value is 8 hours.
+
+* `allow_virtual_agent_interaction` -
+  (Optional)
+  Allows interactions with a Dialogflow virtual agent even if the call is connected for SIPREC purposes.
+
+* `keep_conversation_running` -
+  (Optional)
+  Keeps the conversation running even if the call is disconnected.
+
+* `copy_inbound_call_leg_headers` -
+  (Optional)
+  List of inbound call leg headers to be copied to outbound call legs created later.
+
+* `ignore_reinvite_media_direction` -
+  (Optional)
+  Ignores any media direction in the reINVITE SDP offer. Reuse the previous media direction.
+
 <a name="nested_new_recognition_result_notification_config"></a>The `new_recognition_result_notification_config` block supports:
 
 * `topic` -
@@ -720,7 +799,7 @@ In addition to the arguments listed above, the following computed attributes are
 * `id` - an identifier for the resource with format `{{name}}`
 
 * `name` -
-  name
+  Identifier. The unique identifier of this conversation profile.
 
 
 ## Timeouts
@@ -739,6 +818,16 @@ ConversationProfile can be imported using any of these accepted formats:
 
 * `{{name}}`
 
+In Terraform v1.12.0 and later, use an [`identity` block](https://developer.hashicorp.com/terraform/language/resources/identities) to import ConversationProfile using identity values. For example:
+
+```tf
+import {
+  identity = {
+    name = "<-optional value->"
+  }
+  to = google_dialogflow_conversation_profile.default
+}
+```
 
 In Terraform v1.5.0 and later, use an [`import` block](https://developer.hashicorp.com/terraform/language/import) to import ConversationProfile using one of the formats above. For example:
 

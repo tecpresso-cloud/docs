@@ -56,8 +56,6 @@ resource "google_iam_workload_identity_pool" "example" {
 
 ```hcl
 resource "google_iam_workload_identity_pool" "example" {
-  provider = google-beta
-
   workload_identity_pool_id = "example-pool"
   display_name              = "Name of the pool"
   description               = "Identity pool operates in FEDERATION_ONLY mode"
@@ -65,18 +63,11 @@ resource "google_iam_workload_identity_pool" "example" {
   mode                      = "FEDERATION_ONLY"
 }
 ```
-<div class = "oics-button" style="float: right; margin: 0 0 -15px">
-  <a href="https://console.cloud.google.com/cloudshell/open?cloudshell_git_repo=https%3A%2F%2Fgithub.com%2Fterraform-google-modules%2Fdocs-examples.git&cloudshell_image=gcr.io%2Fcloudshell-images%2Fcloudshell%3Alatest&cloudshell_print=.%2Fmotd&cloudshell_tutorial=.%2Ftutorial.md&cloudshell_working_dir=iam_workload_identity_pool_full_trust_domain_mode&open_in_editor=main.tf" target="_blank">
-    <img alt="Open in Cloud Shell" src="//gstatic.com/cloudssh/images/open-btn.svg" style="max-height: 44px; margin: 32px auto; max-width: 100%;">
-  </a>
-</div>
 ## Example Usage - Iam Workload Identity Pool Full Trust Domain Mode
 
 
 ```hcl
 resource "google_iam_workload_identity_pool" "example" {
-  provider = google-beta
-
   workload_identity_pool_id = "example-pool"
   display_name              = "Name of the pool"
   description               = "Identity pool operates in TRUST_DOMAIN mode"
@@ -93,7 +84,8 @@ resource "google_iam_workload_identity_pool" "example" {
   }
   inline_trust_config {
     additional_trust_bundles {
-      trust_domain = "example.com"
+      trust_domain            = "example.com"
+      trust_default_shared_ca = false      
       trust_anchors {
         pem_certificate = file("test-fixtures/trust_anchor_1.pem")
       }
@@ -102,7 +94,51 @@ resource "google_iam_workload_identity_pool" "example" {
       }
     }
     additional_trust_bundles {
-      trust_domain = "example.net"
+      trust_domain            = "example.net"
+      trust_default_shared_ca = false
+      trust_anchors {
+        pem_certificate = file("test-fixtures/trust_anchor_3.pem")
+      }
+      trust_anchors {
+        pem_certificate = file("test-fixtures/trust_anchor_4.pem")
+      }
+    }
+  }
+  attestation_rules {
+    google_cloud_resource = "//run.googleapis.com/projects/1111111111111/type/Service/*"
+  }
+}
+```
+## Example Usage - Iam Workload Identity Pool Full Trust Domain Mode With Default Shared Ca
+
+
+```hcl
+resource "google_iam_workload_identity_pool" "example" {
+  workload_identity_pool_id = "example-pool"
+  display_name              = "Name of the pool"
+  description               = "Identity pool operates in TRUST_DOMAIN mode"
+  disabled                  = true
+  mode                      = "TRUST_DOMAIN"
+  inline_certificate_issuance_config {
+    use_default_shared_ca      = true
+    lifetime                   = "86400s"
+    rotation_window_percentage = 50
+    key_algorithm              = "ECDSA_P256"
+  }
+  inline_trust_config {
+    additional_trust_bundles {
+      trust_domain            = "example.com"
+      trust_default_shared_ca = true
+      trust_anchors {
+        pem_certificate = file("test-fixtures/trust_anchor_1.pem")
+      }
+      trust_anchors {
+        pem_certificate = file("test-fixtures/trust_anchor_2.pem")
+      }
+    }
+    additional_trust_bundles {
+      trust_domain            = "example.net"
+      trust_default_shared_ca = true
       trust_anchors {
         pem_certificate = file("test-fixtures/trust_anchor_3.pem")
       }
@@ -141,7 +177,7 @@ The following arguments are supported:
   access again.
 
 * `mode` -
-  (Optional, [Beta](../guides/provider_versions.html.markdown))
+  (Optional)
   The mode for the pool is operating in. Pools with an unspecified mode will operate as if they
   are in `FEDERATION_ONLY` mode.
   
@@ -159,17 +195,23 @@ The following arguments are supported:
   format: `ns/<namespace>/sa/<workload_identifier>`.
   `google_iam_workload_identity_pool_provider`s cannot be created within `TRUST_DOMAIN`
   mode pools.
-  Possible values are: `FEDERATION_ONLY`, `TRUST_DOMAIN`.
+  * `SYSTEM_TRUST_DOMAIN`: Pools are managed by Google Cloud services. Neither
+  `google_iam_workload_identity_pool_namespace`s nor `google_iam_workload_identity_pool_provider`s
+  can be created within `SYSTEM_TRUST_DOMAIN` mode pools. All identities within a
+  `SYSTEM_TRUST_DOMAIN` mode pool are in one of the following formats:
+      * `spiffe://<trust-domain>/ns/<kubernetes-namespace>/sa/<kubernetes-service-account>`
+      * `spiffe://<trust-domain>/resources/<resource-scope>/<resource-name>`
+  Possible values are: `FEDERATION_ONLY`, `TRUST_DOMAIN`, `SYSTEM_TRUST_DOMAIN`.
 
 * `inline_certificate_issuance_config` -
-  (Optional, [Beta](../guides/provider_versions.html.markdown))
+  (Optional)
   Represents configuration for generating mutual TLS (mTLS) certificates for the identities
   within this pool. Defines the Certificate Authority (CA) pool resources and configurations
   required for issuance and rotation of mTLS workload certificates.
   Structure is [documented below](#nested_inline_certificate_issuance_config).
 
 * `inline_trust_config` -
-  (Optional, [Beta](../guides/provider_versions.html.markdown))
+  (Optional)
   Represents config to add additional trusted trust domains. Defines configuration for extending
   trust to additional trust domains. By establishing trust with another domain, the current
   domain will recognize and accept certificates issued by entities within the trusted domains.
@@ -177,15 +219,28 @@ The following arguments are supported:
   configuration.
   Structure is [documented below](#nested_inline_trust_config).
 
+* `attestation_rules` -
+  (Optional)
+  Defines which workloads can receive an identity within a pool. When an AttestationRule is
+  defined under a managed identity, matching workloads may receive that identity. A maximum of
+  50 AttestationRules can be set.
+  Structure is [documented below](#nested_attestation_rules).
+
 * `project` - (Optional) The ID of the project in which the resource belongs.
     If it is not provided, the provider project is used.
 
+* `deletion_policy` - (Optional) Whether Terraform will be prevented from destroying the resource. Defaults to DELETE.
+	When a 'terraform destroy' or 'terraform apply' would delete the resource,
+	the command will fail if this field is set to "PREVENT" in Terraform state.
+	When set to "ABANDON", the command will remove the resource from Terraform
+	management without updating or deleting the resource in the API.
+	When set to "DELETE", deleting the resource is allowed.
 
 
 <a name="nested_inline_certificate_issuance_config"></a>The `inline_certificate_issuance_config` block supports:
 
 * `ca_pools` -
-  (Required)
+  (Optional)
   A required mapping of a cloud region to the CA pool resource located in that region used
   for certificate issuance, adhering to these constraints:
   * **Key format:** A supported cloud region name equivalent to the location identifier in
@@ -194,6 +249,16 @@ The following arguments are supported:
   `projects/{project}/locations/{location}/caPools/{ca_pool}`
   * **Region Matching:** Workloads are ONLY issued certificates from CA pools within the
   same region. Also the CA pool region (in value) must match the workload's region (key).
+
+* `use_default_shared_ca` -
+  (Optional)
+  If set to true, the trust domain will utilize the GCP-provisioned default CA. A default
+  CA in the same region as the workload will be selected to issue the certificate. Enabling
+  this will clear any existing `ca_pools` configuration to provision the certificates.
+  
+  ~> **Note** This field is mutually exclusive with `ca_pools`. If this flag is enabled,
+  certificates will be automatically provisioned from the default shared CAs. This flag should
+  not be set if you want to use your own CA pools to provision the certificates.
 
 * `lifetime` -
   (Optional)
@@ -244,6 +309,14 @@ The following arguments are supported:
   trust anchors here.
   Structure is [documented below](#nested_inline_trust_config_additional_trust_bundles_trust_anchors).
 
+* `trust_default_shared_ca` -
+  (Optional)
+  If set to True, the trust bundle will include the private ca managed identity regional root
+  public certificates.
+  
+  ~> **Note** `trust_default_shared_ca` is only supported for managed identity trust domain
+  resource.
+
 
 <a name="nested_inline_trust_config_additional_trust_bundles_trust_anchors"></a>The `trust_anchors` block supports:
 
@@ -251,6 +324,13 @@ The following arguments are supported:
   (Required)
   PEM certificate of the PKI used for validation. Must only contain one ca
   certificate(either root or intermediate cert).
+
+<a name="nested_attestation_rules"></a>The `attestation_rules` block supports:
+
+* `google_cloud_resource` -
+  (Required)
+  A single workload operating on Google Cloud. For example:
+  `//run.googleapis.com/projects/123/type/Service/*`.
 
 ## Attributes Reference
 
@@ -292,6 +372,17 @@ WorkloadIdentityPool can be imported using any of these accepted formats:
 * `{{project}}/{{workload_identity_pool_id}}`
 * `{{workload_identity_pool_id}}`
 
+In Terraform v1.12.0 and later, use an [`identity` block](https://developer.hashicorp.com/terraform/language/resources/identities) to import WorkloadIdentityPool using identity values. For example:
+
+```tf
+import {
+  identity = {
+    workloadIdentityPoolId = "<-required value->"
+    project = "<-optional value->"
+  }
+  to = google_iam_workload_identity_pool.default
+}
+```
 
 In Terraform v1.5.0 and later, use an [`import` block](https://developer.hashicorp.com/terraform/language/import) to import WorkloadIdentityPool using one of the formats above. For example:
 

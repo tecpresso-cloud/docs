@@ -118,7 +118,14 @@ The following arguments are supported:
 Service to be deleted even if a Schema or Connector is present. By default,
 the Service deletion will only succeed when no Schema or Connectors are
 present.
-Possible values: DEFAULT, FORCE
+
+When a 'terraform destroy' or 'terraform apply' would delete the resource,
+the command will fail if this field is set to "PREVENT" in Terraform state.
+When set to "ABANDON", the command will remove the resource from Terraform
+management without updating or deleting the resource in the API.
+When set to "DELETE", the command will behave as if set to "DEFAULT".
+
+Possible values: DEFAULT, FORCE, PREVENT, ABANDON, DELETE
 
 
 ## Attributes Reference
@@ -185,6 +192,18 @@ Service can be imported using any of these accepted formats:
 * `{{project}}/{{location}}/{{service_id}}`
 * `{{location}}/{{service_id}}`
 
+In Terraform v1.12.0 and later, use an [`identity` block](https://developer.hashicorp.com/terraform/language/resources/identities) to import Service using identity values. For example:
+
+```tf
+import {
+  identity = {
+    location = "<-required value->"
+    serviceId = "<-required value->"
+    project = "<-optional value->"
+  }
+  to = google_firebase_data_connect_service.default
+}
+```
 
 In Terraform v1.5.0 and later, use an [`import` block](https://developer.hashicorp.com/terraform/language/import) to import Service using one of the formats above. For example:
 

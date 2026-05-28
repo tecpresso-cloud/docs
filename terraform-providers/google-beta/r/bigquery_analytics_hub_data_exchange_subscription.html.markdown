@@ -179,6 +179,12 @@ The following arguments are supported:
 * `project` - (Optional) The ID of the project in which the resource belongs.
     If it is not provided, the provider project is used.
 
+* `deletion_policy` - (Optional) Whether Terraform will be prevented from destroying the resource. Defaults to DELETE.
+	When a 'terraform destroy' or 'terraform apply' would delete the resource,
+	the command will fail if this field is set to "PREVENT" in Terraform state.
+	When set to "ABANDON", the command will remove the resource from Terraform
+	management without updating or deleting the resource in the API.
+	When set to "DELETE", deleting the resource is allowed.
 * `refresh_policy` - (Optional) Controls when the subscription is automatically refreshed by the provider.
 * `ON_READ`: Default value if not specified. The subscription will be refreshed every time Terraform performs a read operation (e.g., `terraform plan`, `terraform apply`, `terraform refresh`). This ensures the state is always up-to-date.
 * `ON_STALE`: The subscription will only be refreshed when its reported `state` (an output-only field from the API) is `STATE_STALE` during a Terraform read operation.
@@ -309,6 +315,18 @@ DataExchangeSubscription can be imported using any of these accepted formats:
 * `{{project}}/{{location}}/{{subscription_id}}`
 * `{{location}}/{{subscription_id}}`
 
+In Terraform v1.12.0 and later, use an [`identity` block](https://developer.hashicorp.com/terraform/language/resources/identities) to import DataExchangeSubscription using identity values. For example:
+
+```tf
+import {
+  identity = {
+    location = "<-required value->"
+    subscriptionId = "<-required value->"
+    project = "<-optional value->"
+  }
+  to = google_bigquery_analytics_hub_data_exchange_subscription.default
+}
+```
 
 In Terraform v1.5.0 and later, use an [`import` block](https://developer.hashicorp.com/terraform/language/import) to import DataExchangeSubscription using one of the formats above. For example:
 

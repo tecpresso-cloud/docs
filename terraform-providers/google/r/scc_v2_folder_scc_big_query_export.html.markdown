@@ -126,6 +126,12 @@ The following arguments are supported:
   (Optional)
   The BigQuery export configuration is stored in this location. If not provided, Use global as default.
 
+* `deletion_policy` - (Optional) Whether Terraform will be prevented from destroying the resource. Defaults to DELETE.
+	When a 'terraform destroy' or 'terraform apply' would delete the resource,
+	the command will fail if this field is set to "PREVENT" in Terraform state.
+	When set to "ABANDON", the command will remove the resource from Terraform
+	management without updating or deleting the resource in the API.
+	When set to "DELETE", deleting the resource is allowed.
 
 
 ## Attributes Reference
@@ -174,6 +180,18 @@ FolderSccBigQueryExport can be imported using any of these accepted formats:
 * `folders/{{folder}}/locations/{{location}}/bigQueryExports/{{big_query_export_id}}`
 * `{{folder}}/{{location}}/{{big_query_export_id}}`
 
+In Terraform v1.12.0 and later, use an [`identity` block](https://developer.hashicorp.com/terraform/language/resources/identities) to import FolderSccBigQueryExport using identity values. For example:
+
+```tf
+import {
+  identity = {
+    folder = "<-required value->"
+    bigQueryExportId = "<-required value->"
+    location = "<-optional value->"
+  }
+  to = google_scc_v2_folder_scc_big_query_export.default
+}
+```
 
 In Terraform v1.5.0 and later, use an [`import` block](https://developer.hashicorp.com/terraform/language/import) to import FolderSccBigQueryExport using one of the formats above. For example:
 

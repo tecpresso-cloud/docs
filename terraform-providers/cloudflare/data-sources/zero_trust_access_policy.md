@@ -2,12 +2,16 @@
 page_title: "cloudflare_zero_trust_access_policy Data Source - Cloudflare"
 subcategory: ""
 description: |-
-  
+  Accepted Permissions
+  Access: Apps and Policies ReadAccess: Apps and Policies Write
 ---
 
 # cloudflare_zero_trust_access_policy (Data Source)
 
+Accepted Permissions
 
+- `Access: Apps and Policies Read`
+- `Access: Apps and Policies Write`
 
 ## Example Usage
 
@@ -23,14 +27,18 @@ data "cloudflare_zero_trust_access_policy" "example_zero_trust_access_policy" {
 
 ### Required
 
-- `account_id` (String) Identifier.
 - `policy_id` (String) The UUID of the policy
+
+### Optional
+
+- `account_id` (String) Identifier.
 
 ### Read-Only
 
 - `app_count` (Number) Number of access applications currently using this policy.
 - `approval_groups` (Attributes Set) Administrators who can approve a temporary authentication request. (see [below for nested schema](#nestedatt--approval_groups))
 - `approval_required` (Boolean) Requires the user to request access from an administrator at the start of each session.
+- `connection_rules` (Attributes) The rules that define how users may connect to targets secured by your application. (see [below for nested schema](#nestedatt--connection_rules))
 - `created_at` (String)
 - `decision` (String) The action Access will take if a user matches this policy. Infrastructure application policies can only use the Allow action.
 Available values: "allow", "deny", "non_identity", "bypass".
@@ -38,6 +46,7 @@ Available values: "allow", "deny", "non_identity", "bypass".
 - `id` (String) The UUID of the policy
 - `include` (Attributes Set) Rules evaluated with an OR logical operator. A user needs to meet only one of the Include rules. (see [below for nested schema](#nestedatt--include))
 - `isolation_required` (Boolean) Require this application to be served in an isolated browser for users matching this policy. 'Client Web Isolation' must be on for the account in order to use this feature.
+- `mfa_config` (Attributes) Configures multi-factor authentication (MFA) settings. (see [below for nested schema](#nestedatt--mfa_config))
 - `name` (String) The name of the Access policy.
 - `purpose_justification_prompt` (String) A custom message that will appear on the purpose justification screen.
 - `purpose_justification_required` (Boolean) Require users to enter a justification when they log in to the application.
@@ -54,6 +63,23 @@ Read-Only:
 - `approvals_needed` (Number) The number of approvals needed to obtain access.
 - `email_addresses` (List of String) A list of emails that can approve the access request.
 - `email_list_uuid` (String) The UUID of an re-usable email list.
+
+
+<a id="nestedatt--connection_rules"></a>
+### Nested Schema for `connection_rules`
+
+Read-Only:
+
+- `rdp` (Attributes) The RDP-specific rules that define clipboard behavior for RDP connections. (see [below for nested schema](#nestedatt--connection_rules--rdp))
+
+<a id="nestedatt--connection_rules--rdp"></a>
+### Nested Schema for `connection_rules.rdp`
+
+Read-Only:
+
+- `allowed_clipboard_local_to_remote_formats` (List of String) Clipboard formats allowed when copying from local machine to remote RDP session.
+- `allowed_clipboard_remote_to_local_formats` (List of String) Clipboard formats allowed when copying from remote RDP session to local machine.
+
 
 
 <a id="nestedatt--exclude"></a>
@@ -85,6 +111,7 @@ Read-Only:
 - `okta` (Attributes) (see [below for nested schema](#nestedatt--exclude--okta))
 - `saml` (Attributes) (see [below for nested schema](#nestedatt--exclude--saml))
 - `service_token` (Attributes) (see [below for nested schema](#nestedatt--exclude--service_token))
+- `user_risk_score` (Attributes) (see [below for nested schema](#nestedatt--exclude--user_risk_score))
 
 <a id="nestedatt--exclude--any_valid_service_token"></a>
 ### Nested Schema for `exclude.any_valid_service_token`
@@ -278,6 +305,14 @@ Read-Only:
 - `token_id` (String) The ID of a Service Token.
 
 
+<a id="nestedatt--exclude--user_risk_score"></a>
+### Nested Schema for `exclude.user_risk_score`
+
+Read-Only:
+
+- `user_risk_score` (List of String) A list of risk score levels to match. Values can be low, medium, high, or unscored.
+
+
 
 <a id="nestedatt--include"></a>
 ### Nested Schema for `include`
@@ -308,6 +343,7 @@ Read-Only:
 - `okta` (Attributes) (see [below for nested schema](#nestedatt--include--okta))
 - `saml` (Attributes) (see [below for nested schema](#nestedatt--include--saml))
 - `service_token` (Attributes) (see [below for nested schema](#nestedatt--include--service_token))
+- `user_risk_score` (Attributes) (see [below for nested schema](#nestedatt--include--user_risk_score))
 
 <a id="nestedatt--include--any_valid_service_token"></a>
 ### Nested Schema for `include.any_valid_service_token`
@@ -501,6 +537,24 @@ Read-Only:
 - `token_id` (String) The ID of a Service Token.
 
 
+<a id="nestedatt--include--user_risk_score"></a>
+### Nested Schema for `include.user_risk_score`
+
+Read-Only:
+
+- `user_risk_score` (List of String) A list of risk score levels to match. Values can be low, medium, high, or unscored.
+
+
+
+<a id="nestedatt--mfa_config"></a>
+### Nested Schema for `mfa_config`
+
+Read-Only:
+
+- `allowed_authenticators` (List of String) Lists the MFA methods that users can authenticate with.
+- `mfa_disabled` (Boolean) Indicates whether to disable MFA for this resource. This option is available at the application and policy level.
+- `session_duration` (String) Defines the duration of an MFA session. Must be in minutes (m) or hours (h). Minimum: 0m. Maximum: 720h (30 days). Examples:`5m` or `24h`.
+
 
 <a id="nestedatt--require"></a>
 ### Nested Schema for `require`
@@ -531,6 +585,7 @@ Read-Only:
 - `okta` (Attributes) (see [below for nested schema](#nestedatt--require--okta))
 - `saml` (Attributes) (see [below for nested schema](#nestedatt--require--saml))
 - `service_token` (Attributes) (see [below for nested schema](#nestedatt--require--service_token))
+- `user_risk_score` (Attributes) (see [below for nested schema](#nestedatt--require--user_risk_score))
 
 <a id="nestedatt--require--any_valid_service_token"></a>
 ### Nested Schema for `require.any_valid_service_token`
@@ -722,5 +777,13 @@ Read-Only:
 Read-Only:
 
 - `token_id` (String) The ID of a Service Token.
+
+
+<a id="nestedatt--require--user_risk_score"></a>
+### Nested Schema for `require.user_risk_score`
+
+Read-Only:
+
+- `user_risk_score` (List of String) A list of risk score levels to match. Values can be low, medium, high, or unscored.
 
 

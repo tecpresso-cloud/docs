@@ -1,6 +1,72 @@
 # Changelog
+## [v2.31.2](https://github.com/vultr/terraform-provider-vultr/compare/v2.31.1...v2.31.2) (2026-05-12)
+### Documentation
+* Remove old fields from org role docs [PR 737](https://github.com/vultr/terraform-provider-vultr/pull/737)
+
+### Dependencies
+* Update govultr from v3.31.1 to v3.31.2 [PR 738](https://github.com/vultr/terraform-provider-vultr/pull/738)
+
+## [v2.31.1](https://github.com/vultr/terraform-provider-vultr/compare/v2.31.0...v2.31.1) (2026-05-06)
+### Dependencies
+* Update govultr from v3.30.0 to v3.31.1 [PR 731](https://github.com/vultr/terraform-provider-vultr/pull/731)
+* Bump github.com/hashicorp/terraform-plugin-sdk/v2 from 2.40.0 to 2.40.1 [PR 733](https://github.com/vultr/terraform-provider-vultr/pull/733)
+
+### Documentation
+* resource/bare_metal_server: Document mdisk_mode field [PR 734](https://github.com/vultr/terraform-provider-vultr/pull/734)
+
+## New Contributors
+* @tghaas made their first contribution in [PR 734](https://github.com/vultr/terraform-provider-vultr/pull/734)
+
+## [v2.31.0](https://github.com/vultr/terraform-provider-vultr/compare/v2.30.1...v2.31.0) (2026-04-21)
+### Enhancements
+* data source/logs: Add new logs data source [PR 706](https://github.com/vultr/terraform-provider-vultr/pull/706)
+* data source/organization: Added organization/IAM from beta branch [PR 713](https://github.com/vultr/terraform-provider-vultr/pull/713)
+* data source/organization_group: Added organization/IAM from beta branch [PR 713](https://github.com/vultr/terraform-provider-vultr/pull/713)
+* data source/organization_policy: Added organization/IAM from beta branch [PR 713](https://github.com/vultr/terraform-provider-vultr/pull/713)
+* data source/organization_role: Added organization/IAM from beta branch [PR 713](https://github.com/vultr/terraform-provider-vultr/pull/713)
+* resource/organization: Added organization/IAM from beta branch [PR 713](https://github.com/vultr/terraform-provider-vultr/pull/713)
+* resource/organization_group: Added organization/IAM from beta branch [PR 713](https://github.com/vultr/terraform-provider-vultr/pull/713)
+* resource/organization_invitation: Added organization/IAM from beta branch [PR 713](https://github.com/vultr/terraform-provider-vultr/pull/713)
+* resource/organization_policy: Added organization/IAM from beta branch [PR 713](https://github.com/vultr/terraform-provider-vultr/pull/713)
+* resource/organization_policy_group_attachement: Added organization/IAM from beta branch [PR 713](https://github.com/vultr/terraform-provider-vultr/pull/713)
+* resource/organization_policy_user_attachement: Added organization/IAM from beta branch [PR 713](https://github.com/vultr/terraform-provider-vultr/pull/713)
+* resource/organization_role: Added organization/IAM from beta branch [PR 713](https://github.com/vultr/terraform-provider-vultr/pull/713)
+* resource/organization_role_group_attachment: Added organization/IAM from beta branch [PR 713](https://github.com/vultr/terraform-provider-vultr/pull/713)
+* resource/organization_role_user_attachment: Added organization/IAM from beta branch [PR 713](https://github.com/vultr/terraform-provider-vultr/pull/713)
+* resource/organization_role_session: Added organization/IAM from beta branch [PR 713](https://github.com/vultr/terraform-provider-vultr/pull/713)
+* resource/organization_role_trust: Added organization/IAM from beta branch [PR 713](https://github.com/vultr/terraform-provider-vultr/pull/713)
+* resource/database_replica: Add ca_certificate [PR 723](https://github.com/vultr/terraform-provider-vultr/pull/723)
+
+### Dependencies
+* Update govultr from v3.28.1 to v3.29.0 [PR 712](https://github.com/vultr/terraform-provider-vultr/pull/712)
+* Bump github.com/vultr/govultr/v3 from 3.29.0 to 3.30.0 [PR 719](https://github.com/vultr/terraform-provider-vultr/pull/719)
+* Bump google.golang.org/grpc from 1.75.1 to 1.79.3 [PR 710](https://github.com/vultr/terraform-provider-vultr/pull/710)
+* Bump github.com/hashicorp/terraform-plugin-sdk/v2 from 2.38.2 to 2.40.0 [PR 705](https://github.com/vultr/terraform-provider-vultr/pull/705)
+* Bump golang.org/x/oauth2 from 0.35.0 to 0.36.0 [PR 704](https://github.com/vultr/terraform-provider-vultr/pull/704)
+
+### Bug Fixes
+* data source/load_balancer: Change attached instances from list to set to avoid ordering state drift [PR 716](https://github.com/vultr/terraform-provider-vultr/pull/716)
+* resource/object storage: Add tier_id to state import [PR 724](https://github.com/vultr/terraform-provider-vultr/pull/724)
+* resource/vpc: Add composite key import for NAT gateway [PR 725](https://github.com/vultr/terraform-provider-vultr/pull/725)
+* resource/kubernetes_node_pool: Resolve state upgrader nil interface crash when no node pools existed in old state [PR 721](https://github.com/vultr/terraform-provider-vultr/pull/721)
+* resource/firewall_group: Remove count fields from schema [PR 717](https://github.com/vultr/terraform-provider-vultr/pull/717)
+* resource/firewall_rule: Remove validation on rule source [PR 726](https://github.com/vultr/terraform-provider-vultr/pull/726)
+* resource/instance: Add resource missing response check [PR 727](https://github.com/vultr/terraform-provider-vultr/pull/727)
+* resource/bare_metal_server: Add resource missing response check [PR 727](https://github.com/vultr/terraform-provider-vultr/pull/727)
+* resource/firewall_rule: Ignore differences in IPv6 strings [PR 715](https://github.com/vultr/terraform-provider-vultr/pull/715)
+* resource/kubernetes: Ignore node count when autoscaler is enabled [PR 711](https://github.com/vultr/terraform-provider-vultr/pull/711)
+* resource/kubernetes_node_pool: Ignore node count when autoscaler is enabled [PR 711](https://github.com/vultr/terraform-provider-vultr/pull/711)
+* resource/reverse_ipv6: Ensure IPv6 is an expanded string for the API [PR 729](https://github.com/vultr/terraform-provider-vultr/pull/729)
+
+### Automation
+* Fix govet [PR 728](https://github.com/vultr/terraform-provider-vultr/pull/728)
+
+### New Contributors
+* @biondizzle made their first contribution in [PR 716](https://github.com/vultr/terraform-provider-vultr/pull/716)
+* @wiggels made their first contribution in [PR 715](https://github.com/vultr/terraform-provider-vultr/pull/715)
+
 ## [v2.30.1](https://github.com/vultr/terraform-provider-vultr/compare/v2.30.0...v2.30.1) (2026-03-04)
-### Buck Fixes
+### Bug Fixes
 * resource/kubernetes_node_pool: Remove len check on node pool state migration [PR 702](https://github.com/vultr/terraform-provider-vultr/pull/702)
 
 ## [v2.30.0](https://github.com/vultr/terraform-provider-vultr/compare/v2.29.1...v2.30.0) (2026-02-26)
@@ -69,11 +135,9 @@
 ### Enhancements
 * data source/bare metal server: Add snapshot_id field [PR 616](https://github.com/vultr/terraform-provider-vultr/pull/616)
 * resource/bare metal server: Add snapshot_id field [PR 616](https://github.com/vultr/terraform-provider-vultr/pull/616)
-
 * data source/instance: Add snapshot_id field [PR 616](https://github.com/vultr/terraform-provider-vultr/pull/616)
 * data source/instances: Add snapshot_id field [PR 616](https://github.com/vultr/terraform-provider-vultr/pull/616)
 * resource/instance: Add snapshot_id & image_id fields [PR 616](https://github.com/vultr/terraform-provider-vultr/pull/616)
-
 * data source/database: Add ca_certificate field [PR 616](https://github.com/vultr/terraform-provider-vultr/pull/616)
 * resource/database: Add ca_certificate field [PR 616](https://github.com/vultr/terraform-provider-vultr/pull/616)
 

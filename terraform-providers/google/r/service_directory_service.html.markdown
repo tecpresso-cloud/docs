@@ -77,6 +77,12 @@ The following arguments are supported:
   up to 2000 characters, spread across all key-value pairs.
   Metadata that goes beyond any these limits will be rejected.
 
+* `deletion_policy` - (Optional) Whether Terraform will be prevented from destroying the resource. Defaults to DELETE.
+	When a 'terraform destroy' or 'terraform apply' would delete the resource,
+	the command will fail if this field is set to "PREVENT" in Terraform state.
+	When set to "ABANDON", the command will remove the resource from Terraform
+	management without updating or deleting the resource in the API.
+	When set to "DELETE", deleting the resource is allowed.
 
 
 ## Attributes Reference
@@ -108,6 +114,16 @@ Service can be imported using any of these accepted formats:
 * `{{project}}/{{location}}/{{namespace_id}}/{{service_id}}`
 * `{{location}}/{{namespace_id}}/{{service_id}}`
 
+In Terraform v1.12.0 and later, use an [`identity` block](https://developer.hashicorp.com/terraform/language/resources/identities) to import Service using identity values. For example:
+
+```tf
+import {
+  identity = {
+    serviceId = "<-required value->"
+  }
+  to = google_service_directory_service.default
+}
+```
 
 In Terraform v1.5.0 and later, use an [`import` block](https://developer.hashicorp.com/terraform/language/import) to import Service using one of the formats above. For example:
 

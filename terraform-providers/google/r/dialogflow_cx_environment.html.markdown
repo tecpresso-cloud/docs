@@ -96,6 +96,12 @@ The following arguments are supported:
   The Agent to create an Environment for.
   Format: projects/<Project ID>/locations/<Location ID>/agents/<Agent ID>.
 
+* `deletion_policy` - (Optional) Whether Terraform will be prevented from destroying the resource. Defaults to DELETE.
+	When a 'terraform destroy' or 'terraform apply' would delete the resource,
+	the command will fail if this field is set to "PREVENT" in Terraform state.
+	When set to "ABANDON", the command will remove the resource from Terraform
+	management without updating or deleting the resource in the API.
+	When set to "DELETE", deleting the resource is allowed.
 
 
 <a name="nested_version_configs"></a>The `version_configs` block supports:
@@ -134,6 +140,17 @@ Environment can be imported using any of these accepted formats:
 * `{{parent}}/environments/{{name}}`
 * `{{parent}}/{{name}}`
 
+In Terraform v1.12.0 and later, use an [`identity` block](https://developer.hashicorp.com/terraform/language/resources/identities) to import Environment using identity values. For example:
+
+```tf
+import {
+  identity = {
+    name = "<-optional value->"
+    parent = "<-optional value->"
+  }
+  to = google_dialogflow_cx_environment.default
+}
+```
 
 In Terraform v1.5.0 and later, use an [`import` block](https://developer.hashicorp.com/terraform/language/import) to import Environment using one of the formats above. For example:
 

@@ -78,6 +78,12 @@ The following arguments are supported:
   (Optional)
   Optional service account the deployed proxy runs as.
 
+* `deletion_policy` - (Optional) Whether Terraform will be prevented from destroying the resource. Defaults to DELETE.
+	When a 'terraform destroy' or 'terraform apply' would delete the resource,
+	the command will fail if this field is set to "PREVENT" in Terraform state.
+	When set to "ABANDON", the command will remove the resource from Terraform
+	management without updating or deleting the resource in the API.
+	When set to "DELETE", deleting the resource is allowed.
 
 
 ## Attributes Reference
@@ -113,6 +119,19 @@ EnvironmentApiRevisionDeployment can be imported using any of these accepted for
 * `{{org_id}}/{{environment}}/{{api}}/{{revision}}`
 * `{{id}}`
 
+In Terraform v1.12.0 and later, use an [`identity` block](https://developer.hashicorp.com/terraform/language/resources/identities) to import EnvironmentApiRevisionDeployment using identity values. For example:
+
+```tf
+import {
+  identity = {
+    org_id = "<-required value->"
+    environment = "<-required value->"
+    api = "<-required value->"
+    revision = "<-required value->"
+  }
+  to = google_apigee_environment_api_revision_deployment.default
+}
+```
 
 In Terraform v1.5.0 and later, use an [`import` block](https://developer.hashicorp.com/terraform/language/import) to import EnvironmentApiRevisionDeployment using one of the formats above. For example:
 

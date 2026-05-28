@@ -53,8 +53,7 @@ resource "google_vertex_ai_reasoning_engine" "reasoning_engine" {
       python_spec {
         entrypoint_module = "simple_agent"
         entrypoint_object = "fixed_name_generator"
-        requirements_file = "./test-fixtures/requirements.txt"
-        version           = "3.11"
+        version           = "3.14"
       }
     }
   }
@@ -93,6 +92,95 @@ resource "google_vertex_ai_reasoning_engine" "reasoning_engine" {
       }
     }
   }
+}
+```
+<div class = "oics-button" style="float: right; margin: 0 0 -15px">
+  <a href="https://console.cloud.google.com/cloudshell/open?cloudshell_git_repo=https%3A%2F%2Fgithub.com%2Fterraform-google-modules%2Fdocs-examples.git&cloudshell_image=gcr.io%2Fcloudshell-images%2Fcloudshell%3Alatest&cloudshell_print=.%2Fmotd&cloudshell_tutorial=.%2Ftutorial.md&cloudshell_working_dir=vertex_ai_reasoning_engine_image_spec&open_in_editor=main.tf" target="_blank">
+    <img alt="Open in Cloud Shell" src="//gstatic.com/cloudssh/images/open-btn.svg" style="max-height: 44px; margin: 32px auto; max-width: 100%;">
+  </a>
+</div>
+## Example Usage - Vertex Ai Reasoning Engine Image Spec
+
+
+```hcl
+resource "google_vertex_ai_reasoning_engine" "reasoning_engine" {
+  display_name = "reasoning-engine"
+  description  = "Deployed with BYOC Dockerfile through Terraform"
+  region       = "us-central1"
+
+  spec {
+    source_code_spec {
+      inline_source {
+        source_archive = filebase64("./test-fixtures/agent_src.tar.gz")
+      }
+
+      image_spec {
+        build_args = {}
+      }
+    }
+  }
+}
+```
+<div class = "oics-button" style="float: right; margin: 0 0 -15px">
+  <a href="https://console.cloud.google.com/cloudshell/open?cloudshell_git_repo=https%3A%2F%2Fgithub.com%2Fterraform-google-modules%2Fdocs-examples.git&cloudshell_image=gcr.io%2Fcloudshell-images%2Fcloudshell%3Alatest&cloudshell_print=.%2Fmotd&cloudshell_tutorial=.%2Ftutorial.md&cloudshell_working_dir=vertex_ai_reasoning_engine_byoc&open_in_editor=main.tf" target="_blank">
+    <img alt="Open in Cloud Shell" src="//gstatic.com/cloudssh/images/open-btn.svg" style="max-height: 44px; margin: 32px auto; max-width: 100%;">
+  </a>
+</div>
+## Example Usage - Vertex Ai Reasoning Engine Byoc
+
+
+```hcl
+resource "google_vertex_ai_reasoning_engine" "reasoning_engine" {
+  display_name = "reasoning-engine"
+  description  = "Deployed with BYOC through Terraform"
+  region       = "us-central1"
+
+  spec {
+    container_spec {
+      image_uri = "us-central1-docker.pkg.dev/${data.google_project.project.project_id}/vertex-byoc/byoc-agent:latest" # image path
+    }
+  }
+
+  depends_on = [google_project_iam_member.vertex_ar_reader, google_project_iam_member.tenant_ar_reader]
+}
+
+
+# Provision and retrieve the tenant service agent through another agent
+resource "google_vertex_ai_reasoning_engine" "tenant_mds" {
+  display_name = "reasoning-engine-mds"
+  region       = "us-central1"
+
+  spec {
+    source_code_spec {
+      inline_source {
+        source_archive = filebase64("./test-fixtures/mds_agent_src.tar.gz")
+      }
+
+      python_spec {
+        entrypoint_module = "metadata_agent"
+        entrypoint_object = "root_agent"
+      }
+    }
+  }
+}
+
+data "google_vertex_ai_reasoning_engine_query" "tenant_mds" {
+  region              = "us-central1"
+  reasoning_engine_id = google_vertex_ai_reasoning_engine.tenant_mds.name
+}
+
+data "google_project" "project" {}
+
+resource "google_project_iam_member" "vertex_ar_reader" {
+  project = data.google_project.project.project_id
+  role    = "roles/artifactregistry.reader"
+  member  = "serviceAccount:service-${data.google_project.project.number}@gcp-sa-aiplatform-re.iam.gserviceaccount.com"
+}
+
+resource "google_project_iam_member" "tenant_ar_reader" {
+  project = data.google_project.project.project_id
+  role    = "roles/artifactregistry.reader"
+  member  = "serviceAccount:${jsondecode(data.google_vertex_ai_reasoning_engine_query.tenant_mds.output).output}"
 }
 ```
 ## Example Usage - Vertex Ai Reasoning Engine Psc Interface
@@ -381,6 +469,81 @@ resource "google_project_iam_member" "sa_iam_viewer" {
 data "google_project" "project" {
 }
 ```
+<div class = "oics-button" style="float: right; margin: 0 0 -15px">
+  <a href="https://console.cloud.google.com/cloudshell/open?cloudshell_git_repo=https%3A%2F%2Fgithub.com%2Fterraform-google-modules%2Fdocs-examples.git&cloudshell_image=gcr.io%2Fcloudshell-images%2Fcloudshell%3Alatest&cloudshell_print=.%2Fmotd&cloudshell_tutorial=.%2Ftutorial.md&cloudshell_working_dir=vertex_ai_reasoning_engine_context_spec&open_in_editor=main.tf" target="_blank">
+    <img alt="Open in Cloud Shell" src="//gstatic.com/cloudssh/images/open-btn.svg" style="max-height: 44px; margin: 32px auto; max-width: 100%;">
+  </a>
+</div>
+## Example Usage - Vertex Ai Reasoning Engine Context Spec
+
+
+```hcl
+resource "google_vertex_ai_reasoning_engine" "reasoning_engine" {
+  display_name = "re-ctx-spec"
+  description  = "Reasoning engine with context spec"
+  region       = "us-central1"
+  provider     = google-beta
+
+  context_spec {
+    memory_bank_config {
+      generation_config {
+        model = "projects/${data.google_project.project.project_id}/locations/us-central1/publishers/google/models/gemini-2.5-flash"
+      }
+      similarity_search_config {
+        embedding_model = "projects/${data.google_project.project.project_id}/locations/us-central1/publishers/google/models/text-embedding-005"
+      }
+      disable_memory_revisions = false
+      ttl_config {
+        default_ttl = "86400s"
+      }
+    }
+  }
+}
+
+data "google_project" "project" {
+  provider = google-beta
+}
+```
+<div class = "oics-button" style="float: right; margin: 0 0 -15px">
+  <a href="https://console.cloud.google.com/cloudshell/open?cloudshell_git_repo=https%3A%2F%2Fgithub.com%2Fterraform-google-modules%2Fdocs-examples.git&cloudshell_image=gcr.io%2Fcloudshell-images%2Fcloudshell%3Alatest&cloudshell_print=.%2Fmotd&cloudshell_tutorial=.%2Ftutorial.md&cloudshell_working_dir=vertex_ai_reasoning_engine_granular_ttl&open_in_editor=main.tf" target="_blank">
+    <img alt="Open in Cloud Shell" src="//gstatic.com/cloudssh/images/open-btn.svg" style="max-height: 44px; margin: 32px auto; max-width: 100%;">
+  </a>
+</div>
+## Example Usage - Vertex Ai Reasoning Engine Granular Ttl
+
+
+```hcl
+resource "google_vertex_ai_reasoning_engine" "reasoning_engine" {
+  display_name = "re-gran-ttl"
+  description  = "Reasoning engine with granular ttl"
+  region       = "us-central1"
+  provider     = google-beta
+
+  context_spec {
+    memory_bank_config {
+      generation_config {
+        model = "projects/${data.google_project.project.project_id}/locations/us-central1/publishers/google/models/gemini-2.5-flash"
+      }
+      similarity_search_config {
+        embedding_model = "projects/${data.google_project.project.project_id}/locations/us-central1/publishers/google/models/text-embedding-005"
+      }
+      disable_memory_revisions = false
+      ttl_config {
+        memory_revision_default_ttl = "86400s"
+        granular_ttl_config {
+          create_ttl = "86400s"
+          generate_created_ttl = "86400s"
+          generate_updated_ttl = "86400s"
+        }
+      }
+    }
+  }
+}
+
+data "google_project" "project" {
+  provider = google-beta
+}
+```
 
 ## Argument Reference
 
@@ -396,6 +559,14 @@ The following arguments are supported:
   (Optional)
   The description of the ReasoningEngine.
 
+* `labels` -
+  (Optional)
+  The labels associated with this ReasoningEngine. You can use these to
+  organize and group your ReasoningEngines.
+
+  **Note**: This field is non-authoritative, and will only manage the labels present in your configuration.
+  Please refer to the field `effective_labels` for all of the labels present on the resource.
+
 * `encryption_spec` -
   (Optional)
   Optional. Customer-managed encryption key spec for a ReasoningEngine.
@@ -408,12 +579,26 @@ The following arguments are supported:
   Optional. Configurations of the ReasoningEngine.
   Structure is [documented below](#nested_spec).
 
+* `context_spec` -
+  (Optional, [Beta](../guides/provider_versions.html.markdown))
+  Optional. Configuration for how Agent Engine sub-resources should manage context.
+  Structure is [documented below](#nested_context_spec).
+
 * `region` -
   (Optional)
   The region of the reasoning engine. eg us-central1
 
 * `project` - (Optional) The ID of the project in which the resource belongs.
     If it is not provided, the provider project is used.
+
+* `deletion_policy` - (Optional) Optional. The deletion policy for the reasoning engine.
+Setting this to FORCE allows the reasoning engine to be deleted regardless of child undeleted resources.
+
+When a 'terraform destroy' or 'terraform apply' would delete the resource,
+the command will fail if this field is set to "PREVENT" in Terraform state.
+When set to "ABANDON", the command will remove the resource from Terraform
+management without updating or deleting the resource in the API.
+When set to "DELETE", deleting the resource is permitted.
 
 
 
@@ -451,6 +636,11 @@ The following arguments are supported:
   field_behavior to avoid introducing breaking changes.
   Structure is [documented below](#nested_spec_package_spec).
 
+* `container_spec` -
+  (Optional)
+  Deploy from a container image with a defined entrypoint and commands.
+  Structure is [documented below](#nested_spec_container_spec).
+
 * `source_code_spec` -
   (Optional)
   Specification for deploying from source code.
@@ -463,6 +653,20 @@ The following arguments are supported:
   project's Cloud Storage and "roles/aiplatform.user" for using Vertex
   extensions. If not specified, the Vertex AI Reasoning Engine service
   Agent in the project will be used.
+
+* `identity_type` -
+  (Optional)
+  Optional. The identity type to use for the Reasoning Engine.
+  If not specified, the `service_account` field will be used if set,
+  otherwise the default Vertex AI Reasoning Engine Service Agent in the project will be used.
+  Possible values:
+  * `SERVICE_ACCOUNT`: Use a custom service account if the `service_account` field is set, otherwise use the default Vertex AI Reasoning Engine Service Agent in the project.
+  * `AGENT_IDENTITY`: Use Agent Identity. The `service_account` field must not be set.
+  Possible values are: `SERVICE_ACCOUNT`, `AGENT_IDENTITY`.
+
+* `effective_identity` -
+  (Output)
+  The identity to use for the Reasoning Engine.
 
 
 <a name="nested_spec_deployment_spec"></a>The `deployment_spec` block supports:
@@ -621,12 +825,25 @@ The following arguments are supported:
   (Optional)
   Optional. The Cloud Storage URI of the requirements.txtfile
 
+<a name="nested_spec_container_spec"></a>The `container_spec` block supports:
+
+* `image_uri` -
+  (Required)
+  The Artifact Registry Docker image URI (e.g.,
+  `us-central1-docker.pkg.dev/my-project/my-repo/my-image:tag`) of the
+  container image that is to be run on each worker replica.
+
 <a name="nested_spec_source_code_spec"></a>The `source_code_spec` block supports:
 
 * `inline_source` -
   (Optional)
   Source code is provided directly in the request.
   Structure is [documented below](#nested_spec_source_code_spec_inline_source).
+
+* `image_spec` -
+  (Optional)
+  Configuration for building an image with custom config file.
+  Structure is [documented below](#nested_spec_source_code_spec_image_spec).
 
 * `python_spec` -
   (Optional)
@@ -646,6 +863,12 @@ The following arguments are supported:
   Required. Input only.
   The application source code archive, provided as a compressed
   tarball (.tar.gz) file. A base64-encoded string.
+
+<a name="nested_spec_source_code_spec_image_spec"></a>The `image_spec` block supports:
+
+* `build_args` -
+  (Optional)
+  Build arguments to be used. They will be passed through --build-arg flags.
 
 <a name="nested_spec_source_code_spec_python_spec"></a>The `python_spec` block supports:
 
@@ -696,6 +919,78 @@ The following arguments are supported:
   (Required)
   The revision to fetch from the Git repository such as a branch, a tag, a commit SHA, or any Git ref.
 
+<a name="nested_context_spec"></a>The `context_spec` block supports:
+
+* `memory_bank_config` -
+  (Optional)
+  Specification for a Memory Bank, which manages memories for the Agent Engine.
+  Structure is [documented below](#nested_context_spec_memory_bank_config).
+
+
+<a name="nested_context_spec_memory_bank_config"></a>The `memory_bank_config` block supports:
+
+* `generation_config` -
+  (Optional)
+  Configuration for how to generate memories for the Memory Bank.
+  Structure is [documented below](#nested_context_spec_memory_bank_config_generation_config).
+
+* `similarity_search_config` -
+  (Optional)
+  Configuration for how to perform similarity search on memories.
+  Structure is [documented below](#nested_context_spec_memory_bank_config_similarity_search_config).
+
+* `ttl_config` -
+  (Optional)
+  Configuration for automatic TTL ("time-to-live") of the memories in the Memory Bank.
+  Structure is [documented below](#nested_context_spec_memory_bank_config_ttl_config).
+
+* `disable_memory_revisions` -
+  (Optional)
+  If true, no memory revisions will be created for any requests to the Memory Bank.
+
+
+<a name="nested_context_spec_memory_bank_config_generation_config"></a>The `generation_config` block supports:
+
+* `model` -
+  (Required)
+  The model used to generate memories. Format: projects/{project}/locations/{location}/publishers/google/models/{model}.
+
+<a name="nested_context_spec_memory_bank_config_similarity_search_config"></a>The `similarity_search_config` block supports:
+
+* `embedding_model` -
+  (Required)
+  The model used to generate embeddings to lookup similar memories. Format: projects/{project}/locations/{location}/publishers/google/models/{model}.
+
+<a name="nested_context_spec_memory_bank_config_ttl_config"></a>The `ttl_config` block supports:
+
+* `default_ttl` -
+  (Optional)
+  The default TTL duration of the memories in the Memory Bank.
+
+* `granular_ttl_config` -
+  (Optional)
+  The granular TTL configuration of the memories in the Memory Bank.
+  Structure is [documented below](#nested_context_spec_memory_bank_config_ttl_config_granular_ttl_config).
+
+* `memory_revision_default_ttl` -
+  (Optional)
+  The default TTL duration of the memory revisions in the Memory Bank.
+
+
+<a name="nested_context_spec_memory_bank_config_ttl_config_granular_ttl_config"></a>The `granular_ttl_config` block supports:
+
+* `create_ttl` -
+  (Optional)
+  The TTL duration for memories uploaded via CreateMemory.
+
+* `generate_created_ttl` -
+  (Optional)
+  The TTL duration for memories newly generated via GenerateMemories.
+
+* `generate_updated_ttl` -
+  (Optional)
+  The TTL duration for memories updated via GenerateMemories.
+
 ## Attributes Reference
 
 In addition to the arguments listed above, the following computed attributes are exported:
@@ -713,6 +1008,13 @@ In addition to the arguments listed above, the following computed attributes are
 * `update_time` -
   The timestamp of when the Index was last updated in RFC3339 UTC "Zulu"
   format, with nanosecond resolution and up to nine fractional digits.
+
+* `terraform_labels` -
+  The combination of labels configured directly on the resource
+   and default labels configured on the provider.
+
+* `effective_labels` -
+  All of labels (key/value pairs) present on the resource in GCP, including the labels configured through Terraform, other clients and services.
 
 
 ## Timeouts
@@ -734,6 +1036,18 @@ ReasoningEngine can be imported using any of these accepted formats:
 * `{{region}}/{{name}}`
 * `{{name}}`
 
+In Terraform v1.12.0 and later, use an [`identity` block](https://developer.hashicorp.com/terraform/language/resources/identities) to import ReasoningEngine using identity values. For example:
+
+```tf
+import {
+  identity = {
+    name = "<-optional value->"
+    region = "<-optional value->"
+    project = "<-optional value->"
+  }
+  to = google_vertex_ai_reasoning_engine.default
+}
+```
 
 In Terraform v1.5.0 and later, use an [`import` block](https://developer.hashicorp.com/terraform/language/import) to import ReasoningEngine using one of the formats above. For example:
 

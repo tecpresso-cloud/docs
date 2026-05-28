@@ -166,6 +166,12 @@ The following arguments are supported:
 * `project` - (Optional) The ID of the project in which the resource belongs.
     If it is not provided, the provider project is used.
 
+* `deletion_policy` - (Optional) Whether Terraform will be prevented from destroying the resource. Defaults to DELETE.
+	When a 'terraform destroy' or 'terraform apply' would delete the resource,
+	the command will fail if this field is set to "PREVENT" in Terraform state.
+	When set to "ABANDON", the command will remove the resource from Terraform
+	management without updating or deleting the resource in the API.
+	When set to "DELETE", deleting the resource is allowed.
 * `force_destroy` - (Optional) When deleting a spanner instance, this boolean option will delete all backups of this instance.
 This must be set to true if you created a backup manually in the console.
 
@@ -261,20 +267,53 @@ This must be set to true if you created a backup manually in the console.
 <a name="nested_autoscaling_config_asymmetric_autoscaling_options_overrides"></a>The `overrides` block supports:
 
 * `autoscaling_limits` -
-  (Required)
+  (Optional)
   A nested object resource.
   Structure is [documented below](#nested_autoscaling_config_asymmetric_autoscaling_options_overrides_autoscaling_limits).
+
+* `autoscaling_target_high_priority_cpu_utilization_percent` -
+  (Optional)
+  The target high priority cpu utilization percentage that the autoscaler
+  should be trying to achieve for this replica.
+  This number is on a scale from 0 (no utilization) to 100 (full utilization).
+
+* `autoscaling_target_total_cpu_utilization_percent` -
+  (Optional)
+  The target total cpu utilization percentage that the autoscaler
+  should be trying to achieve for this replica.
+  This number is on a scale from 0 (no utilization) to 100 (full utilization).
+
+* `disable_high_priority_cpu_autoscaling` -
+  (Optional)
+  If true, disables high priority CPU autoscaling for this replica and ignores
+  high_priority_cpu_utilization_percent in the top-level autoscaling configuration.
+
+* `disable_total_cpu_autoscaling` -
+  (Optional)
+  If true, disables total CPU autoscaling for this replica and ignores
+  total_cpu_utilization_percent in the top-level autoscaling configuration.
 
 
 <a name="nested_autoscaling_config_asymmetric_autoscaling_options_overrides_autoscaling_limits"></a>The `autoscaling_limits` block supports:
 
 * `min_nodes` -
-  (Required)
+  (Optional)
   The minimum number of nodes for this specific replica.
 
 * `max_nodes` -
-  (Required)
+  (Optional)
   The maximum number of nodes for this specific replica.
+
+* `min_processing_units` -
+  (Optional)
+  The minimum number of processing units for this specific replica.
+  If set, this number should be multiples of 1000.
+
+* `max_processing_units` -
+  (Optional)
+  The maximum number of processing units for this specific replica.
+  If set, this number should be multiples of 1000 and be greater than or equal to
+  min_processing_units.
 
 ## Attributes Reference
 
@@ -311,6 +350,17 @@ Instance can be imported using any of these accepted formats:
 * `{{project}}/{{name}}`
 * `{{name}}`
 
+In Terraform v1.12.0 and later, use an [`identity` block](https://developer.hashicorp.com/terraform/language/resources/identities) to import Instance using identity values. For example:
+
+```tf
+import {
+  identity = {
+    name = "<-optional value->"
+    project = "<-optional value->"
+  }
+  to = google_spanner_instance.default
+}
+```
 
 In Terraform v1.5.0 and later, use an [`import` block](https://developer.hashicorp.com/terraform/language/import) to import Instance using one of the formats above. For example:
 

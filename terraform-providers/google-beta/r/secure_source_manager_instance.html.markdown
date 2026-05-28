@@ -172,6 +172,102 @@ resource "time_sleep" "wait_120_seconds" {
 data "google_project" "project" {}
 ```
 <div class = "oics-button" style="float: right; margin: 0 0 -15px">
+  <a href="https://console.cloud.google.com/cloudshell/open?cloudshell_git_repo=https%3A%2F%2Fgithub.com%2Fterraform-google-modules%2Fdocs-examples.git&cloudshell_image=gcr.io%2Fcloudshell-images%2Fcloudshell%3Alatest&cloudshell_print=.%2Fmotd&cloudshell_tutorial=.%2Ftutorial.md&cloudshell_working_dir=secure_source_manager_instance_private_custom_host&open_in_editor=main.tf" target="_blank">
+    <img alt="Open in Cloud Shell" src="//gstatic.com/cloudssh/images/open-btn.svg" style="max-height: 44px; margin: 32px auto; max-width: 100%;">
+  </a>
+</div>
+## Example Usage - Secure Source Manager Instance Private Custom Host
+
+
+```hcl
+data "google_project" "project" {}
+
+resource "google_privateca_ca_pool" "ca_pool" {
+  name     = "ca-pool"
+  location = "us-central1"
+  tier     = "ENTERPRISE"
+  publishing_options {
+    publish_ca_cert = true
+    publish_crl     = true
+  }
+}
+
+resource "google_privateca_certificate_authority" "root_ca" {
+  pool                     = google_privateca_ca_pool.ca_pool.name
+  certificate_authority_id = "root-ca"
+  location                 = "us-central1"
+  config {
+    subject_config {
+      subject {
+        organization = "google"
+        common_name = "my-certificate-authority"
+      }
+    }
+    x509_config {
+      ca_options {
+        is_ca = true
+      }
+      key_usage {
+        base_key_usage {
+          cert_sign = true
+          crl_sign = true
+        }
+        extended_key_usage {
+          server_auth = true
+        }
+      }
+    }
+  }
+  key_spec {
+    algorithm = "RSA_PKCS1_4096_SHA256"
+  }
+
+  // Disable deletion protections for easier test cleanup purposes
+  deletion_protection = false
+  ignore_active_certificates_on_deletion = true
+  skip_grace_period = true
+}
+
+resource "google_privateca_ca_pool_iam_binding" "ca_pool_binding" {
+  ca_pool = google_privateca_ca_pool.ca_pool.id
+  role = "roles/privateca.certificateRequester"
+
+  members = [
+    "serviceAccount:service-${data.google_project.project.number}@gcp-sa-sourcemanager.iam.gserviceaccount.com"
+  ]
+}
+
+resource "google_secure_source_manager_instance" "default" {
+  instance_id = "my-instance"
+  location = "us-central1"
+  private_config {
+    is_private = true
+    ca_pool = google_privateca_ca_pool.ca_pool.id
+    custom_host_config {
+      api = "api.example.com"
+      git_http = "git-http.example.com"
+      git_ssh = "git-ssh.example.com"
+      html   = "html.example.com"
+    }
+  }
+
+  # Prevent accidental deletions.
+  deletion_policy = "PREVENT"
+
+  depends_on = [
+    google_privateca_certificate_authority.root_ca,
+    time_sleep.wait_120_seconds
+  ]
+}
+
+# ca pool IAM permissions can take time to propagate
+resource "time_sleep" "wait_120_seconds" {
+  depends_on = [google_privateca_ca_pool_iam_binding.ca_pool_binding]
+
+  create_duration = "120s"
+}
+```
+<div class = "oics-button" style="float: right; margin: 0 0 -15px">
   <a href="https://console.cloud.google.com/cloudshell/open?cloudshell_git_repo=https%3A%2F%2Fgithub.com%2Fterraform-google-modules%2Fdocs-examples.git&cloudshell_image=gcr.io%2Fcloudshell-images%2Fcloudshell%3Alatest&cloudshell_print=.%2Fmotd&cloudshell_tutorial=.%2Ftutorial.md&cloudshell_working_dir=secure_source_manager_instance_private_psc_backend&open_in_editor=main.tf" target="_blank">
     <img alt="Open in Cloud Shell" src="//gstatic.com/cloudssh/images/open-btn.svg" style="max-height: 44px; margin: 32px auto; max-width: 100%;">
   </a>
@@ -583,15 +679,12 @@ The following arguments are supported:
 * `project` - (Optional) The ID of the project in which the resource belongs.
     If it is not provided, the provider project is used.
 
-* `deletion_policy` - (Optional) The deletion policy for the instance. Setting `ABANDON` allows the resource
-to be abandoned, rather than deleted. Setting `DELETE` deletes the resource
-and all its contents. Setting `PREVENT` prevents the resource from accidental
-deletion by erroring out during plan.
-Default is `PREVENT`.  Possible values are:
-  * DELETE
-  * PREVENT
-  * ABANDON
-
+* `deletion_policy` - (Optional) Whether Terraform will be prevented from destroying the resource. Defaults to PREVENT.
+	When a 'terraform destroy' or 'terraform apply' would delete the resource,
+	the command will fail if this field is set to "PREVENT" in Terraform state.
+	When set to "ABANDON", the command will remove the resource from Terraform
+	management without updating or deleting the resource in the API.
+	When set to "DELETE", deleting the resource is allowed.
 
 
 <a name="nested_private_config"></a>The `private_config` block supports:
@@ -599,6 +692,11 @@ Default is `PREVENT`.  Possible values are:
 * `is_private` -
   (Required)
   'Indicate if it's private instance.'
+
+* `custom_host_config` -
+  (Optional)
+  Custom host configuration for the instance.
+  Structure is [documented below](#nested_private_config_custom_host_config).
 
 * `ca_pool` -
   (Optional)
@@ -611,6 +709,25 @@ Default is `PREVENT`.  Possible values are:
 * `ssh_service_attachment` -
   (Output)
   Service Attachment for SSH, resource is in the format of `projects/{project}/regions/{region}/serviceAttachments/{service_attachment}`.
+
+
+<a name="nested_private_config_custom_host_config"></a>The `custom_host_config` block supports:
+
+* `html` -
+  (Required)
+  HTML hostname.
+
+* `api` -
+  (Required)
+  API hostname.
+
+* `git_http` -
+  (Required)
+  Git HTTP hostname.
+
+* `git_ssh` -
+  (Required)
+  Git SSH hostname.
 
 <a name="nested_workforce_identity_federation_config"></a>The `workforce_identity_federation_config` block supports:
 
@@ -688,6 +805,18 @@ Instance can be imported using any of these accepted formats:
 * `{{location}}/{{instance_id}}`
 * `{{instance_id}}`
 
+In Terraform v1.12.0 and later, use an [`identity` block](https://developer.hashicorp.com/terraform/language/resources/identities) to import Instance using identity values. For example:
+
+```tf
+import {
+  identity = {
+    location = "<-required value->"
+    instance_id = "<-required value->"
+    project = "<-optional value->"
+  }
+  to = google_secure_source_manager_instance.default
+}
+```
 
 In Terraform v1.5.0 and later, use an [`import` block](https://developer.hashicorp.com/terraform/language/import) to import Instance using one of the formats above. For example:
 

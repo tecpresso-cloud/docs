@@ -100,6 +100,12 @@ The following arguments are supported:
   The `service-account-name` is formatted like an email address. For example: serviceAccount@my_project_id.iam.gserviceaccount.com
   You might specify multiple service accounts, for example, if you have multiple environments and wish to assign a unique service account to each one.
 
+* `deletion_policy` - (Optional) Whether Terraform will be prevented from destroying the resource. Defaults to DELETE.
+	When a 'terraform destroy' or 'terraform apply' would delete the resource,
+	the command will fail if this field is set to "PREVENT" in Terraform state.
+	When set to "ABANDON", the command will remove the resource from Terraform
+	management without updating or deleting the resource in the API.
+	When set to "DELETE", deleting the resource is allowed.
 
 
 ## Attributes Reference
@@ -126,6 +132,16 @@ ControlPlaneAccess can be imported using any of these accepted formats:
 * `organizations/{{name}}/controlPlaneAccess`
 * `{{name}}`
 
+In Terraform v1.12.0 and later, use an [`identity` block](https://developer.hashicorp.com/terraform/language/resources/identities) to import ControlPlaneAccess using identity values. For example:
+
+```tf
+import {
+  identity = {
+    name = "<-required value->"
+  }
+  to = google_apigee_control_plane_access.default
+}
+```
 
 In Terraform v1.5.0 and later, use an [`import` block](https://developer.hashicorp.com/terraform/language/import) to import ControlPlaneAccess using one of the formats above. For example:
 

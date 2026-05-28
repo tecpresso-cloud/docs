@@ -24,8 +24,6 @@ description: |-
 Represents a namespace for a workload identity pool. Namespaces are used to segment identities
 within the pool.
 
-~> **Warning:** This resource is in beta, and should be used with the terraform-provider-google-beta provider.
-See [Provider Versions](../guides/provider_versions.html.markdown) for more details on beta resources.
 
 To get more information about WorkloadIdentityPoolNamespace, see:
 
@@ -44,15 +42,11 @@ To get more information about WorkloadIdentityPoolNamespace, see:
 
 ```hcl
 resource "google_iam_workload_identity_pool" "pool" {
-  provider = google-beta
-
   workload_identity_pool_id = "example-pool"
   mode                      = "TRUST_DOMAIN"
 }
 
 resource "google_iam_workload_identity_pool_namespace" "example" {
-  provider = google-beta
-
   workload_identity_pool_id           = google_iam_workload_identity_pool.pool.workload_identity_pool_id
   workload_identity_pool_namespace_id = "example-namespace"
 }
@@ -67,15 +61,11 @@ resource "google_iam_workload_identity_pool_namespace" "example" {
 
 ```hcl
 resource "google_iam_workload_identity_pool" "pool" {
-  provider = google-beta
-
   workload_identity_pool_id = "example-pool"
   mode                      = "TRUST_DOMAIN"
 }
 
 resource "google_iam_workload_identity_pool_namespace" "example" {
-  provider = google-beta
-
   workload_identity_pool_id           = google_iam_workload_identity_pool.pool.workload_identity_pool_id
   workload_identity_pool_namespace_id = "example-namespace"
   description                         = "Example Namespace in a Workload Identity Pool"
@@ -118,6 +108,12 @@ The following arguments are supported:
 * `project` - (Optional) The ID of the project in which the resource belongs.
     If it is not provided, the provider project is used.
 
+* `deletion_policy` - (Optional) Whether Terraform will be prevented from destroying the resource. Defaults to DELETE.
+	When a 'terraform destroy' or 'terraform apply' would delete the resource,
+	the command will fail if this field is set to "PREVENT" in Terraform state.
+	When set to "ABANDON", the command will remove the resource from Terraform
+	management without updating or deleting the resource in the API.
+	When set to "DELETE", deleting the resource is allowed.
 
 
 ## Attributes Reference
@@ -169,6 +165,18 @@ WorkloadIdentityPoolNamespace can be imported using any of these accepted format
 * `{{project}}/{{workload_identity_pool_id}}/{{workload_identity_pool_namespace_id}}`
 * `{{workload_identity_pool_id}}/{{workload_identity_pool_namespace_id}}`
 
+In Terraform v1.12.0 and later, use an [`identity` block](https://developer.hashicorp.com/terraform/language/resources/identities) to import WorkloadIdentityPoolNamespace using identity values. For example:
+
+```tf
+import {
+  identity = {
+    workload_identity_pool_id = "<-required value->"
+    workload_identity_pool_namespace_id = "<-required value->"
+    project = "<-optional value->"
+  }
+  to = google_iam_workload_identity_pool_namespace.default
+}
+```
 
 In Terraform v1.5.0 and later, use an [`import` block](https://developer.hashicorp.com/terraform/language/import) to import WorkloadIdentityPoolNamespace using one of the formats above. For example:
 

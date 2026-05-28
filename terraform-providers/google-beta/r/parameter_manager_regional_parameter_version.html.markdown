@@ -190,6 +190,12 @@ The following arguments are supported:
   (Optional)
   The current state of Regional Parameter Version. This field is only applicable for updating Regional Parameter Version.
 
+* `deletion_policy` - (Optional) Whether Terraform will be prevented from destroying the resource. Defaults to DELETE.
+	When a 'terraform destroy' or 'terraform apply' would delete the resource,
+	the command will fail if this field is set to "PREVENT" in Terraform state.
+	When set to "ABANDON", the command will remove the resource from Terraform
+	management without updating or deleting the resource in the API.
+	When set to "DELETE", deleting the resource is allowed.
 
 
 ## Attributes Reference
@@ -232,6 +238,17 @@ RegionalParameterVersion can be imported using any of these accepted formats:
 
 * `projects/{{project}}/locations/{{location}}/parameters/{{parameter_id}}/versions/{{parameter_version_id}}`
 
+In Terraform v1.12.0 and later, use an [`identity` block](https://developer.hashicorp.com/terraform/language/resources/identities) to import RegionalParameterVersion using identity values. For example:
+
+```tf
+import {
+  identity = {
+    parameter_version_id = "<-required value->"
+    location = "<-optional value->"
+  }
+  to = google_parameter_manager_regional_parameter_version.default
+}
+```
 
 In Terraform v1.5.0 and later, use an [`import` block](https://developer.hashicorp.com/terraform/language/import) to import RegionalParameterVersion using one of the formats above. For example:
 

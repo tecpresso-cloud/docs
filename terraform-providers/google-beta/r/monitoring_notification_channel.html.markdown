@@ -136,6 +136,12 @@ The following arguments are supported:
 * `project` - (Optional) The ID of the project in which the resource belongs.
     If it is not provided, the provider project is used.
 
+* `deletion_policy` - (Optional) Whether Terraform will be prevented from destroying the resource. Defaults to DELETE.
+	When a 'terraform destroy' or 'terraform apply' would delete the resource,
+	the command will fail if this field is set to "PREVENT" in Terraform state.
+	When set to "ABANDON", the command will remove the resource from Terraform
+	management without updating or deleting the resource in the API.
+	When set to "DELETE", deleting the resource is allowed.
 * `force_delete` - (Optional) If true, the notification channel will be deleted regardless
 of its use in alert policies (the policies will be updated
 to remove the channel). If false, channels that are still
@@ -225,6 +231,16 @@ NotificationChannel can be imported using any of these accepted formats:
 
 * `{{name}}`
 
+In Terraform v1.12.0 and later, use an [`identity` block](https://developer.hashicorp.com/terraform/language/resources/identities) to import NotificationChannel using identity values. For example:
+
+```tf
+import {
+  identity = {
+    name = "<-optional value->"
+  }
+  to = google_monitoring_notification_channel.default
+}
+```
 
 In Terraform v1.5.0 and later, use an [`import` block](https://developer.hashicorp.com/terraform/language/import) to import NotificationChannel using one of the formats above. For example:
 

@@ -2,12 +2,16 @@
 page_title: "cloudflare_certificate_pack Resource - Cloudflare"
 subcategory: ""
 description: |-
-  
+  Accepted Permissions
+  SSL and Certificates ReadSSL and Certificates Write
 ---
 
 # cloudflare_certificate_pack (Resource)
 
+Accepted Permissions
 
+- `SSL and Certificates Read`
+- `SSL and Certificates Write`
 
 ~> Certificate packs are not able to be updated in place. If
 you require a zero downtime rotation, you can create multiple
@@ -41,16 +45,17 @@ Available values: "advanced".
 Available values: "txt", "http", "email".
 - `validity_days` (Number) Validity Days selected for the order.
 Available values: 14, 30, 90, 365.
-- `zone_id` (String) Identifier.
 
 ### Optional
 
 - `cloudflare_branding` (Boolean) Whether or not to add Cloudflare Branding for the order.  This will add a subdomain of sni.cloudflaressl.com as the Common Name if set to true.
 - `hosts` (Set of String) Comma separated list of valid host names for the certificate packs. Must contain the zone apex, may not contain more than 50 hosts, and may not be empty.
+- `zone_id` (String) Identifier.
 
 ### Read-Only
 
 - `certificates` (Attributes List) Array of certificates in this pack. (see [below for nested schema](#nestedatt--certificates))
+- `dcv_delegation_records` (Attributes List) DCV Delegation records for domain validation. (see [below for nested schema](#nestedatt--dcv_delegation_records))
 - `id` (String) Identifier.
 - `primary_certificate` (String) Identifier of the primary certificate in a pack.
 - `status` (String) Status of certificate pack.
@@ -85,6 +90,21 @@ Read-Only:
 
 
 
+<a id="nestedatt--dcv_delegation_records"></a>
+### Nested Schema for `dcv_delegation_records`
+
+Read-Only:
+
+- `cname` (String) The CNAME record hostname for DCV delegation.
+- `cname_target` (String) The CNAME record target value for DCV delegation.
+- `emails` (List of String) The set of email addresses that the certificate authority (CA) will use to complete domain validation.
+- `http_body` (String) The content that the certificate authority (CA) will expect to find at the http_url during the domain validation.
+- `http_url` (String) The url that will be checked during domain validation.
+- `status` (String) Status of the validation record.
+- `txt_name` (String) The hostname that the certificate authority (CA) will check for a TXT record during domain validation .
+- `txt_value` (String) The TXT record that the certificate authority (CA) will check during domain validation.
+
+
 <a id="nestedatt--validation_errors"></a>
 ### Nested Schema for `validation_errors`
 
@@ -98,9 +118,12 @@ Read-Only:
 
 Read-Only:
 
+- `cname` (String) The CNAME record hostname for DCV delegation.
+- `cname_target` (String) The CNAME record target value for DCV delegation.
 - `emails` (List of String) The set of email addresses that the certificate authority (CA) will use to complete domain validation.
 - `http_body` (String) The content that the certificate authority (CA) will expect to find at the http_url during the domain validation.
 - `http_url` (String) The url that will be checked during domain validation.
+- `status` (String) Status of the validation record.
 - `txt_name` (String) The hostname that the certificate authority (CA) will check for a TXT record during domain validation .
 - `txt_value` (String) The TXT record that the certificate authority (CA) will check during domain validation.
 

@@ -195,7 +195,7 @@ The following arguments are supported:
   Structure is [documented below](#nested_block_devices).
 
 * `large_capacity_config` -
-  (Optional, [Beta](../guides/provider_versions.html.markdown))
+  (Optional)
   Configuration for a Large Capacity Volume. A Large Capacity Volume
   supports sizes ranging from 12 TiB to 20 PiB, it is composed of multiple
   internal constituents, and must be created in a large capacity pool.
@@ -207,7 +207,14 @@ The following arguments are supported:
 * `deletion_policy` - (Optional) Policy to determine if the volume should be deleted forcefully.
 Volumes may have nested snapshot resources. Deleting such a volume will fail.
 Setting this parameter to FORCE will delete volumes including nested snapshots.
-Possible values: DEFAULT, FORCE.
+
+When a 'terraform destroy' or 'terraform apply' would delete the resource,
+the command will fail if this field is set to "PREVENT" in Terraform state.
+When set to "ABANDON", the command will remove the resource from Terraform
+management without updating or deleting the resource in the API.
+When set to "DELETE", the command will behave as if set to "DEFAULT".
+
+Possible values: DEFAULT, FORCE, PREVENT, ABANDON, DELETE.
 
 
 
@@ -671,6 +678,18 @@ Volume can be imported using any of these accepted formats:
 * `{{project}}/{{location}}/{{name}}`
 * `{{location}}/{{name}}`
 
+In Terraform v1.12.0 and later, use an [`identity` block](https://developer.hashicorp.com/terraform/language/resources/identities) to import Volume using identity values. For example:
+
+```tf
+import {
+  identity = {
+    location = "<-required value->"
+    name = "<-required value->"
+    project = "<-optional value->"
+  }
+  to = google_netapp_volume.default
+}
+```
 
 In Terraform v1.5.0 and later, use an [`import` block](https://developer.hashicorp.com/terraform/language/import) to import Volume using one of the formats above. For example:
 

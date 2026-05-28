@@ -2,12 +2,20 @@
 page_title: "cloudflare_page_shield_policy Resource - Cloudflare"
 subcategory: ""
 description: |-
-  
+  Accepted Permissions
+  Domain Page ShieldDomain Page Shield ReadPage ShieldPage Shield ReadZone Settings ReadZone Settings Write
 ---
 
 # cloudflare_page_shield_policy (Resource)
 
+Accepted Permissions
 
+- `Domain Page Shield`
+- `Domain Page Shield Read`
+- `Page Shield`
+- `Page Shield Read`
+- `Zone Settings Read`
+- `Zone Settings Write`
 
 ## Example Usage
 
@@ -28,11 +36,14 @@ resource "cloudflare_page_shield_policy" "example_page_shield_policy" {
 ### Required
 
 - `action` (String) The action to take if the expression matches
-Available values: "allow", "log".
+Available values: "allow", "log", "add_reporting_directives".
 - `description` (String) A description for the policy
 - `enabled` (Boolean) Whether the policy is enabled
 - `expression` (String) The expression which must match for the policy to be applied, using the Cloudflare Firewall rule expression syntax
 - `value` (String) The policy which will be applied
+
+### Optional
+
 - `zone_id` (String) Identifier
 
 ### Read-Only

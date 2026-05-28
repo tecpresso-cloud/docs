@@ -54,6 +54,7 @@ resource "google_compute_autoscaler" "default" {
     max_replicas    = 5
     min_replicas    = 1
     cooldown_period = 60
+    stabilization_period = 300
 
     metric {
       name                       = "pubsub.googleapis.com/subscription/num_undelivered_messages"
@@ -141,6 +142,7 @@ resource "google_compute_autoscaler" "foobar" {
     max_replicas    = 5
     min_replicas    = 1
     cooldown_period = 60
+    stabilization_period = 300
 
     cpu_utilization {
       target = 0.5
@@ -233,6 +235,12 @@ The following arguments are supported:
 * `project` - (Optional) The ID of the project in which the resource belongs.
     If it is not provided, the provider project is used.
 
+* `deletion_policy` - (Optional) Whether Terraform will be prevented from destroying the resource. Defaults to DELETE.
+	When a 'terraform destroy' or 'terraform apply' would delete the resource,
+	the command will fail if this field is set to "PREVENT" in Terraform state.
+	When set to "ABANDON", the command will remove the resource from Terraform
+	management without updating or deleting the resource in the API.
+	When set to "DELETE", deleting the resource is allowed.
 
 
 <a name="nested_autoscaling_policy"></a>The `autoscaling_policy` block supports:
@@ -262,6 +270,14 @@ The following arguments are supported:
   numerous factors. We recommend that you test how long an
   instance may take to initialize. To do this, create an instance
   and time the startup process.
+
+* `stabilization_period` -
+  (Optional)
+  The number of seconds that the autoscaler waits for load stabilization
+  before making scale-in decisions.
+  This might appear as a delay in scaling in but it is an important mechanism
+  for your application to not have fluctuating size due to short term load
+  fluctuations.
 
 * `mode` -
   (Optional)
@@ -512,6 +528,18 @@ Autoscaler can be imported using any of these accepted formats:
 * `{{zone}}/{{name}}`
 * `{{name}}`
 
+In Terraform v1.12.0 and later, use an [`identity` block](https://developer.hashicorp.com/terraform/language/resources/identities) to import Autoscaler using identity values. For example:
+
+```tf
+import {
+  identity = {
+    name = "<-required value->"
+    zone = "<-optional value->"
+    project = "<-optional value->"
+  }
+  to = google_compute_autoscaler.default
+}
+```
 
 In Terraform v1.5.0 and later, use an [`import` block](https://developer.hashicorp.com/terraform/language/import) to import Autoscaler using one of the formats above. For example:
 

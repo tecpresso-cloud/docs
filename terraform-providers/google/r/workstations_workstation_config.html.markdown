@@ -23,12 +23,10 @@ description: |-
 
 A set of configuration options describing how a workstation will be run. Workstation configurations are intended to be shared across multiple workstations.
 
-~> **Warning:** This resource is in beta, and should be used with the terraform-provider-google-beta provider.
-See [Provider Versions](../guides/provider_versions.html.markdown) for more details on beta resources.
 
 To get more information about WorkstationConfig, see:
 
-* [API documentation](https://cloud.google.com/workstations/docs/reference/rest/v1beta/projects.locations.workstationClusters.workstationConfigs/create)
+* [API documentation](https://cloud.google.com/workstations/docs/reference/rest/v1/projects.locations.workstationClusters.workstationConfigs/create)
 * How-to Guides
     * [Workstations](https://cloud.google.com/workstations/docs/)
 
@@ -42,25 +40,21 @@ To get more information about WorkstationConfig, see:
 
 ```hcl
 resource "google_tags_tag_key" "tag_key1" {
-  provider   = google-beta
   parent     = "organizations/123456789"
   short_name = "keyname"
 }
 
 resource "google_tags_tag_value" "tag_value1" {
-  provider   = google-beta
   parent     = google_tags_tag_key.tag_key1.id
   short_name = "valuename"
 }
 
 resource "google_compute_network" "default" {
-  provider                = google-beta
   name                    = "workstation-cluster"
   auto_create_subnetworks = false
 }
 
 resource "google_compute_subnetwork" "default" {
-  provider      = google-beta
   name          = "workstation-cluster"
   ip_cidr_range = "10.0.0.0/24"
   region        = "us-central1"
@@ -68,7 +62,6 @@ resource "google_compute_subnetwork" "default" {
 }
 
 resource "google_workstations_workstation_cluster" "default" {
-  provider               = google-beta
   workstation_cluster_id = "workstation-cluster"
   network                = google_compute_network.default.id
   subnetwork             = google_compute_subnetwork.default.id
@@ -84,7 +77,6 @@ resource "google_workstations_workstation_cluster" "default" {
 }
 
 resource "google_workstations_workstation_config" "default" {
-  provider               = google-beta
   workstation_config_id  = "workstation-config"
   workstation_cluster_id = google_workstations_workstation_cluster.default.workstation_cluster_id
   location   		         = "us-central1"
@@ -126,13 +118,11 @@ resource "google_workstations_workstation_config" "default" {
 
 ```hcl
 resource "google_compute_network" "default" {
-  provider                = google-beta
   name                    = "workstation-cluster"
   auto_create_subnetworks = false
 }
 
 resource "google_compute_subnetwork" "default" {
-  provider      = google-beta
   name          = "workstation-cluster"
   ip_cidr_range = "10.0.0.0/24"
   region        = "us-central1"
@@ -140,7 +130,6 @@ resource "google_compute_subnetwork" "default" {
 }
 
 resource "google_workstations_workstation_cluster" "default" {
-  provider               = google-beta
   workstation_cluster_id = "workstation-cluster"
   network                = google_compute_network.default.id
   subnetwork             = google_compute_subnetwork.default.id
@@ -156,7 +145,6 @@ resource "google_workstations_workstation_cluster" "default" {
 }
 
 resource "google_workstations_workstation_config" "default" {
-  provider               = google-beta
   workstation_config_id  = "workstation-config"
   workstation_cluster_id = google_workstations_workstation_cluster.default.workstation_cluster_id
   location   		         = "us-central1"
@@ -180,6 +168,133 @@ resource "google_workstations_workstation_config" "default" {
 }
 ```
 <div class = "oics-button" style="float: right; margin: 0 0 -15px">
+  <a href="https://console.cloud.google.com/cloudshell/open?cloudshell_git_repo=https%3A%2F%2Fgithub.com%2Fterraform-google-modules%2Fdocs-examples.git&cloudshell_image=gcr.io%2Fcloudshell-images%2Fcloudshell%3Alatest&cloudshell_print=.%2Fmotd&cloudshell_tutorial=.%2Ftutorial.md&cloudshell_working_dir=workstation_config_hyperdisk&open_in_editor=main.tf" target="_blank">
+    <img alt="Open in Cloud Shell" src="//gstatic.com/cloudssh/images/open-btn.svg" style="max-height: 44px; margin: 32px auto; max-width: 100%;">
+  </a>
+</div>
+## Example Usage - Workstation Config Hyperdisk
+
+
+```hcl
+resource "google_compute_network" "default" {
+  name                    = "workstation-cluster"
+  auto_create_subnetworks = false
+}
+
+resource "google_compute_subnetwork" "default" {
+  name          = "workstation-cluster"
+  ip_cidr_range = "10.0.0.0/24"
+  region        = "us-central1"
+  network       = google_compute_network.default.name
+}
+
+resource "google_workstations_workstation_cluster" "default" {
+  workstation_cluster_id = "workstation-cluster"
+  network                = google_compute_network.default.id
+  subnetwork             = google_compute_subnetwork.default.id
+  location               = "us-central1"
+}
+
+resource "google_workstations_workstation_config" "default" {
+  workstation_config_id  = "workstation-config"
+  workstation_cluster_id = google_workstations_workstation_cluster.default.workstation_cluster_id
+  location               = "us-central1"
+
+  host {
+    gce_instance {
+      # C3 machine types require Hyperdisk storage
+      machine_type = "c3-standard-22"
+    }
+  }
+
+  persistent_directories {
+    mount_path = "/home"
+    gce_hd {
+      size_gb         = 200
+      reclaim_policy  = "DELETE"
+      archive_timeout = "3600s"
+    }
+  }
+}
+```
+<div class = "oics-button" style="float: right; margin: 0 0 -15px">
+  <a href="https://console.cloud.google.com/cloudshell/open?cloudshell_git_repo=https%3A%2F%2Fgithub.com%2Fterraform-google-modules%2Fdocs-examples.git&cloudshell_image=gcr.io%2Fcloudshell-images%2Fcloudshell%3Alatest&cloudshell_print=.%2Fmotd&cloudshell_tutorial=.%2Ftutorial.md&cloudshell_working_dir=workstation_config_hyperdisk_source_snapshot&open_in_editor=main.tf" target="_blank">
+    <img alt="Open in Cloud Shell" src="//gstatic.com/cloudssh/images/open-btn.svg" style="max-height: 44px; margin: 32px auto; max-width: 100%;">
+  </a>
+</div>
+## Example Usage - Workstation Config Hyperdisk Source Snapshot
+
+
+```hcl
+resource "google_tags_tag_key" "tag_key1" {
+  parent     = "organizations/0123456789"
+  short_name = "keyname"
+}
+
+resource "google_tags_tag_value" "tag_value1" {
+  parent     = google_tags_tag_key.tag_key1.id
+  short_name = "valuename"
+}
+
+resource "google_compute_network" "default" {
+  name                    = "workstation-cluster"
+  auto_create_subnetworks = false
+}
+
+resource "google_compute_subnetwork" "default" {
+  name          = "workstation-cluster"
+  ip_cidr_range = "10.0.0.0/24"
+  region        = "us-central1"
+  network       = google_compute_network.default.name
+}
+
+resource "google_compute_disk" "my_source_disk" {
+  name  = "workstation-config-source-disk"
+  size  = 10
+  type  = "pd-ssd"
+  zone  = "us-central1-a"
+}
+
+resource "google_compute_snapshot" "my_source_snapshot" {
+  name        = "workstation-config-source-snapshot"
+  source_disk = google_compute_disk.my_source_disk.name
+  zone        = "us-central1-a"
+}
+
+resource "google_workstations_workstation_cluster" "default" {
+  workstation_cluster_id = "workstation-cluster"
+  network                = google_compute_network.default.id
+  subnetwork             = google_compute_subnetwork.default.id
+  location               = "us-central1"
+}
+
+resource "google_workstations_workstation_config" "default" {
+  workstation_config_id  = "workstation-config"
+  workstation_cluster_id = google_workstations_workstation_cluster.default.workstation_cluster_id
+  location               = "us-central1"
+
+  host {
+      gce_instance {
+        machine_type                = "c3-standard-22"
+        boot_disk_size_gb           = 35
+        disable_public_ip_addresses = true
+        vm_tags = {
+          (google_tags_tag_key.tag_key1.id) = google_tags_tag_value.tag_value1.id
+        }
+      }
+    }
+
+  persistent_directories {
+    mount_path = "/home"
+    gce_hd {
+      source_snapshot = google_compute_snapshot.my_source_snapshot.id
+      reclaim_policy  = "DELETE"
+      archive_timeout = "3600s"
+    }
+  }
+}
+```
+<div class = "oics-button" style="float: right; margin: 0 0 -15px">
   <a href="https://console.cloud.google.com/cloudshell/open?cloudshell_git_repo=https%3A%2F%2Fgithub.com%2Fterraform-google-modules%2Fdocs-examples.git&cloudshell_image=gcr.io%2Fcloudshell-images%2Fcloudshell%3Alatest&cloudshell_print=.%2Fmotd&cloudshell_tutorial=.%2Ftutorial.md&cloudshell_working_dir=workstation_config_persistent_directories&open_in_editor=main.tf" target="_blank">
     <img alt="Open in Cloud Shell" src="//gstatic.com/cloudssh/images/open-btn.svg" style="max-height: 44px; margin: 32px auto; max-width: 100%;">
   </a>
@@ -189,13 +304,11 @@ resource "google_workstations_workstation_config" "default" {
 
 ```hcl
 resource "google_compute_network" "default" {
-  provider                = google-beta
   name                    = "workstation-cluster"
   auto_create_subnetworks = false
 }
 
 resource "google_compute_subnetwork" "default" {
-  provider      = google-beta
   name          = "workstation-cluster"
   ip_cidr_range = "10.0.0.0/24"
   region        = "us-central1"
@@ -203,7 +316,6 @@ resource "google_compute_subnetwork" "default" {
 }
 
 resource "google_workstations_workstation_cluster" "default" {
-  provider               = google-beta
   workstation_cluster_id = "workstation-cluster"
   network                = google_compute_network.default.id
   subnetwork             = google_compute_subnetwork.default.id
@@ -219,7 +331,6 @@ resource "google_workstations_workstation_cluster" "default" {
 }
 
 resource "google_workstations_workstation_config" "default" {
-  provider               = google-beta
   workstation_config_id  = "workstation-config"
   workstation_cluster_id = google_workstations_workstation_cluster.default.workstation_cluster_id
   location   		         = "us-central1"
@@ -257,13 +368,11 @@ resource "google_workstations_workstation_config" "default" {
 
 ```hcl
 resource "google_compute_network" "default" {
-  provider                = google-beta
   name                    = "workstation-cluster"
   auto_create_subnetworks = false
 }
 
 resource "google_compute_subnetwork" "default" {
-  provider      = google-beta
   name          = "workstation-cluster"
   ip_cidr_range = "10.0.0.0/24"
   region        = "us-central1"
@@ -271,7 +380,6 @@ resource "google_compute_subnetwork" "default" {
 }
 
 resource "google_compute_disk" "my_source_disk" {
-  provider = google-beta
   name     = "workstation-config"
   size     = 10
   type     = "pd-ssd"
@@ -279,14 +387,12 @@ resource "google_compute_disk" "my_source_disk" {
 }
 
 resource "google_compute_snapshot" "my_source_snapshot" {
-  provider    = google-beta
   name        = "workstation-config"
   source_disk = google_compute_disk.my_source_disk.name
   zone        = "us-central1-a"
 }
 
 resource "google_workstations_workstation_cluster" "default" {
-  provider               = google-beta
   workstation_cluster_id = "workstation-cluster"
   network                = google_compute_network.default.id
   subnetwork             = google_compute_subnetwork.default.id
@@ -294,7 +400,6 @@ resource "google_workstations_workstation_cluster" "default" {
 }
 
 resource "google_workstations_workstation_config" "default" {
-  provider               = google-beta
   workstation_config_id  = "workstation-config"
   workstation_cluster_id = google_workstations_workstation_cluster.default.workstation_cluster_id
   location               = google_workstations_workstation_cluster.default.location
@@ -319,13 +424,11 @@ resource "google_workstations_workstation_config" "default" {
 
 ```hcl
 resource "google_compute_network" "default" {
-  provider                = google-beta
   name                    = "workstation-cluster"
   auto_create_subnetworks = false
 }
 
 resource "google_compute_subnetwork" "default" {
-  provider      = google-beta
   name          = "workstation-cluster"
   ip_cidr_range = "10.0.0.0/24"
   region        = "us-central1"
@@ -333,7 +436,6 @@ resource "google_compute_subnetwork" "default" {
 }
 
 resource "google_workstations_workstation_cluster" "default" {
-  provider               = google-beta
   workstation_cluster_id = "workstation-cluster"
   network                = google_compute_network.default.id
   subnetwork             = google_compute_subnetwork.default.id
@@ -349,7 +451,6 @@ resource "google_workstations_workstation_cluster" "default" {
 }
 
 resource "google_workstations_workstation_config" "default" {
-  provider               = google-beta
   workstation_config_id  = "workstation-config"
   workstation_cluster_id = google_workstations_workstation_cluster.default.workstation_cluster_id
   location   		         = "us-central1"
@@ -377,13 +478,11 @@ resource "google_workstations_workstation_config" "default" {
 
 ```hcl
 resource "google_compute_network" "default" {
-  provider                = google-beta
   name                    = "workstation-cluster"
   auto_create_subnetworks = false
 }
 
 resource "google_compute_subnetwork" "default" {
-  provider      = google-beta
   name          = "workstation-cluster"
   ip_cidr_range = "10.0.0.0/24"
   region        = "us-central1"
@@ -391,7 +490,6 @@ resource "google_compute_subnetwork" "default" {
 }
 
 resource "google_workstations_workstation_cluster" "default" {
-  provider               = google-beta
   workstation_cluster_id = "workstation-cluster"
   network                = google_compute_network.default.id
   subnetwork             = google_compute_subnetwork.default.id
@@ -407,7 +505,6 @@ resource "google_workstations_workstation_cluster" "default" {
 }
 
 resource "google_workstations_workstation_config" "default" {
-  provider               = google-beta
   workstation_config_id  = "workstation-config"
   workstation_cluster_id = google_workstations_workstation_cluster.default.workstation_cluster_id
   location               = "us-central1"
@@ -435,13 +532,11 @@ resource "google_workstations_workstation_config" "default" {
 
 ```hcl
 resource "google_compute_network" "default" {
-  provider                = google-beta
   name                    = "workstation-cluster"
   auto_create_subnetworks = false
 }
 
 resource "google_compute_subnetwork" "default" {
-  provider      = google-beta
   name          = "workstation-cluster"
   ip_cidr_range = "10.0.0.0/24"
   region        = "us-central1"
@@ -449,7 +544,6 @@ resource "google_compute_subnetwork" "default" {
 }
 
 resource "google_workstations_workstation_cluster" "default" {
-  provider               = google-beta
   workstation_cluster_id = "workstation-cluster"
   network                = google_compute_network.default.id
   subnetwork             = google_compute_subnetwork.default.id
@@ -465,7 +559,6 @@ resource "google_workstations_workstation_cluster" "default" {
 }
 
 resource "google_workstations_workstation_config" "default" {
-  provider               = google-beta
   workstation_config_id  = "workstation-config"
   workstation_cluster_id = google_workstations_workstation_cluster.default.workstation_cluster_id
   location               = "us-central1"
@@ -504,14 +597,12 @@ resource "google_workstations_workstation_config" "default" {
 
 ```hcl
 resource "google_compute_network" "default" {
-  provider = google-beta
 
   name                    = "workstation-cluster"
   auto_create_subnetworks = false
 }
 
 resource "google_compute_subnetwork" "default" {
-  provider = google-beta
 
   name          = "workstation-cluster"
   ip_cidr_range = "10.0.0.0/24"
@@ -520,7 +611,6 @@ resource "google_compute_subnetwork" "default" {
 }
 
 resource "google_workstations_workstation_cluster" "default" {
-  provider = google-beta
 
   workstation_cluster_id = "workstation-cluster"
   network                = google_compute_network.default.id
@@ -537,28 +627,24 @@ resource "google_workstations_workstation_cluster" "default" {
 }
 
 resource "google_kms_key_ring" "default" {
-  provider = google-beta
 
   name     = "workstation-cluster"
   location = "us-central1"
 }
 
 resource "google_kms_crypto_key" "default" {
-  provider = google-beta
 
   name            = "workstation-cluster"
   key_ring        = google_kms_key_ring.default.id
 }
 
 resource "google_service_account" "default" {
-  provider = google-beta
 
   account_id   = "my-account"
   display_name = "Service Account"
 }
 
 resource "google_workstations_workstation_config" "default" {
-  provider               = google-beta
 
   workstation_config_id  = "workstation-config"
   workstation_cluster_id = google_workstations_workstation_cluster.default.workstation_cluster_id
@@ -592,13 +678,11 @@ resource "google_workstations_workstation_config" "default" {
 
 ```hcl
 resource "google_compute_network" "default" {
-  provider                = google-beta
   name                    = "workstation-cluster"
   auto_create_subnetworks = false
 }
 
 resource "google_compute_subnetwork" "default" {
-  provider      = google-beta
   name          = "workstation-cluster"
   ip_cidr_range = "10.0.0.0/24"
   region        = "us-central1"
@@ -606,7 +690,6 @@ resource "google_compute_subnetwork" "default" {
 }
 
 resource "google_workstations_workstation_cluster" "default" {
-  provider               = google-beta
   workstation_cluster_id = "workstation-cluster"
   network                = google_compute_network.default.id
   subnetwork             = google_compute_subnetwork.default.id
@@ -622,7 +705,6 @@ resource "google_workstations_workstation_cluster" "default" {
 }
 
 resource "google_workstations_workstation_config" "default" {
-  provider               = google-beta
   workstation_config_id  = "workstation-config"
   workstation_cluster_id = google_workstations_workstation_cluster.default.workstation_cluster_id
   location               = "us-central1"
@@ -757,6 +839,12 @@ The following arguments are supported:
 * `project` - (Optional) The ID of the project in which the resource belongs.
     If it is not provided, the provider project is used.
 
+* `deletion_policy` - (Optional) Whether Terraform will be prevented from destroying the resource. Defaults to DELETE.
+	When a 'terraform destroy' or 'terraform apply' would delete the resource,
+	the command will fail if this field is set to "PREVENT" in Terraform state.
+	When set to "ABANDON", the command will remove the resource from Terraform
+	management without updating or deleting the resource in the API.
+	When set to "DELETE", deleting the resource is allowed.
 
 
 <a name="nested_host"></a>The `host` block supports:
@@ -804,7 +892,7 @@ The following arguments are supported:
 * `enable_nested_virtualization` -
   (Optional)
   Whether to enable nested virtualization on the Compute Engine VMs backing the Workstations.
-  See https://cloud.google.com/workstations/docs/reference/rest/v1beta/projects.locations.workstationClusters.workstationConfigs#GceInstance.FIELDS.enable_nested_virtualization
+  See https://cloud.google.com/workstations/docs/reference/rest/v1/projects.locations.workstationClusters.workstationConfigs#GceInstance.FIELDS.enable_nested_virtualization
 
 * `shielded_instance_config` -
   (Optional)
@@ -882,7 +970,7 @@ The following arguments are supported:
 * `enable_nested_virtualization` -
   (Optional)
   Whether to enable nested virtualization on the Compute Engine VMs backing boosted Workstations.
-  See https://cloud.google.com/workstations/docs/reference/rest/v1beta/projects.locations.workstationClusters.workstationConfigs#GceInstance.FIELDS.enable_nested_virtualization
+  See https://cloud.google.com/workstations/docs/reference/rest/v1/projects.locations.workstationClusters.workstationConfigs#GceInstance.FIELDS.enable_nested_virtualization
 
 * `pool_size` -
   (Optional)
@@ -915,6 +1003,11 @@ The following arguments are supported:
   A directory to persist across workstation sessions, backed by a Compute Engine regional persistent disk. Can only be updated if not empty during creation.
   Structure is [documented below](#nested_persistent_directories_gce_pd).
 
+* `gce_hd` -
+  (Optional)
+  A directory to persist across workstation sessions, backed by a Compute Engine Hyperdisk Balanced High Availability disk.
+  Structure is [documented below](#nested_persistent_directories_gce_hd).
+
 
 <a name="nested_persistent_directories_gce_pd"></a>The `gce_pd` block supports:
 
@@ -939,6 +1032,25 @@ The following arguments are supported:
 * `source_snapshot` -
   (Optional)
   Name of the snapshot to use as the source for the disk. This can be the snapshot's `self_link`, `id`, or a string in the format of `projects/{project}/global/snapshots/{snapshot}`. If set, `sizeGb` and `fsType` must be empty. Can only be updated if it has an existing value.
+
+<a name="nested_persistent_directories_gce_hd"></a>The `gce_hd` block supports:
+
+* `size_gb` -
+  (Optional)
+  The GB capacity of a persistent home directory. Defaults to '200'.
+
+* `source_snapshot` -
+  (Optional)
+  Name of the snapshot to use as the source for the disk.
+
+* `reclaim_policy` -
+  (Optional)
+  Whether the persistent disk should be deleted when the workstation is deleted.
+  Possible values are: `DELETE`, `RETAIN`.
+
+* `archive_timeout` -
+  (Optional)
+  How long to wait before converting the disk into a snapshot.
 
 <a name="nested_ephemeral_directories"></a>The `ephemeral_directories` block supports:
 
@@ -1101,6 +1213,19 @@ WorkstationConfig can be imported using any of these accepted formats:
 * `{{project}}/{{location}}/{{workstation_cluster_id}}/{{workstation_config_id}}`
 * `{{location}}/{{workstation_cluster_id}}/{{workstation_config_id}}`
 
+In Terraform v1.12.0 and later, use an [`identity` block](https://developer.hashicorp.com/terraform/language/resources/identities) to import WorkstationConfig using identity values. For example:
+
+```tf
+import {
+  identity = {
+    workstationConfigId = "<-required value->"
+    workstationClusterId = "<-required value->"
+    location = "<-required value->"
+    project = "<-optional value->"
+  }
+  to = google_workstations_workstation_config.default
+}
+```
 
 In Terraform v1.5.0 and later, use an [`import` block](https://developer.hashicorp.com/terraform/language/import) to import WorkstationConfig using one of the formats above. For example:
 

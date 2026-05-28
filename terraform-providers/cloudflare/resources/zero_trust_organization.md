@@ -2,12 +2,17 @@
 page_title: "cloudflare_zero_trust_organization Resource - Cloudflare"
 subcategory: ""
 description: |-
-  
+  Accepted Permissions
+  Access: Organizations, Identity Providers, and Groups ReadAccess: Organizations, Identity Providers, and Groups RevokeAccess: Organizations, Identity Providers, and Groups Write
 ---
 
 # cloudflare_zero_trust_organization (Resource)
 
+Accepted Permissions
 
+- `Access: Organizations, Identity Providers, and Groups Read`
+- `Access: Organizations, Identity Providers, and Groups Revoke`
+- `Access: Organizations, Identity Providers, and Groups Write`
 
 ## Example Usage
 
@@ -31,6 +36,20 @@ resource "cloudflare_zero_trust_organization" "example_zero_trust_organization" 
     logo_path = "https://example.com/logo.png"
     text_color = "#c5ed1b"
   }
+  mfa_config = {
+    allowed_authenticators = ["totp", "biometrics", "security_key"]
+    amr_matching_session_duration = "12h"
+    required_aaguids = "2fc0579f-8113-47ea-b116-bb5a8db9202a"
+    session_duration = "24h"
+  }
+  mfa_required_for_all_apps = false
+  mfa_ssh_piv_key_requirements = {
+    pin_policy = "always"
+    require_fips_device = true
+    ssh_key_size = [256, 2048]
+    ssh_key_type = ["ecdsa", "rsa"]
+    touch_policy = "always"
+  }
   name = "Widget Corps Internal Applications"
   session_duration = "24h"
   ui_read_only_toggle_reason = "Temporarily turn off the UI read only lock to make a change via the UI"
@@ -53,6 +72,10 @@ resource "cloudflare_zero_trust_organization" "example_zero_trust_organization" 
 - `deny_unmatched_requests_exempted_zone_names` (List of String) Contains zone names to exempt from the `deny_unmatched_requests` feature. Requests to a subdomain in an exempted zone will block unauthenticated traffic by default if there is a configured Access application and policy that matches the request.
 - `is_ui_read_only` (Boolean) Lock all settings as Read-Only in the Dashboard, regardless of user permission. Updates may only be made via the API or Terraform for this account when enabled.
 - `login_design` (Attributes) (see [below for nested schema](#nestedatt--login_design))
+- `mfa_config` (Attributes) Configures multi-factor authentication (MFA) settings for an organization. (see [below for nested schema](#nestedatt--mfa_config))
+- `mfa_configuration_allowed` (Boolean) Indicates if this organization can enforce multi-factor authentication (MFA) requirements at the application and policy level.
+- `mfa_required_for_all_apps` (Boolean) Determines whether global MFA settings apply to applications by default. The organization must have MFA enabled with at least one authentication method and a session duration configured.
+- `mfa_ssh_piv_key_requirements` (Attributes) Configures SSH PIV key requirements for MFA using hardware security keys. (see [below for nested schema](#nestedatt--mfa_ssh_piv_key_requirements))
 - `name` (String) The name of your Zero Trust organization.
 - `session_duration` (String) The amount of time that tokens issued for applications will be valid. Must be in the format `300ms` or `2h45m`. Valid time units are: ns, us (or µs), ms, s, m, h.
 - `ui_read_only_toggle_reason` (String) A description of the reason why the UI read only field is being toggled.
@@ -79,6 +102,31 @@ Optional:
 - `header_text` (String) The text at the top of your login page.
 - `logo_path` (String) The URL of the logo on your login page.
 - `text_color` (String) The text color on your login page.
+
+
+<a id="nestedatt--mfa_config"></a>
+### Nested Schema for `mfa_config`
+
+Optional:
+
+- `allowed_authenticators` (List of String) Lists the MFA methods that users can authenticate with. `ssh_piv_key` is only relevant for infrastructure applications.
+- `amr_matching_session_duration` (String) Allows a user to skip MFA via Authentication Method Reference (AMR) matching when the AMR claim provided by the IdP the user used to authenticate contains "mfa". Must be in minutes (m) or hours (h). Minimum: 0m. Maximum: 720h (30 days).
+- `required_aaguids` (String) Specifies a Cloudflare List of required FIDO2 authenticator device AAGUIDs.
+- `session_duration` (String) Defines the duration of an MFA session. Must be in minutes (m) or hours (h). Minimum: 0m. Maximum: 720h (30 days). Examples:`5m` or `24h`.
+
+
+<a id="nestedatt--mfa_ssh_piv_key_requirements"></a>
+### Nested Schema for `mfa_ssh_piv_key_requirements`
+
+Optional:
+
+- `pin_policy` (String) Defines when a PIN is required to use the SSH key. Valid values: `never` (no PIN required), `once` (PIN required once per session), `always` (PIN required for each use).
+Available values: "never", "once", "always".
+- `require_fips_device` (Boolean) Requires the SSH PIV key to be stored on a FIPS 140-2 Level 1 or higher validated device.
+- `ssh_key_size` (List of Number) Specifies the allowed SSH key sizes in bits. Valid sizes depend on key type. Ed25519 has a fixed key size and does not accept this parameter.
+- `ssh_key_type` (List of String) Specifies the allowed SSH key types. Valid values are `ecdsa`, `ed25519`, and `rsa`.
+- `touch_policy` (String) Defines when physical touch is required to use the SSH key. Valid values: `never` (no touch required), `always` (touch required for each use), `cached` (touch cached for 15 seconds).
+Available values: "never", "always", "cached".
 
 ## Import
 

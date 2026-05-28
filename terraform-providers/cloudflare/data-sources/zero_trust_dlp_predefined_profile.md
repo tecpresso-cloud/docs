@@ -2,12 +2,16 @@
 page_title: "cloudflare_zero_trust_dlp_predefined_profile Data Source - Cloudflare"
 subcategory: ""
 description: |-
-  
+  Accepted Permissions
+  Zero Trust ReadZero Trust Write
 ---
 
 # cloudflare_zero_trust_dlp_predefined_profile (Data Source)
 
+Accepted Permissions
 
+- `Zero Trust Read`
+- `Zero Trust Write`
 
 ## Example Usage
 
@@ -23,8 +27,11 @@ data "cloudflare_zero_trust_dlp_predefined_profile" "example_zero_trust_dlp_pred
 
 ### Required
 
-- `account_id` (String)
 - `profile_id` (String)
+
+### Optional
+
+- `account_id` (String)
 
 ### Read-Only
 
@@ -48,6 +55,7 @@ Determines if the words should be matched in a case-sensitive manner
 Cannot be set to false if secret is true
 - `confidence` (Attributes) (see [below for nested schema](#nestedatt--entries--confidence))
 - `created_at` (String)
+- `description` (String)
 - `enabled` (Boolean)
 - `id` (String)
 - `name` (String)

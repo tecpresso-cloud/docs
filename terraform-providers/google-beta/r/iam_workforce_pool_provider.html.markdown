@@ -441,6 +441,39 @@ resource "google_iam_workforce_pool_provider" "example" {
   }
 }
 ```
+## Example Usage - Iam Workforce Pool Provider Oidc Detailed Audit Logging
+
+
+```hcl
+resource "google_iam_workforce_pool" "pool" {
+  workforce_pool_id = "example-pool"
+  parent            = "organizations/123456789"
+  location          = "global"
+}
+
+resource "google_iam_workforce_pool_provider" "example" {
+  workforce_pool_id  = google_iam_workforce_pool.pool.workforce_pool_id
+  location           = google_iam_workforce_pool.pool.location
+  provider_id        = "example-prvdr"
+  attribute_mapping  = {
+    "google.subject" = "assertion.sub"
+  }
+  oidc {
+    issuer_uri       = "https://accounts.thirdparty.com"
+    client_id        = "client-id"
+    client_secret {
+      value {
+        plain_text = "client-secret"
+      }
+    }
+    web_sso_config {
+      response_type             = "CODE"
+      assertion_claims_behavior = "MERGE_USER_INFO_OVER_ID_TOKEN_CLAIMS"
+    }
+  }
+  detailed_audit_logging = true
+}
+```
 
 ## Argument Reference
 
@@ -573,7 +606,7 @@ The following arguments are supported:
   to a unique Microsoft Entra ID user.
   Structure is [documented below](#nested_extended_attributes_oauth2_client).
 
-  ~> **Warning:** `extended_attributes_oauth2_client` is restricted. We suggest use SCIM instead.
+  ~> **Warning:** `extended_attributes_oauth2_client` is deprecated. Use SCIM instead.
 
 * `scim_usage` -
   (Optional)
@@ -588,6 +621,16 @@ The following arguments are supported:
     attribute mapping for authorization checks
   Possible values are: `SCIM_USAGE_UNSPECIFIED`, `ENABLED_FOR_GROUPS`.
 
+* `detailed_audit_logging` -
+  (Optional)
+  If true, populates additional debug information in Cloud Audit Logs for this provider. Logged attribute mappings and values can be found in `sts.googleapis.com` data access logs. Default value is false.
+
+* `deletion_policy` - (Optional) Whether Terraform will be prevented from destroying the resource. Defaults to DELETE.
+	When a 'terraform destroy' or 'terraform apply' would delete the resource,
+	the command will fail if this field is set to "PREVENT" in Terraform state.
+	When set to "ABANDON", the command will remove the resource from Terraform
+	management without updating or deleting the resource in the API.
+	When set to "DELETE", deleting the resource is allowed.
 
 
 <a name="nested_saml"></a>The `saml` block supports:
@@ -866,6 +909,18 @@ WorkforcePoolProvider can be imported using any of these accepted formats:
 * `locations/{{location}}/workforcePools/{{workforce_pool_id}}/providers/{{provider_id}}`
 * `{{location}}/{{workforce_pool_id}}/{{provider_id}}`
 
+In Terraform v1.12.0 and later, use an [`identity` block](https://developer.hashicorp.com/terraform/language/resources/identities) to import WorkforcePoolProvider using identity values. For example:
+
+```tf
+import {
+  identity = {
+    location = "<-required value->"
+    workforcePoolId = "<-required value->"
+    providerId = "<-required value->"
+  }
+  to = google_iam_workforce_pool_provider.default
+}
+```
 
 In Terraform v1.5.0 and later, use an [`import` block](https://developer.hashicorp.com/terraform/language/import) to import WorkforcePoolProvider using one of the formats above. For example:
 

@@ -23,12 +23,10 @@ description: |-
 
 A single instance of a developer workstation with its own persistent storage.
 
-~> **Warning:** This resource is in beta, and should be used with the terraform-provider-google-beta provider.
-See [Provider Versions](../guides/provider_versions.html.markdown) for more details on beta resources.
 
 To get more information about Workstation, see:
 
-* [API documentation](https://cloud.google.com/workstations/docs/reference/rest/v1beta/projects.locations.workstationClusters.workstationConfigs.workstations)
+* [API documentation](https://cloud.google.com/workstations/docs/reference/rest/v1/projects.locations.workstationClusters.workstationConfigs.workstations)
 * How-to Guides
     * [Workstations](https://cloud.google.com/workstations/docs/)
 
@@ -42,13 +40,11 @@ To get more information about Workstation, see:
 
 ```hcl
 resource "google_compute_network" "default" {
-  provider                = google-beta
   name                    = "workstation-cluster"
   auto_create_subnetworks = false
 }
 
 resource "google_compute_subnetwork" "default" {
-  provider      = google-beta
   name          = "workstation-cluster"
   ip_cidr_range = "10.0.0.0/24"
   region        = "us-central1"
@@ -56,7 +52,6 @@ resource "google_compute_subnetwork" "default" {
 }
 
 resource "google_workstations_workstation_cluster" "default" {
-  provider               = google-beta
   workstation_cluster_id = "workstation-cluster"
   network                = google_compute_network.default.id
   subnetwork             = google_compute_subnetwork.default.id
@@ -72,7 +67,6 @@ resource "google_workstations_workstation_cluster" "default" {
 }
 
 resource "google_workstations_workstation_config" "default" {
-  provider               = google-beta
   workstation_config_id  = "workstation-config"
   workstation_cluster_id = google_workstations_workstation_cluster.default.workstation_cluster_id
   location   		         = "us-central1"
@@ -87,7 +81,6 @@ resource "google_workstations_workstation_config" "default" {
 }
 
 resource "google_workstations_workstation" "default" {
-  provider               = google-beta
   workstation_id         = "work-station"
   workstation_config_id  = google_workstations_workstation_config.default.workstation_config_id
   workstation_cluster_id = google_workstations_workstation_cluster.default.workstation_cluster_id
@@ -157,6 +150,12 @@ The following arguments are supported:
 * `project` - (Optional) The ID of the project in which the resource belongs.
     If it is not provided, the provider project is used.
 
+* `deletion_policy` - (Optional) Whether Terraform will be prevented from destroying the resource. Defaults to DELETE.
+	When a 'terraform destroy' or 'terraform apply' would delete the resource,
+	the command will fail if this field is set to "PREVENT" in Terraform state.
+	When set to "ABANDON", the command will remove the resource from Terraform
+	management without updating or deleting the resource in the API.
+	When set to "DELETE", deleting the resource is allowed.
 
 
 ## Attributes Reference
@@ -211,6 +210,20 @@ Workstation can be imported using any of these accepted formats:
 * `{{project}}/{{location}}/{{workstation_cluster_id}}/{{workstation_config_id}}/{{workstation_id}}`
 * `{{location}}/{{workstation_cluster_id}}/{{workstation_config_id}}/{{workstation_id}}`
 
+In Terraform v1.12.0 and later, use an [`identity` block](https://developer.hashicorp.com/terraform/language/resources/identities) to import Workstation using identity values. For example:
+
+```tf
+import {
+  identity = {
+    workstationId = "<-required value->"
+    workstationConfigId = "<-required value->"
+    workstationClusterId = "<-required value->"
+    location = "<-required value->"
+    project = "<-optional value->"
+  }
+  to = google_workstations_workstation.default
+}
+```
 
 In Terraform v1.5.0 and later, use an [`import` block](https://developer.hashicorp.com/terraform/language/import) to import Workstation using one of the formats above. For example:
 

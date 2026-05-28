@@ -108,6 +108,7 @@ resource "google_kms_autokey_config" "example-autokeyconfig" {
   provider    = google-beta
   folder      = google_folder.autokms_folder.id
   key_project = "projects/${google_project.key_project.project_id}"
+  key_project_resolution_mode = "DEDICATED_KEY_PROJECT"
   depends_on  = [time_sleep.wait_srv_acc_permissions]
 }
 
@@ -135,6 +136,17 @@ The following arguments are supported:
   CryptoKey for any new KeyHandle the Developer creates. Should have the form
   `projects/<project_id_or_number>`.
 
+* `key_project_resolution_mode` -
+  (Optional)
+  How Autokey determines which project to use when provisioning CMEK keys.
+  Possible values are: `DEDICATED_KEY_PROJECT`, `RESOURCE_PROJECT`, `DISABLED`.
+
+* `deletion_policy` - (Optional) Whether Terraform will be prevented from destroying the resource. Defaults to DELETE.
+	When a 'terraform destroy' or 'terraform apply' would delete the resource,
+	the command will fail if this field is set to "PREVENT" in Terraform state.
+	When set to "ABANDON", the command will remove the resource from Terraform
+	management without updating or deleting the resource in the API.
+	When set to "DELETE", deleting the resource is allowed.
 
 
 ## Attributes Reference
@@ -164,6 +176,16 @@ AutokeyConfig can be imported using any of these accepted formats:
 * `folders/{{folder}}/autokeyConfig`
 * `{{folder}}`
 
+In Terraform v1.12.0 and later, use an [`identity` block](https://developer.hashicorp.com/terraform/language/resources/identities) to import AutokeyConfig using identity values. For example:
+
+```tf
+import {
+  identity = {
+    folder = "<-required value->"
+  }
+  to = google_kms_autokey_config.default
+}
+```
 
 In Terraform v1.5.0 and later, use an [`import` block](https://developer.hashicorp.com/terraform/language/import) to import AutokeyConfig using one of the formats above. For example:
 

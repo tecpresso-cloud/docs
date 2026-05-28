@@ -165,6 +165,10 @@ resource "google_firebase_ai_logic_config" "default" {
     sampling_rate = 1.0
   }
 
+  traffic_filter {
+    template_only = true
+  }
+
   depends_on = [time_sleep.wait_30s]
 }
 ```
@@ -190,6 +194,11 @@ The following arguments are supported:
   Firebase AI Logic backend.
   Structure is [documented below](#nested_telemetry_config).
 
+* `traffic_filter` -
+  (Optional)
+  Configuration for traffic filtering.
+  Structure is [documented below](#nested_traffic_filter).
+
 * `location` -
   (Optional)
   Resource ID segment making up resource `name`. It identifies the resource within its parent collection as described in https://google.aip.dev/122.
@@ -197,6 +206,12 @@ The following arguments are supported:
 * `project` - (Optional) The ID of the project in which the resource belongs.
     If it is not provided, the provider project is used.
 
+* `deletion_policy` - (Optional) Whether Terraform will be prevented from destroying the resource. Defaults to DELETE.
+	When a 'terraform destroy' or 'terraform apply' would delete the resource,
+	the command will fail if this field is set to "PREVENT" in Terraform state.
+	When set to "ABANDON", the command will remove the resource from Terraform
+	management without updating or deleting the resource in the API.
+	When set to "DELETE", deleting the resource is allowed.
 
 
 <a name="nested_generative_language_config"></a>The `generative_language_config` block supports:
@@ -240,6 +255,13 @@ The following arguments are supported:
   in the range (0,1]. Note that the actual sampling rate may be lower than
   the specified value if the system is overloaded. Default is 1.0.
 
+<a name="nested_traffic_filter"></a>The `traffic_filter` block supports:
+
+* `template_only` -
+  (Optional)
+  Only allows users to use AI Logic via prompt templates for this project.
+  If true, only calls using server templates are permitted.
+
 ## Attributes Reference
 
 In addition to the arguments listed above, the following computed attributes are exported:
@@ -269,6 +291,17 @@ Config can be imported using any of these accepted formats:
 * `{{project}}/{{location}}`
 * `{{location}}`
 
+In Terraform v1.12.0 and later, use an [`identity` block](https://developer.hashicorp.com/terraform/language/resources/identities) to import Config using identity values. For example:
+
+```tf
+import {
+  identity = {
+    location = "<-optional value->"
+    project = "<-optional value->"
+  }
+  to = google_firebase_ai_logic_config.default
+}
+```
 
 In Terraform v1.5.0 and later, use an [`import` block](https://developer.hashicorp.com/terraform/language/import) to import Config using one of the formats above. For example:
 

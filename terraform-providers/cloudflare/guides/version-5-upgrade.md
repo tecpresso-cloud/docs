@@ -48,47 +48,117 @@ At a high level, there are two parts to the migration. The first is the migratio
 configuration (HCL) and the second is the migration of the state. Within each of those
 sections, there is the need to migrate attributes and potentially the resource rename.
 
-### Automatic
+### Automatic (tf-migrate)
 
-For assisting with automatic migrations, we have provided [GritQL] patterns.
+-> For the recommended migration approach using built-in state upgraders, see the
+[version 5 migration guide](version-5-migration).
 
-This will allow you to rewrite the parts of your Terraform configuration and state
-that have changed automatically. Once you [install Grit], you can run the commands
-in the directory where your Terraform configuration is located.
+For automatic configuration (HCL) migrations, use [tf-migrate], the official
+Cloudflare Terraform Provider migration tool. It handles resource renames,
+attribute changes, block restructuring, `moved {}` blocks, and `import {}`
+blocks for new v5 resources — across 80+ resource types.
 
-~> While all efforts have been made to ease the transition, some of the more complex
-resources that may contain difficult to reconcile resources have been intentionally
-skipped for the automatic migration and are only manually documented. If you are
-using modules or other dynamic features of HCL, the provided codemods may not be
-as effective. We recommend reviewing the manual migration notes to verify all the
-changes.
+**Installation:**
 
-We recommend ensuring you are using version control for these changes or make a
-backup prior to initiating the change to enable reverting if needed.
-
-1. Update the resource attributes in your configuration. _Note: this will not update
-   your state file. The next step will determine how your state file is updated._
+Download the latest release from the [tf-migrate releases] page, or build from source:
 
 ```bash
-$ grit apply github.com/cloudflare/terraform-provider-cloudflare#cloudflare_terraform_v5
+go install github.com/cloudflare/tf-migrate/cmd/tf-migrate@latest
 ```
 
-2. Choose the appropriate method from [migrating renamed resources] that best suits
-   your situation and use case to migrate the attribute changes. If you are choosing to
-   use the provided GritQL patterns, the pattern name is
-   `cloudflare_terraform_v5_attribute_renames_state`. Otherwise, you can reimport the
-   resources without manually managing the state file.
-3. Perform the resource renames. _Note: this will not update your state file.
-   The next step will determine how your state file is updated._
+**Migrate your configuration:**
 
 ```bash
-$ grit apply github.com/cloudflare/terraform-provider-cloudflare#cloudflare_terraform_v5_resource_renames_configuration
+# Preview changes without modifying files (dry run)
+tf-migrate migrate --dry-run --source-version v4 --target-version v5
+
+# Apply the migration in-place
+tf-migrate migrate --source-version v4 --target-version v5
+
+# Apply the migration, specifying an explicit provider version
+tf-migrate migrate \
+  --source-version v4 \
+  --target-version v5 \
+  --target-provider-version 5.x.y
 ```
 
-4. Choose the appropriate method from [migrating renamed resources] that best suits
-   your situation and use case to migrate the resource renames. If you are choosing to
-   use the provided GritQL patterns, the pattern name is
-   `cloudflare_terraform_v5_resource_renames_state`.
+**Migrate specific resources only:**
+
+```bash
+tf-migrate migrate \
+  --resources dns_record,zero_trust_list \
+  --source-version v4 \
+  --target-version v5
+```
+
+After migration, tf-migrate prints a summary of actionable warnings (manual
+steps required) and informational notices (changes applied automatically). Use
+`--verbose` to see all notices, or `--quiet` to suppress everything except errors.
+
+#### Phased migration for `cloudflare_zone_settings_override`
+
+`cloudflare_zone_settings_override` has no equivalent in v5 — each setting
+becomes an independent `cloudflare_zone_setting` resource. Because v4 state
+entries for `cloudflare_zone_settings_override` must be removed **before**
+switching to the v5 provider (to avoid schema conflicts), tf-migrate handles
+this automatically in two phases when it detects these resources:
+
+**Phase 1 (first run):**
+
+tf-migrate comments out each `cloudflare_zone_settings_override` block and
+replaces it with a `removed { lifecycle { destroy = false } }` block:
+
+```hcl
+# tf-migrate: resource "cloudflare_zone_settings_override" "example" {
+# tf-migrate:   zone_id = var.zone_id
+# tf-migrate:   settings {
+# tf-migrate:     always_online = "on"
+# tf-migrate:   }
+# tf-migrate: }
+
+removed {
+  from = cloudflare_zone_settings_override.example
+  lifecycle {
+    destroy = false
+  }
+}
+```
+
+Commit and push these files. Your CI/CD pipeline (e.g. Atlantis) will apply
+using the **current v4 provider**, which processes the `removed {}` blocks and
+drops the state entries without affecting infrastructure.
+
+**Phase 2 (second run, after v4 apply succeeds):**
+
+Re-run `tf-migrate migrate` in the same directory. It detects the commented-out
+blocks and prompts:
+
+```
+It looks like phase 1 has already run (resource blocks are commented out).
+Did you apply the v4 config and remove the resources from state? [y/N]:
+```
+
+On confirmation, tf-migrate uncomments the resource blocks, removes the
+`removed {}` blocks, and runs the full v4→v5 migration — splitting each
+`cloudflare_zone_settings_override` into individual `cloudflare_zone_setting`
+resources.
+
+If your workspace does not use `cloudflare_zone_settings_override`, tf-migrate
+completes the migration in a single pass.
+
+~> `tf-migrate` handles configuration (HCL) transformations only. State migration
+is handled automatically by the v5 provider's built-in state upgraders when you
+run `terraform plan` or `terraform apply`. See the
+[version 5 migration guide](version-5-migration) for details.
+
+~> While all efforts have been made to ease the transition, some resources require
+manual steps after migration. tf-migrate prints actionable warnings with exact
+file paths and commands when manual intervention is needed. Search migrated files
+for `MIGRATION WARNING` to find all locations requiring attention:
+
+```bash
+grep -rn "MIGRATION WARNING" ./terraform
+```
 
 ### Manual
 
@@ -99,19 +169,16 @@ $ grit apply github.com/cloudflare/terraform-provider-cloudflare#cloudflare_terr
 4. Choose the appropriate method from [migrating renamed resources] that best suits
    your situation and use case to migrate the resource renames.
 
-<!-- This code block is only used for confirming grit patterns -->
-
 ## Changelog
-
-```grit
-language hcl
-
-cloudflare_terraform_v5()
-```
 
 ## cloudflare_access_application
 
 - Renamed to `cloudflare_zero_trust_access_application`
+
+~> Depending on your configuration, Terraform may still plan a replacement for
+an Access application during migration. If replacement occurs, the application's
+`aud` changes. If your services validate Access JWT audiences, plan to update
+those allow-lists during the migration window.
 
 ## cloudflare_access_ca_certificate
 
@@ -148,6 +215,65 @@ cloudflare_terraform_v5()
 ## cloudflare_access_policy
 
 - Renamed to `cloudflare_zero_trust_access_policy`
+
+~> **Application-scoped policies require manual config migration.** If your
+`cloudflare_access_policy` resource has an `application_id` attribute, it
+cannot be converted automatically into v5 inline application policies by
+`tf-migrate` or state upgraders. These policies use a different API endpoint
+(`/access/apps/{app_id}/policies/`) than account-level policies
+(`/access/policies/`).
+
+In v5, application-scoped policies are managed as inline `policies` attributes
+within the `cloudflare_zero_trust_access_application` resource. To migrate:
+
+Do not add a `moved` block for this case. The old standalone policy resource
+must be removed from state, then rewritten inline on the application.
+
+1. Run `tf-migrate` and keep the generated `removed` block for the old
+   `cloudflare_access_policy` resource (this drops state tracking without
+   deleting the remote policy).
+2. Add the policy configuration inline in your
+   `cloudflare_zero_trust_access_application` resource's `policies` attribute.
+3. Run `terraform apply`.
+
+On the first plan/apply, Terraform may show that the old policy
+"will no longer be managed by Terraform". This is expected when using a
+`removed` block with `destroy = false`.
+
+If you are not using `tf-migrate`, you can do the equivalent state removal
+manually with `terraform state rm cloudflare_access_policy.example` before
+applying the inline policy configuration.
+
+See the [migration guide](version-5-migration#application-scoped-access-policies)
+for detailed instructions.
+
+## cloudflare_access_rule
+
+- `configuration` is now a single nested attribute (`configuration = { ... }`) instead of a block (`configuration { ... }`).
+
+  Before
+
+  ```hcl
+  resource "cloudflare_access_rule" "example" {
+    mode = "block"
+    configuration {
+      target = "ip"
+      value  = "1.2.3.4"
+    }
+  }
+  ```
+
+  After
+
+  ```hcl
+  resource "cloudflare_access_rule" "example" {
+    mode = "block"
+    configuration = {
+      target = "ip"
+      value  = "1.2.3.4"
+    }
+  }
+  ```
 
 ## cloudflare_access_service_token
 
@@ -436,6 +562,326 @@ resource "cloudflare_api_token" "example" {
     }
   }
 }
+```
+
+## cloudflare_authenticated_origin_pulls
+
+In version 4, `cloudflare_authenticated_origin_pulls` was a single polymorphic resource that handled three different modes of Authenticated Origin Pulls (AOP) based on which optional attributes were set. In version 5, this has been split into separate resources that map to distinct API endpoints.
+
+**Migration Note:** After importing resources, you may see computed fields (like `id`, `status`, `expires_on`) refresh on the first `terraform plan`. This is expected behavior as Terraform populates these values from the API. Additionally, certificate resources require a temporary `lifecycle { ignore_changes = [private_key] }` block after import, since the API doesn't return private keys for security reasons.
+
+**Migration paths by mode:**
+
+### Global AOP (zone-level toggle only)
+
+If your v4 resource only had `zone_id` and `enabled` (no certificate or hostname), migrate to `cloudflare_authenticated_origin_pulls_settings`.
+
+Before
+
+```hcl
+resource "cloudflare_authenticated_origin_pulls" "example" {
+  zone_id = "0da42c8d2132a9ddaf714f9e7c920711"
+  enabled = true
+}
+```
+
+After
+
+```hcl
+resource "cloudflare_authenticated_origin_pulls_settings" "example" {
+  zone_id = "0da42c8d2132a9ddaf714f9e7c920711"
+  enabled = true
+}
+```
+
+State migration:
+
+```sh
+terraform state rm cloudflare_authenticated_origin_pulls.example
+terraform import cloudflare_authenticated_origin_pulls_settings.example 0da42c8d2132a9ddaf714f9e7c920711
+```
+
+### Per-Zone AOP (zone-level with custom certificate)
+
+If your v4 resource had `zone_id`, `enabled`, and `authenticated_origin_pulls_certificate` (but no `hostname`), the association resource changes name in v5. **Important:** Per-zone AOP requires TWO resources in both v4 and v5 - one for the certificate and one for the settings.
+
+Before
+
+```hcl
+# V4: Certificate resource
+resource "cloudflare_authenticated_origin_pulls_certificate" "my_cert" {
+  zone_id     = "0da42c8d2132a9ddaf714f9e7c920711"
+  type        = "per-zone"
+  certificate = file("cert.pem")
+  private_key = file("key.pem")
+}
+
+# V4: Association/settings resource
+resource "cloudflare_authenticated_origin_pulls" "my_zone" {
+  zone_id                               = "0da42c8d2132a9ddaf714f9e7c920711"
+  authenticated_origin_pulls_certificate = cloudflare_authenticated_origin_pulls_certificate.my_cert.id
+  enabled                               = true
+}
+```
+
+After
+
+```hcl
+# V5: Certificate resource (same name, drop 'type' attribute)
+resource "cloudflare_authenticated_origin_pulls_certificate" "my_cert" {
+  zone_id     = "0da42c8d2132a9ddaf714f9e7c920711"
+  certificate = file("cert.pem")
+  private_key = file("key.pem")
+
+  # Temporary: required during migration to prevent unnecessary replacement
+  # due to private_key not being returned by the API after import.
+  # Remove this block after migration is complete and run terraform apply.
+  lifecycle {
+    ignore_changes = [private_key]
+  }
+}
+
+# V5: Settings resource (RENAMED from cloudflare_authenticated_origin_pulls)
+resource "cloudflare_authenticated_origin_pulls_settings" "my_zone" {
+  zone_id = "0da42c8d2132a9ddaf714f9e7c920711"
+  enabled = true
+}
+```
+
+Key changes:
+- Certificate resource: Remove the `type` attribute (see `cloudflare_authenticated_origin_pulls_certificate` section below for details)
+- Association resource: Rename to `cloudflare_authenticated_origin_pulls_settings` and remove the `authenticated_origin_pulls_certificate` reference (the certificate is now implicitly used when uploaded)
+
+State migration:
+
+```sh
+# Remove the v4 association resource
+terraform state rm cloudflare_authenticated_origin_pulls.my_zone
+
+# Import into v5 settings resource
+terraform import cloudflare_authenticated_origin_pulls_settings.my_zone 0da42c8d2132a9ddaf714f9e7c920711
+
+# Certificate resource state migration is covered in the cloudflare_authenticated_origin_pulls_certificate section below
+
+# Verify no drift remains
+terraform plan
+
+# Once the plan is clean, remove the lifecycle block from the certificate resource and run terraform apply to store the private_key in state
+terraform apply
+# Expected: "No changes. Your infrastructure matches the configuration."
+```
+
+### Per-Hostname AOP (hostname-specific configuration)
+
+If your v4 resource had all four attributes (`zone_id`, `enabled`, `authenticated_origin_pulls_certificate`, and `hostname`), **both the certificate and association resources change** in v5. Per-hostname AOP requires TWO resources in both v4 and v5.
+
+Before
+
+```hcl
+# V4: Certificate resource with type="per-hostname"
+resource "cloudflare_authenticated_origin_pulls_certificate" "my_cert" {
+  zone_id     = "0da42c8d2132a9ddaf714f9e7c920711"
+  type        = "per-hostname"
+  certificate = file("cert.pem")
+  private_key = file("key.pem")
+}
+
+# V4: Hostname association resource
+resource "cloudflare_authenticated_origin_pulls" "my_hostname" {
+  zone_id                               = "0da42c8d2132a9ddaf714f9e7c920711"
+  authenticated_origin_pulls_certificate = cloudflare_authenticated_origin_pulls_certificate.my_cert.id
+  hostname                              = "app.example.com"
+  enabled                               = true
+}
+```
+
+After
+
+```hcl
+# V5: Certificate resource (RENAMED and type removed)
+resource "cloudflare_authenticated_origin_pulls_hostname_certificate" "my_cert" {
+  zone_id     = "0da42c8d2132a9ddaf714f9e7c920711"
+  certificate = file("cert.pem")
+  private_key = file("key.pem")
+
+  # Temporary: Add this lifecycle block during migration to prevent unnecessary
+  # diff on private_key after import (the API does not return the private key).
+  # You can safely remove this block after migration is complete.
+  lifecycle {
+    ignore_changes = [private_key]
+  }
+}
+
+# V5: Hostname association resource (RESTRUCTURED schema)
+resource "cloudflare_authenticated_origin_pulls" "my_hostname" {
+  zone_id = "0da42c8d2132a9ddaf714f9e7c920711"
+  config = [{
+    hostname = "app.example.com"
+    cert_id  = cloudflare_authenticated_origin_pulls_hostname_certificate.my_cert.id
+    enabled  = true
+  }]
+}
+```
+
+Key changes:
+- Certificate resource: Rename to `cloudflare_authenticated_origin_pulls_hostname_certificate` and remove `type` attribute (see certificate section below)
+- Association resource: Restructure flat attributes into a nested `config` list; rename `authenticated_origin_pulls_certificate` to `cert_id`
+- The `config` list must contain exactly one item per resource instance
+
+State migration:
+
+```sh
+# Certificate resource - see cloudflare_authenticated_origin_pulls_certificate section below for detailed steps
+terraform state rm cloudflare_authenticated_origin_pulls_certificate.my_cert
+terraform import cloudflare_authenticated_origin_pulls_hostname_certificate.my_cert 0da42c8d2132a9ddaf714f9e7c920711/<certificate_id>
+
+# Association resource
+terraform state rm cloudflare_authenticated_origin_pulls.my_hostname
+terraform import cloudflare_authenticated_origin_pulls.my_hostname 0da42c8d2132a9ddaf714f9e7c920711/app.example.com
+
+# Verify no drift remains
+terraform plan
+# Expected: "No changes. Your infrastructure matches the configuration."
+
+# After verifying a clean plan, remove the lifecycle { ignore_changes = [private_key] }
+# block from your configuration and run terraform apply to store private_key in state.
+# This ensures future key rotations are detected by Terraform.
+```
+
+**Troubleshooting Import Issues**
+
+If you encounter `Error: Attempt to index null value` during import:
+
+**Cause:** Outputs or other resource references try to access nested attributes (`config[0].enabled`) before the resource is fully populated from the API.
+
+**Solution A - Use defensive output syntax (Recommended):**
+```hcl
+output "hostname_aop_enabled" {
+  value       = try(cloudflare_authenticated_origin_pulls.my_hostname.config[0].enabled, null)
+  description = "Whether hostname-level AOP is enabled (null during import, populated after plan/apply)"
+}
+```
+The `try()` function returns `null` if `config` is null during import, then populates with the actual value after `terraform plan` or `terraform apply`.
+
+**Solution B - Comment out outputs temporarily:**
+Comment out nested attribute references during import, then uncomment after running `terraform plan`.
+
+**Solution C - Remove outputs during migration:**
+Delete outputs entirely during migration, add them back after verification is complete.
+
+## cloudflare_authenticated_origin_pulls_certificate
+
+In version 4, this resource had a `type` attribute with values `"per-zone"` or `"per-hostname"` to differentiate between zone-level and hostname-level certificates. In version 5, these are now separate resources.
+
+### Per-Zone Certificate
+
+If your v4 certificate had `type = "per-zone"`, the resource name stays the same but the `type` attribute is removed. **Note:** You must also use `cloudflare_authenticated_origin_pulls_settings` to enable zone-level AOP (see the `cloudflare_authenticated_origin_pulls` section above).
+
+Before
+
+```hcl
+resource "cloudflare_authenticated_origin_pulls_certificate" "example" {
+  zone_id     = "0da42c8d2132a9ddaf714f9e7c920711"
+  type        = "per-zone"
+  certificate = <<EOT
+-----BEGIN CERTIFICATE-----
+MIIGAjCCA+qgAwIBAgIJAI7kymlF7CWT...
+-----END CERTIFICATE-----
+EOT
+  private_key = <<EOT
+-----BEGIN PRIVATE KEY-----
+MIIEvQIBADANBgkqhkiG9w0BAQEFAASC...
+-----END PRIVATE KEY-----
+EOT
+}
+```
+
+After
+
+```hcl
+resource "cloudflare_authenticated_origin_pulls_certificate" "example" {
+  zone_id     = "0da42c8d2132a9ddaf714f9e7c920711"
+  certificate = <<EOT
+-----BEGIN CERTIFICATE-----
+MIIGAjCCA+qgAwIBAgIJAI7kymlF7CWT...
+-----END CERTIFICATE-----
+EOT
+  private_key = <<EOT
+-----BEGIN PRIVATE KEY-----
+MIIEvQIBADANBgkqhkiG9w0BAQEFAASC...
+-----END PRIVATE KEY-----
+EOT
+
+  # Temporary: required during migration to prevent unnecessary replacement
+  # due to private_key not being returned by the API after import.
+  # Remove this block after migration is complete and run terraform apply.
+  lifecycle {
+    ignore_changes = [private_key]
+  }
+}
+```
+
+State migration is not required for per-zone certificates; simply remove the `type` attribute from your configuration. If you are re-importing the certificate, add the temporary `lifecycle` block shown above, verify with `terraform plan`, then remove it and run `terraform apply`.
+
+### Per-Hostname Certificate
+
+If your v4 certificate had `type = "per-hostname"`, migrate to the new `cloudflare_authenticated_origin_pulls_hostname_certificate` resource and remove the `type` attribute. **Note:** You must also update your hostname association resources (see the per-hostname section in `cloudflare_authenticated_origin_pulls` above).
+
+Before
+
+```hcl
+resource "cloudflare_authenticated_origin_pulls_certificate" "example" {
+  zone_id     = "0da42c8d2132a9ddaf714f9e7c920711"
+  type        = "per-hostname"
+  certificate = <<EOT
+-----BEGIN CERTIFICATE-----
+MIIGAjCCA+qgAwIBAgIJAI7kymlF7CWT...
+-----END CERTIFICATE-----
+EOT
+  private_key = <<EOT
+-----BEGIN PRIVATE KEY-----
+MIIEvQIBADANBgkqhkiG9w0BAQEFAASC...
+-----END PRIVATE KEY-----
+EOT
+}
+```
+
+After
+
+```hcl
+resource "cloudflare_authenticated_origin_pulls_hostname_certificate" "example" {
+  zone_id     = "0da42c8d2132a9ddaf714f9e7c920711"
+  certificate = <<EOT
+-----BEGIN CERTIFICATE-----
+MIIGAjCCA+qgAwIBAgIJAI7kymlF7CWT...
+-----END CERTIFICATE-----
+EOT
+  private_key = <<EOT
+-----BEGIN PRIVATE KEY-----
+MIIEvQIBADANBgkqhkiG9w0BAQEFAASC...
+-----END PRIVATE KEY-----
+EOT
+
+  # Temporary: required during migration to prevent unnecessary replacement
+  # due to private_key not being returned by the API after import.
+  # Remove this block after migration is complete and run terraform apply.
+  lifecycle {
+    ignore_changes = [private_key]
+  }
+}
+```
+
+State migration:
+
+```sh
+terraform state rm cloudflare_authenticated_origin_pulls_certificate.example
+terraform import cloudflare_authenticated_origin_pulls_hostname_certificate.example 0da42c8d2132a9ddaf714f9e7c920711/<certificate_id>
+
+# Verify no drift
+terraform plan
+# Expected: "No changes. Your infrastructure matches the configuration."
+
+# After verifying a clean plan, remove the lifecycle block and run terraform apply
 ```
 
 ## cloudflare_hostname_tls_setting
@@ -784,26 +1230,42 @@ This has been removed. Users should instead use the:
 ## cloudflare_zero_trust_tunnel_cloudflared
 
 - `secret` is now `tunnel_secret`.
-- `cname` is no longer available.
+- `cname` is no longer available. The CNAME was previously computed by the provider as `<tunnel-id>.cfargotunnel.com`. To reference the tunnel CNAME in v5, construct it manually using the tunnel ID:
 
-  Before
+  Before (v4)
 
   ```hcl
-  resource "zero_trust_tunnel_cloudflared" "example" {
+  resource "cloudflare_tunnel" "example" {
     account_id = "0da42c8d2132a9ddaf714f9e7c920711"
-    secret = "example-secret"
-    cname = "foo.example.com"
+    name       = "my-tunnel"
+    secret     = "example-secret"
+  }
+
+  resource "cloudflare_record" "tunnel_dns" {
+    zone_id = "0da42c8d2132a9ddaf714f9e7c920711"
+    name    = "tunnel"
+    type    = "CNAME"
+    value   = cloudflare_tunnel.example.cname
   }
   ```
 
-  After
+  After (v5)
 
   ```hcl
-  resource "zero_trust_tunnel_cloudflared" "example" {
-    account_id = "0da42c8d2132a9ddaf714f9e7c920711"
+  resource "cloudflare_zero_trust_tunnel_cloudflared" "example" {
+    account_id    = "0da42c8d2132a9ddaf714f9e7c920711"
+    name          = "my-tunnel"
     tunnel_secret = "example-secret"
   }
+
+  resource "cloudflare_dns_record" "tunnel_dns" {
+    zone_id = "0da42c8d2132a9ddaf714f9e7c920711"
+    name    = "tunnel"
+    type    = "CNAME"
+    content = "${cloudflare_zero_trust_tunnel_cloudflared.example.id}.cfargotunnel.com"
+  }
   ```
+
 
 ## cloudflare_zone_cache_variants
 
@@ -1151,6 +1613,34 @@ resource "cloudflare_list_item" "example" {
 - `pagerduty_integration` is now a list of objects (`pagerduty_integration = [{ ... }]`) instead of multiple block attribute (`pagerduty_integration { ... }`).
 - `webhooks_integration` is now a list of objects (`webhooks_integration = [{ ... }]`) instead of multiple block attribute (`webhooks_integration { ... }`).
 
+## cloudflare_origin_ca_certificate
+
+- `min_days_for_renewal` has been removed. Certificate renewal should be managed through external automation or lifecycle rules.
+
+## cloudflare_pages_domain
+
+- `domain` is now `name`.
+
+  Before
+
+  ```hcl
+  resource "cloudflare_pages_domain" "example" {
+    account_id   = "f037e56e89293a057740de681ac9abbe"
+    project_name = "my-project"
+    domain       = "example.com"
+  }
+  ```
+
+  After
+
+  ```hcl
+  resource "cloudflare_pages_domain" "example" {
+    account_id   = "f037e56e89293a057740de681ac9abbe"
+    project_name = "my-project"
+    name         = "example.com"
+  }
+  ```
+
 ## cloudflare_pages_project
 
 - `build_config` is now a single nested attribute (`build_config = { ... }`) instead of a block (`build_config { ... }`).
@@ -1161,6 +1651,51 @@ resource "cloudflare_list_item" "example" {
 - `production` is now a single nested attribute (`production = { ... }`) instead of a block (`production { ... }`).
 - `service_binding` is now a list of objects (`service_binding = [{ ... }]`) instead of multiple block attribute (`service_binding { ... }`).
 - `source` is now a list of objects (`source = [{ ... }]`) instead of multiple block attribute (`source { ... }`).
+
+## cloudflare_regional_hostname
+
+- `timeouts` block has been removed.
+
+## cloudflare_snippet
+
+- `name` is now `snippet_name`.
+- `main_module` is now `metadata.main_module`.
+- `files` is now a list of objects (`files = [{ ... }]`) instead of multiple blocks (`files { ... }`).
+
+  Before
+
+  ```hcl
+  resource "cloudflare_snippet" "example" {
+    zone_id     = "0da42c8d2132a9ddaf714f9e7c920711"
+    name        = "my-snippet"
+    main_module = "main.js"
+
+    files {
+      name    = "main.js"
+      content = "export default { async fetch(request) { return new Response('hello') } }"
+    }
+  }
+  ```
+
+  After
+
+  ```hcl
+  resource "cloudflare_snippet" "example" {
+    zone_id      = "0da42c8d2132a9ddaf714f9e7c920711"
+    snippet_name = "my-snippet"
+
+    metadata = {
+      main_module = "main.js"
+    }
+
+    files = [
+      {
+        name    = "main.js"
+        content = "export default { async fetch(request) { return new Response('hello') } }"
+      }
+    ]
+  }
+  ```
 
 ## cloudflare_dns_record
 
@@ -1291,6 +1826,58 @@ resource "cloudflare_list_item" "example" {
 - `service_binding` is now a list of objects (`service_binding = [{ ... }]`) instead of multiple block attribute (`service_binding { ... }`).
 - `webassembly_binding` is now a list of objects (`webassembly_binding = [{ ... }]`) instead of multiple block attribute (`webassembly_binding { ... }`).
 
+## cloudflare_turnstile_widget
+
+- `domains` is now a list (`domains = [...]`) instead of a set (`domains = toset([...])`). Domains must be listed in alphabetical order to prevent drift.
+
+  Before
+
+  ```hcl
+  resource "cloudflare_turnstile_widget" "example" {
+    account_id = "f037e56e89293a057740de681ac9abbe"
+    name       = "my-widget"
+    domains    = toset(["test.example.com", "example.com"])
+    mode       = "managed"
+  }
+  ```
+
+  After
+
+  ```hcl
+  resource "cloudflare_turnstile_widget" "example" {
+    account_id = "f037e56e89293a057740de681ac9abbe"
+    name       = "my-widget"
+    domains    = ["example.com", "test.example.com"]
+    mode       = "managed"
+  }
+  ```
+
+## cloudflare_worker_route / cloudflare_workers_route
+
+- Renamed from `cloudflare_worker_route` to `cloudflare_workers_route`.
+- `script_name` is now `script`.
+- References to `cloudflare_workers_script.<name>.name` must be updated to `cloudflare_workers_script.<name>.id`.
+
+  Before
+
+  ```hcl
+  resource "cloudflare_worker_route" "example" {
+    zone_id     = "0da42c8d2132a9ddaf714f9e7c920711"
+    pattern     = "example.com/*"
+    script_name = cloudflare_workers_script.my_script.name
+  }
+  ```
+
+  After
+
+  ```hcl
+  resource "cloudflare_workers_route" "example" {
+    zone_id = "0da42c8d2132a9ddaf714f9e7c920711"
+    pattern = "example.com/*"
+    script  = cloudflare_workers_script.my_script.id
+  }
+  ```
+
 ## cloudflare_magic_wan_static_route
 
 - `colo_names` is now `scope.colo_names`
@@ -1335,6 +1922,5 @@ resource "cloudflare_page_rule" "example" {
 }
 ```
 
-[GritQL]: https://www.grit.io/
-[install Grit]: https://docs.grit.io/cli/quickstart
-[migrating renamed resources]: https://registry.terraform.io/providers/cloudflare/cloudflare/latest/docs/guides/migrating-renamed-resources
+[tf-migrate]: https://github.com/cloudflare/tf-migrate
+[tf-migrate releases]: https://github.com/cloudflare/tf-migrate/releases

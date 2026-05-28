@@ -76,6 +76,9 @@ resource "google_colab_runtime_template" "runtime-template" {
   network_spec {
     enable_internet_access = true
   }
+
+  software_config {
+  }
 }
 ```
 <div class = "oics-button" style="float: right; margin: 0 0 -15px">
@@ -153,6 +156,10 @@ resource "google_colab_runtime_template" "runtime-template" {
       post_startup_script = "echo 'hello world'"
       post_startup_script_url = "gs://colab-enterprise-pss-secure/secure_pss.sh"
       post_startup_script_behavior = "RUN_ONCE"
+    }
+
+    colab_image {
+      release_name = "py312"
     }
   }
 }
@@ -233,6 +240,12 @@ The following arguments are supported:
 * `project` - (Optional) The ID of the project in which the resource belongs.
     If it is not provided, the provider project is used.
 
+* `deletion_policy` - (Optional) Whether Terraform will be prevented from destroying the resource. Defaults to DELETE.
+	When a 'terraform destroy' or 'terraform apply' would delete the resource,
+	the command will fail if this field is set to "PREVENT" in Terraform state.
+	When set to "ABANDON", the command will remove the resource from Terraform
+	management without updating or deleting the resource in the API.
+	When set to "DELETE", deleting the resource is allowed.
 
 
 <a name="nested_machine_spec"></a>The `machine_spec` block supports:
@@ -309,6 +322,11 @@ The following arguments are supported:
   Post startup script config.
   Structure is [documented below](#nested_software_config_post_startup_script_config).
 
+* `colab_image` -
+  (Optional)
+  Colab Image Configuration.
+  Structure is [documented below](#nested_software_config_colab_image).
+
 
 <a name="nested_software_config_env"></a>The `env` block supports:
 
@@ -334,6 +352,12 @@ The following arguments are supported:
   (Optional)
   Post startup script behavior that defines download and execution behavior.
   Possible values are: `RUN_ONCE`, `RUN_EVERY_START`, `DOWNLOAD_AND_RUN_EVERY_START`.
+
+<a name="nested_software_config_colab_image"></a>The `colab_image` block supports:
+
+* `release_name` -
+  (Optional)
+  The release name of the NotebookRuntime Colab image, e.g. "py310". If not specified, detault to the latest release.
 
 ## Attributes Reference
 
@@ -367,6 +391,18 @@ RuntimeTemplate can be imported using any of these accepted formats:
 * `{{project}}/{{location}}/{{name}}`
 * `{{location}}/{{name}}`
 
+In Terraform v1.12.0 and later, use an [`identity` block](https://developer.hashicorp.com/terraform/language/resources/identities) to import RuntimeTemplate using identity values. For example:
+
+```tf
+import {
+  identity = {
+    name = "<-optional value->"
+    location = "<-required value->"
+    project = "<-optional value->"
+  }
+  to = google_colab_runtime_template.default
+}
+```
 
 In Terraform v1.5.0 and later, use an [`import` block](https://developer.hashicorp.com/terraform/language/import) to import RuntimeTemplate using one of the formats above. For example:
 

@@ -174,12 +174,30 @@ resource "google_oracle_database_autonomous_database" "myADB"{
 
 
 ```hcl
+resource "google_oracle_database_autonomous_database" "adb-dr"{
+  autonomous_database_id = "my-instance"
+  location = "us-east4"
+  project = "my-project"
+  database = "mydatabase"
+  admin_password = "123Abpassword"
+  properties {
+    compute_count = "2"
+    data_storage_size_gb="20"
+    db_version = "19c"
+    db_workload = "OLTP"
+    license_type = "LICENSE_INCLUDED"
+    mtls_connection_required = "true"
+    }
+  deletion_protection = "true"
+}
+
+
 resource "google_oracle_database_autonomous_database" "myADB"{
-  autonomous_database_id = "my-primary-adb-id"
+  autonomous_database_id = "my-instance"
   location = "my-location"
   project = "my-project"
   source_config {
-    autonomous_database = ""projects/my-project/locations/us-east4/autonomousDatabases/adb-id""
+    autonomous_database = google_oracle_database_autonomous_database.adb-dr.name
     automatic_backups_replication_enabled = "false"
     }
   deletion_protection = "true"
@@ -260,6 +278,12 @@ The following arguments are supported:
 * `project` - (Optional) The ID of the project in which the resource belongs.
     If it is not provided, the provider project is used.
 
+* `deletion_policy` - (Optional) Whether Terraform will be prevented from destroying the resource. Defaults to DELETE.
+	When a 'terraform destroy' or 'terraform apply' would delete the resource,
+	the command will fail if this field is set to "PREVENT" in Terraform state.
+	When set to "ABANDON", the command will remove the resource from Terraform
+	management without updating or deleting the resource in the API.
+	When set to "DELETE", deleting the resource is allowed.
 * `deletion_protection` - (Optional) Whether or not to allow Terraform to destroy the instance. Unless this field is set to false in Terraform state, a terraform destroy or terraform apply that would delete the instance will fail.
 
 
@@ -966,6 +990,18 @@ AutonomousDatabase can be imported using any of these accepted formats:
 * `{{project}}/{{location}}/{{autonomous_database_id}}`
 * `{{location}}/{{autonomous_database_id}}`
 
+In Terraform v1.12.0 and later, use an [`identity` block](https://developer.hashicorp.com/terraform/language/resources/identities) to import AutonomousDatabase using identity values. For example:
+
+```tf
+import {
+  identity = {
+    location = "<-required value->"
+    autonomousDatabaseId = "<-required value->"
+    project = "<-optional value->"
+  }
+  to = google_oracle_database_autonomous_database.default
+}
+```
 
 In Terraform v1.5.0 and later, use an [`import` block](https://developer.hashicorp.com/terraform/language/import) to import AutonomousDatabase using one of the formats above. For example:
 

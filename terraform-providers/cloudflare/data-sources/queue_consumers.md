@@ -2,12 +2,18 @@
 page_title: "cloudflare_queue_consumers Data Source - Cloudflare"
 subcategory: ""
 description: |-
-  
+  Accepted Permissions
+  Queues ReadQueues WriteWorkers Scripts ReadWorkers Scripts Write
 ---
 
 # cloudflare_queue_consumers (Data Source)
 
+Accepted Permissions
 
+- `Queues Read`
+- `Queues Write`
+- `Workers Scripts Read`
+- `Workers Scripts Write`
 
 ## Example Usage
 
@@ -23,11 +29,11 @@ data "cloudflare_queue_consumers" "example_queue_consumers" {
 
 ### Required
 
-- `account_id` (String) A Resource identifier.
 - `queue_id` (String) A Resource identifier.
 
 ### Optional
 
+- `account_id` (String) A Resource identifier.
 - `max_items` (Number) Max items to fetch, default: 1000
 
 ### Read-Only
@@ -41,8 +47,8 @@ Read-Only:
 
 - `consumer_id` (String) A Resource identifier.
 - `created_on` (String)
-- `queue_id` (String) A Resource identifier.
-- `script` (String) Name of a Worker
+- `dead_letter_queue` (String) Name of the dead letter queue, or empty string if not configured
+- `queue_name` (String)
 - `script_name` (String) Name of a Worker
 - `settings` (Attributes) (see [below for nested schema](#nestedatt--result--settings))
 - `type` (String) Available values: "worker", "http_pull".

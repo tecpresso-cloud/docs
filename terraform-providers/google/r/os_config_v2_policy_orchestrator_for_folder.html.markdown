@@ -199,6 +199,12 @@ The following arguments are supported:
   **Note**: This field is non-authoritative, and will only manage the labels present in your configuration.
   Please refer to the field `effective_labels` for all of the labels present on the resource.
 
+* `deletion_policy` - (Optional) Whether Terraform will be prevented from destroying the resource. Defaults to DELETE.
+	When a 'terraform destroy' or 'terraform apply' would delete the resource,
+	the command will fail if this field is set to "PREVENT" in Terraform state.
+	When set to "ABANDON", the command will remove the resource from Terraform
+	management without updating or deleting the resource in the API.
+	When set to "DELETE", deleting the resource is allowed.
 
 
 <a name="nested_orchestrated_resource"></a>The `orchestrated_resource` block supports:
@@ -1430,6 +1436,17 @@ PolicyOrchestratorForFolder can be imported using any of these accepted formats:
 * `folders/{{folder_id}}/locations/global/policyOrchestrators/{{policy_orchestrator_id}}`
 * `{{folder_id}}/{{policy_orchestrator_id}}`
 
+In Terraform v1.12.0 and later, use an [`identity` block](https://developer.hashicorp.com/terraform/language/resources/identities) to import PolicyOrchestratorForFolder using identity values. For example:
+
+```tf
+import {
+  identity = {
+    folderId = "<-required value->"
+    policyOrchestratorId = "<-required value->"
+  }
+  to = google_os_config_v2_policy_orchestrator_for_folder.default
+}
+```
 
 In Terraform v1.5.0 and later, use an [`import` block](https://developer.hashicorp.com/terraform/language/import) to import PolicyOrchestratorForFolder using one of the formats above. For example:
 

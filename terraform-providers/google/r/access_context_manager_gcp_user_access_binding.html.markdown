@@ -109,6 +109,12 @@ The following arguments are supported:
   Optional. A list of scoped access settings that set this binding's restrictions on a subset of applications.
   Structure is [documented below](#nested_scoped_access_settings).
 
+* `deletion_policy` - (Optional) Whether Terraform will be prevented from destroying the resource. Defaults to DELETE.
+	When a 'terraform destroy' or 'terraform apply' would delete the resource,
+	the command will fail if this field is set to "PREVENT" in Terraform state.
+	When set to "ABANDON", the command will remove the resource from Terraform
+	management without updating or deleting the resource in the API.
+	When set to "DELETE", deleting the resource is allowed.
 
 
 <a name="nested_session_settings"></a>The `session_settings` block supports:
@@ -245,6 +251,16 @@ GcpUserAccessBinding can be imported using any of these accepted formats:
 
 * `{{name}}`
 
+In Terraform v1.12.0 and later, use an [`identity` block](https://developer.hashicorp.com/terraform/language/resources/identities) to import GcpUserAccessBinding using identity values. For example:
+
+```tf
+import {
+  identity = {
+    name = "<-optional value->"
+  }
+  to = google_access_context_manager_gcp_user_access_binding.default
+}
+```
 
 In Terraform v1.5.0 and later, use an [`import` block](https://developer.hashicorp.com/terraform/language/import) to import GcpUserAccessBinding using one of the formats above. For example:
 

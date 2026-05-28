@@ -35,7 +35,7 @@ IcebergTables are the primary objects in an IcebergCatalog.
 
 ```hcl
 resource "google_storage_bucket" "bucket" {
-  name          = "my-bucket-%{random_suffix}"
+  name          = "my-bucket"
   location      = "us-central1"
   force_destroy = true
   uniform_bucket_level_access = true
@@ -48,14 +48,14 @@ resource "google_biglake_iceberg_catalog" "catalog" {
 
 resource "google_biglake_iceberg_namespace" "namespace" {
   catalog = google_biglake_iceberg_catalog.catalog.name
-  namespace_id = "my_namespace_%{random_suffix}"
+  namespace_id = "my_namespace"
 }
 
 resource "google_biglake_iceberg_table" "my_iceberg_table" {
   catalog   = google_biglake_iceberg_catalog.catalog.name
   namespace = google_biglake_iceberg_namespace.namespace.namespace_id
-  name      = "my_table_%{random_suffix}"
-  location  = "gs://${google_storage_bucket.bucket.name}/${google_biglake_iceberg_namespace.namespace.namespace_id}/my_table_%{random_suffix}"
+  name      = "my_table"
+  location  = "gs://${google_storage_bucket.bucket.name}/${google_biglake_iceberg_namespace.namespace.namespace_id}/my_table"
   schema {
     type = "struct"
     fields {
@@ -92,7 +92,7 @@ resource "google_biglake_iceberg_table" "my_iceberg_table" {
 
 ```hcl
 resource "google_storage_bucket" "bucket" {
-  name          = "my-bucket-%{random_suffix}"
+  name          = "my-bucket"
   location      = "us-central1"
   force_destroy = true
   uniform_bucket_level_access = true
@@ -105,13 +105,13 @@ resource "google_biglake_iceberg_catalog" "catalog" {
 
 resource "google_biglake_iceberg_namespace" "namespace" {
   catalog = google_biglake_iceberg_catalog.catalog.name
-  namespace_id = "my_namespace_%{random_suffix}"
+  namespace_id = "my_namespace"
 }
 
 resource "google_biglake_iceberg_table" "my_iceberg_table" {
   catalog   = google_biglake_iceberg_catalog.catalog.name
   namespace = google_biglake_iceberg_namespace.namespace.namespace_id
-  name      = "my_table_%{random_suffix}"
+  name      = "my_table"
   schema {
     type = "struct"
     fields {
@@ -167,6 +167,12 @@ The following arguments are supported:
 * `project` - (Optional) The ID of the project in which the resource belongs.
     If it is not provided, the provider project is used.
 
+* `deletion_policy` - (Optional) Whether Terraform will be prevented from destroying the resource. Defaults to DELETE.
+	When a 'terraform destroy' or 'terraform apply' would delete the resource,
+	the command will fail if this field is set to "PREVENT" in Terraform state.
+	When set to "ABANDON", the command will remove the resource from Terraform
+	management without updating or deleting the resource in the API.
+	When set to "DELETE", deleting the resource is allowed.
 
 
 <a name="nested_schema"></a>The `schema` block supports:
@@ -264,6 +270,19 @@ IcebergTable can be imported using any of these accepted formats:
 * `{{project}}/{{catalog}}/{{namespace}}/{{name}}`
 * `{{catalog}}/{{namespace}}/{{name}}`
 
+In Terraform v1.12.0 and later, use an [`identity` block](https://developer.hashicorp.com/terraform/language/resources/identities) to import IcebergTable using identity values. For example:
+
+```tf
+import {
+  identity = {
+    name = "<-required value->"
+    catalog = "<-required value->"
+    namespace = "<-required value->"
+    project = "<-optional value->"
+  }
+  to = google_biglake_iceberg_table.default
+}
+```
 
 In Terraform v1.5.0 and later, use an [`import` block](https://developer.hashicorp.com/terraform/language/import) to import IcebergTable using one of the formats above. For example:
 

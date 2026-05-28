@@ -137,6 +137,12 @@ The following arguments are supported:
   additional information.
   Structure is [documented below](#nested_condition).
 
+* `deletion_policy` - (Optional) Whether Terraform will be prevented from destroying the resource. Defaults to DELETE.
+	When a 'terraform destroy' or 'terraform apply' would delete the resource,
+	the command will fail if this field is set to "PREVENT" in Terraform state.
+	When set to "ABANDON", the command will remove the resource from Terraform
+	management without updating or deleting the resource in the API.
+	When set to "DELETE", deleting the resource is allowed.
 
 
 <a name="nested_target"></a>The `target` block supports:
@@ -211,6 +217,18 @@ FoldersPolicyBinding can be imported using any of these accepted formats:
 * `folders/{{folder}}/locations/{{location}}/policyBindings/{{policy_binding_id}}`
 * `{{folder}}/{{location}}/{{policy_binding_id}}`
 
+In Terraform v1.12.0 and later, use an [`identity` block](https://developer.hashicorp.com/terraform/language/resources/identities) to import FoldersPolicyBinding using identity values. For example:
+
+```tf
+import {
+  identity = {
+    folder = "<-required value->"
+    location = "<-required value->"
+    policyBindingId = "<-required value->"
+  }
+  to = google_iam_folders_policy_binding.default
+}
+```
 
 In Terraform v1.5.0 and later, use an [`import` block](https://developer.hashicorp.com/terraform/language/import) to import FoldersPolicyBinding using one of the formats above. For example:
 

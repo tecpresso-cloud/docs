@@ -210,6 +210,12 @@ The following arguments are supported:
   Specification that applies to a Cloud Storage fileset. This is only valid on entries of type FILESET.
   Structure is [documented below](#nested_gcs_fileset_spec).
 
+* `deletion_policy` - (Optional) Whether Terraform will be prevented from destroying the resource. Defaults to DELETE.
+	When a 'terraform destroy' or 'terraform apply' would delete the resource,
+	the command will fail if this field is set to "PREVENT" in Terraform state.
+	When set to "ABANDON", the command will remove the resource from Terraform
+	management without updating or deleting the resource in the API.
+	When set to "DELETE", deleting the resource is allowed.
 
 
 <a name="nested_gcs_fileset_spec"></a>The `gcs_fileset_spec` block supports:
@@ -332,6 +338,16 @@ Entry can be imported using any of these accepted formats:
 
 * `{{name}}`
 
+In Terraform v1.12.0 and later, use an [`identity` block](https://developer.hashicorp.com/terraform/language/resources/identities) to import Entry using identity values. For example:
+
+```tf
+import {
+  identity = {
+    name = "<-optional value->"
+  }
+  to = google_data_catalog_entry.default
+}
+```
 
 In Terraform v1.5.0 and later, use an [`import` block](https://developer.hashicorp.com/terraform/language/import) to import Entry using one of the formats above. For example:
 

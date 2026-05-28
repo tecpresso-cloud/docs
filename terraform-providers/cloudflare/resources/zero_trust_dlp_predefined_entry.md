@@ -2,12 +2,16 @@
 page_title: "cloudflare_zero_trust_dlp_predefined_entry Resource - Cloudflare"
 subcategory: ""
 description: |-
-  
+  Accepted Permissions
+  Zero Trust ReadZero Trust Write
 ---
 
 # cloudflare_zero_trust_dlp_predefined_entry (Resource)
 
+Accepted Permissions
 
+- `Zero Trust Read`
+- `Zero Trust Write`
 
 ## Example Usage
 
@@ -25,12 +29,12 @@ resource "cloudflare_zero_trust_dlp_predefined_entry" "example_zero_trust_dlp_pr
 
 ### Required
 
-- `account_id` (String)
 - `enabled` (Boolean)
 - `entry_id` (String)
 
 ### Optional
 
+- `account_id` (String)
 - `profile_id` (String) This field is not used as the owning profile.
 For predefined entries it is already set to a predefined profile.
 
@@ -41,6 +45,7 @@ Determines if the words should be matched in a case-sensitive manner
 Cannot be set to false if secret is true
 - `confidence` (Attributes) (see [below for nested schema](#nestedatt--confidence))
 - `created_at` (String)
+- `description` (String)
 - `id` (String) The ID of this resource.
 - `name` (String)
 - `pattern` (Attributes) (see [below for nested schema](#nestedatt--pattern))

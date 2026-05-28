@@ -172,6 +172,12 @@ The following arguments are supported:
   (Optional)
   Validity duration of certificate, in days. Accepts positive non-zero value. Defaults to 365.
 
+* `deletion_policy` - (Optional) Whether Terraform will be prevented from destroying the resource. Defaults to DELETE.
+	When a 'terraform destroy' or 'terraform apply' would delete the resource,
+	the command will fail if this field is set to "PREVENT" in Terraform state.
+	When set to "ABANDON", the command will remove the resource from Terraform
+	management without updating or deleting the resource in the API.
+	When set to "DELETE", deleting the resource is allowed.
 
 
 <a name="nested_subject"></a>The `subject` block supports:
@@ -295,6 +301,19 @@ KeystoresAliasesSelfSignedCert can be imported using any of these accepted forma
 * `organizations/{{org_id}}/environments/{{environment}}/keystores/{{keystore}}/aliases/{{alias}}`
 * `{{org_id}}/{{environment}}/{{keystore}}/{{alias}}`
 
+In Terraform v1.12.0 and later, use an [`identity` block](https://developer.hashicorp.com/terraform/language/resources/identities) to import KeystoresAliasesSelfSignedCert using identity values. For example:
+
+```tf
+import {
+  identity = {
+    orgId = "<-required value->"
+    environment = "<-required value->"
+    keystore = "<-required value->"
+    alias = "<-required value->"
+  }
+  to = google_apigee_keystores_aliases_self_signed_cert.default
+}
+```
 
 In Terraform v1.5.0 and later, use an [`import` block](https://developer.hashicorp.com/terraform/language/import) to import KeystoresAliasesSelfSignedCert using one of the formats above. For example:
 

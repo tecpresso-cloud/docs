@@ -425,7 +425,15 @@ The following arguments are supported:
 * `deletion_policy` - (Optional) Policy to determine if the cluster should be deleted forcefully.
 If setting deletion_policy = "FORCE", the Looker instance will be deleted regardless
 of its nested resources. If set to "DEFAULT", Looker instances that still have
-nested resources will return an error. Possible values: DEFAULT, FORCE
+nested resources will return an error.
+
+When a 'terraform destroy' or 'terraform apply' would delete the resource,
+the command will fail if this field is set to "PREVENT" in Terraform state.
+When set to "ABANDON", the command will remove the resource from Terraform
+management without updating or deleting the resource in the API.
+When set to "DELETE", the command will behave as if set to "DEFAULT".
+
+Possible values: DEFAULT, FORCE, PREVENT, ABANDON, DELETE
 
 
 
@@ -722,6 +730,18 @@ Instance can be imported using any of these accepted formats:
 * `{{region}}/{{name}}`
 * `{{name}}`
 
+In Terraform v1.12.0 and later, use an [`identity` block](https://developer.hashicorp.com/terraform/language/resources/identities) to import Instance using identity values. For example:
+
+```tf
+import {
+  identity = {
+    name = "<-required value->"
+    region = "<-optional value->"
+    project = "<-optional value->"
+  }
+  to = google_looker_instance.default
+}
+```
 
 In Terraform v1.5.0 and later, use an [`import` block](https://developer.hashicorp.com/terraform/language/import) to import Instance using one of the formats above. For example:
 

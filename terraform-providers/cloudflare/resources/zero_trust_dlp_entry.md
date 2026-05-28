@@ -2,12 +2,16 @@
 page_title: "cloudflare_zero_trust_dlp_entry Resource - Cloudflare"
 subcategory: ""
 description: |-
-  
+  Accepted Permissions
+  Zero Trust ReadZero Trust Write
 ---
 
 # cloudflare_zero_trust_dlp_entry (Resource)
 
+Accepted Permissions
 
+- `Zero Trust Read`
+- `Zero Trust Write`
 
 ## Example Usage
 
@@ -20,6 +24,7 @@ resource "cloudflare_zero_trust_dlp_entry" "example_zero_trust_dlp_entry" {
     regex = "regex"
     validation = "luhn"
   }
+  description = "description"
   profile_id = "182bd5e5-6e1a-4fe4-a799-aa6d9a6ab26e"
 }
 ```
@@ -29,13 +34,14 @@ resource "cloudflare_zero_trust_dlp_entry" "example_zero_trust_dlp_entry" {
 
 ### Required
 
-- `account_id` (String)
 - `enabled` (Boolean)
 - `name` (String)
 - `pattern` (Attributes) (see [below for nested schema](#nestedatt--pattern))
 
 ### Optional
 
+- `account_id` (String)
+- `description` (String)
 - `profile_id` (String)
 - `type` (String) Available values: "custom", "predefined", "integration".
 

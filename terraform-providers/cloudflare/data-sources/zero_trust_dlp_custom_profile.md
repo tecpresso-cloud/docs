@@ -2,12 +2,16 @@
 page_title: "cloudflare_zero_trust_dlp_custom_profile Data Source - Cloudflare"
 subcategory: ""
 description: |-
-  
+  Accepted Permissions
+  Zero Trust ReadZero Trust Write
 ---
 
 # cloudflare_zero_trust_dlp_custom_profile (Data Source)
 
+Accepted Permissions
 
+- `Zero Trust Read`
+- `Zero Trust Write`
 
 ## Example Usage
 
@@ -23,8 +27,11 @@ data "cloudflare_zero_trust_dlp_custom_profile" "example_zero_trust_dlp_custom_p
 
 ### Required
 
-- `account_id` (String)
 - `profile_id` (String)
+
+### Optional
+
+- `account_id` (String)
 
 ### Read-Only
 
@@ -33,12 +40,16 @@ data "cloudflare_zero_trust_dlp_custom_profile" "example_zero_trust_dlp_custom_p
 - `confidence_threshold` (String) Available values: "low", "medium", "high", "very_high".
 - `context_awareness` (Attributes, Deprecated) Scan the context of predefined entries to only return matches surrounded by keywords. (see [below for nested schema](#nestedatt--context_awareness))
 - `created_at` (String) When the profile was created.
+- `data_classes` (List of String) Data classes associated with this profile.
+- `data_tags` (List of String) Data tags associated with this profile.
 - `description` (String) The description of the profile.
-- `entries` (Attributes List) (see [below for nested schema](#nestedatt--entries))
+- `entries` (Attributes List, Deprecated) (see [below for nested schema](#nestedatt--entries))
 - `id` (String) The ID of this resource.
 - `name` (String) The name of the profile.
 - `ocr_enabled` (Boolean)
 - `open_access` (Boolean) Whether this profile can be accessed by anyone.
+- `sensitivity_levels` (Attributes List) Sensitivity levels associated with this profile. (see [below for nested schema](#nestedatt--sensitivity_levels))
+- `shared_entries` (Attributes List) (see [below for nested schema](#nestedatt--shared_entries))
 - `type` (String) Available values: "custom", "predefined", "integration".
 - `updated_at` (String) When the profile was lasted updated.
 
@@ -69,6 +80,7 @@ Determines if the words should be matched in a case-sensitive manner
 Cannot be set to false if secret is true
 - `confidence` (Attributes) (see [below for nested schema](#nestedatt--entries--confidence))
 - `created_at` (String)
+- `description` (String)
 - `enabled` (Boolean)
 - `id` (String)
 - `name` (String)
@@ -100,6 +112,66 @@ Read-Only:
 
 <a id="nestedatt--entries--variant"></a>
 ### Nested Schema for `entries.variant`
+
+Read-Only:
+
+- `description` (String)
+- `topic_type` (String) Available values: "Intent", "Content".
+- `type` (String) Available values: "PromptTopic".
+
+
+
+<a id="nestedatt--sensitivity_levels"></a>
+### Nested Schema for `sensitivity_levels`
+
+Read-Only:
+
+- `group_id` (String)
+- `level_id` (String)
+
+
+<a id="nestedatt--shared_entries"></a>
+### Nested Schema for `shared_entries`
+
+Read-Only:
+
+- `case_sensitive` (Boolean) Only applies to custom word lists.
+Determines if the words should be matched in a case-sensitive manner
+Cannot be set to false if secret is true
+- `confidence` (Attributes) (see [below for nested schema](#nestedatt--shared_entries--confidence))
+- `created_at` (String)
+- `description` (String)
+- `enabled` (Boolean)
+- `id` (String)
+- `name` (String)
+- `pattern` (Attributes) (see [below for nested schema](#nestedatt--shared_entries--pattern))
+- `profile_id` (String)
+- `secret` (Boolean)
+- `type` (String) Available values: "custom", "predefined", "integration", "exact_data", "document_fingerprint", "word_list".
+- `updated_at` (String)
+- `variant` (Attributes) (see [below for nested schema](#nestedatt--shared_entries--variant))
+- `word_list` (String)
+
+<a id="nestedatt--shared_entries--confidence"></a>
+### Nested Schema for `shared_entries.confidence`
+
+Read-Only:
+
+- `ai_context_available` (Boolean) Indicates whether this entry has AI remote service validation.
+- `available` (Boolean) Indicates whether this entry has any form of validation that is not an AI remote service.
+
+
+<a id="nestedatt--shared_entries--pattern"></a>
+### Nested Schema for `shared_entries.pattern`
+
+Read-Only:
+
+- `regex` (String)
+- `validation` (String, Deprecated) Available values: "luhn".
+
+
+<a id="nestedatt--shared_entries--variant"></a>
+### Nested Schema for `shared_entries.variant`
 
 Read-Only:
 
