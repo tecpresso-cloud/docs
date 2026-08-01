@@ -1,20 +1,67 @@
 ---
 title: Vultr
-description: "Vultr documentation reference - VPS provisioning, Terraform provider, API, WHMCS modules."
+description: "Vultr reference - Terraform provider, API, and VPS provisioning best practices."
 ---
 
 # Vultr
 
-Placeholder - to be populated with Vultr provider documentation, API references, and WHMCS VPS module integration details.
+Reference for provisioning and managing Vultr Cloud Compute with Terraform and the Vultr API. Vultr is an official partner.
 
-## Key References
+The version-pinned, authoritative resource and data-source reference is synced into `terraform-providers/vultr/`. This page is the curated overview and best-practice index.
 
-- **Terraform Provider:** [vultr/vultr](https://registry.terraform.io/providers/vultr/vultr/latest/docs) (current: v2.29.1)
-- **GitHub:** [vultr/terraform-provider-vultr](https://github.com/vultr/terraform-provider-vultr)
-- **API Docs:** [vultr.com/api](https://www.vultr.com/api/)
-- **Partnership:** Official partner
+## Provider
 
-## WHMCS Integration
+| | |
+|---|---|
+| Terraform provider | [`vultr/vultr`](https://registry.terraform.io/providers/vultr/vultr/latest/docs) |
+| Synced docs version | **v2.31.2** (synced 2026-05-28; `terraform-providers/vultr/`) |
+| Source | [vultr/terraform-provider-vultr](https://github.com/vultr/terraform-provider-vultr) |
+| API | [vultr.com/api](https://www.vultr.com/api/) |
 
-- VPS module(s) under development
-- Must account for Vultr provisioning alongside existing providers
+```hcl
+terraform {
+  required_providers {
+    vultr = {
+      source  = "vultr/vultr"
+      version = "2.31.2"
+    }
+  }
+}
+
+provider "vultr" {
+  # api_key is read from the VULTR_API_KEY environment variable - never hardcode it.
+  rate_limit  = 100   # ms between calls (Vultr caps API at 30 calls/sec)
+  retry_limit = 3
+}
+```
+
+- **`api_key`** should be supplied via the `VULTR_API_KEY` environment variable, never written into HCL or committed state.
+- **`rate_limit`** (ms between calls) and **`retry_limit`** tune behavior against Vultr's 30 calls/sec ceiling.
+
+## Core resources for VPS provisioning
+
+| Resource | Purpose | Notes |
+|---|---|---|
+| `vultr_instance` | Cloud Compute VM | `plan`, `region` (3-letter DCID), `os_id`, `hostname`, `enable_ipv6`, `ssh_key_ids`, `firewall_group_id`, `reserved_ip_id`, `user_scheme`, `user_data`, `tags` |
+| `vultr_ssh_key` | Account SSH key | referenced by id in `vultr_instance.ssh_key_ids` |
+| `vultr_reserved_ip` | Floating IP (v4/v6) | adopt as the instance main IP via `reserved_ip_id`; independent of instance lifecycle |
+| `vultr_firewall_group` | Firewall container | one group per instance (`firewall_group_id` is singular) |
+| `vultr_firewall_rule` | Inbound rule | single `ip_type` per rule (v4 + v6 are separate resources); inbound-only, stateful |
+| `vultr_startup_script` | Boot script | for non-cloud-init flows; Linux generally uses cloud-init `user_data` instead |
+
+Useful data sources: `vultr_os` (resolve `os_id`), `vultr_plan`, `vultr_region`, `vultr_reserved_ip`.
+
+## Best practices and gotchas
+
+- **Cloud-init via raw `user_data`.** Linux instances consume cloud-init user-data. The provider base64-encodes `user_data` internally - pass raw cloud-config, do **not** `base64encode()` it.
+- **Create-only fields force an OS REINSTALL (data loss).** Changing `hostname`, `user_data`, `os_id`, or `ssh_key_ids` on an existing `vultr_instance` triggers an in-place reinstall that wipes the disk. Guard them with `lifecycle { ignore_changes = [hostname, user_data, os_id] }` and use an explicit taint/replace for an intentional rebuild.
+- **Stable IP across reinstall.** Create a `vultr_reserved_ip` and attach it via `vultr_instance.reserved_ip_id` so the address survives an OS reinstall (and any IP-bound licensing). Express the attach on the instance side only to avoid a dependency cycle; the IPv4 is exported as `.subnet`.
+- **Resolve `os_id` deliberately.** Look it up with the `vultr_os` data source or pin a known id; ids are stable but vary per image.
+- **Firewall is inbound-only and stateful.** No egress rules. One firewall group per instance; v4 and v6 are separate `vultr_firewall_rule` resources. A passive-port range is expressible as a single rule (e.g. `49152:65534`).
+- **Region availability is plan-gated.** Not every plan exists in every region - confirm plan availability per region before pinning.
+- **Pricing is globally flat.** Vultr `monthly_cost` is a single value per plan with no regional variance.
+
+## Related
+
+- Authoritative, version-pinned provider reference: `terraform-providers/vultr/`
+- WHMCS VPS modules: under development (multi-cloud provisioning)
