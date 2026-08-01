@@ -484,6 +484,10 @@ resource "google_vertex_ai_reasoning_engine" "reasoning_engine" {
   region       = "us-central1"
   provider     = google-beta
 
+  traffic_config {
+    traffic_split_always_latest {}
+  }
+
   context_spec {
     memory_bank_config {
       generation_config {
@@ -493,6 +497,88 @@ resource "google_vertex_ai_reasoning_engine" "reasoning_engine" {
         embedding_model = "projects/${data.google_project.project.project_id}/locations/us-central1/publishers/google/models/text-embedding-005"
       }
       disable_memory_revisions = false
+
+      # 1. User-level Customization Config (Lifelong baseline)
+      customization_configs {
+        scope_keys                   = ["user_id"]
+        enable_third_person_memories = true
+        consolidation_config {
+          revisions_per_candidate_count = 1
+        }
+        memory_topics {
+          managed_memory_topic {
+            managed_topic_enum = "USER_PREFERENCES"
+          }
+        }
+      }
+
+      # 2. Session-level Customization Config (Transient scratchpad)
+      customization_configs {
+        scope_keys                   = ["user_id", "session_id"]
+        enable_third_person_memories = true
+        memory_topics {
+          custom_memory_topic {
+            label       = "session_scratchpad"
+            description = "Active consideration details, recent queries, and temporary workflow state."
+          }
+        }
+      }
+
+      # 1. Standard User Profile Schema (from official documentation)
+      structured_memory_configs {
+        scope_keys = ["user_id"]
+        schema_configs {
+          id            = "user-profile"
+          memory_schema = jsonencode({
+            type = "OBJECT"
+            properties = {
+              name = {
+                type        = "STRING"
+                description = "Name of the user."
+              }
+              technical_stack = {
+                type        = "STRING"
+                description = "Comma-separated list tools or languages used by the user."
+              }
+              primary_goal = {
+                type        = "STRING"
+                description = "The main objective the user is pursuing."
+              }
+              expertise_level = {
+                type        = "STRING"
+                description = "Current skill level (e.g., Junior, Senior)."
+              }
+              job_status = {
+                type        = "STRING"
+                description = "The job status of the individual"
+                enum        = ["unemployed", "part_time", "full_time", "student"]
+              }
+            }
+          })
+        }
+      }
+
+      # 2. Conversation Summary Schema (Demonstrating session scope)
+      structured_memory_configs {
+        scope_keys = ["user_id", "session_id"]
+        schema_configs {
+          id            = "conversation-summary"
+          memory_schema = jsonencode({
+            type = "OBJECT"
+            properties = {
+              main_topic = {
+                type        = "STRING"
+                description = "The primary topic of this specific chat session."
+              }
+              status = {
+                type        = "STRING"
+                description = "Current resolution state of the discussion."
+                enum        = ["open", "in_progress", "resolved"]
+              }
+            }
+          })
+        }
+      }
       ttl_config {
         default_ttl = "86400s"
       }
@@ -584,6 +670,11 @@ The following arguments are supported:
   Optional. Configuration for how Agent Engine sub-resources should manage context.
   Structure is [documented below](#nested_context_spec).
 
+* `traffic_config` -
+  (Optional, [Beta](../guides/provider_versions.html.markdown))
+  Optional. Traffic distribution configuration for the Reasoning Engine.
+  Structure is [documented below](#nested_traffic_config).
+
 * `region` -
   (Optional)
   The region of the reasoning engine. eg us-central1
@@ -622,6 +713,241 @@ When set to "DELETE", deleting the resource is permitted.
   (Optional)
   Optional. Declarations for object class methods in OpenAPI
   specification format.
+  **Note**: When deploying via Terraform, this field must be populated manually.
+  Otherwise, client SDKs (like `agent_engines.get()`) will not be able to discover the methods, and calls to the engine (or A2A integrations) will fail.
+  Depending on the template/framework used (`agent_framework`), the required class methods and their parameters differ:
+  **Warning**: The configuration snippets below are illustrative, may not be exhaustive, and could stop working over time. For the most up-to-date method lists and schemas, please consult the respective SDK source code:
+  * For Google ADK: See [ADK Python SDK cli_deploy.py](https://github.com/google/adk-python/blob/68a780306e3bdd648a882ef34c0abf8e5148353e/src/google/adk/cli/cli_deploy.py#L109).
+  * For Langchain: See [Vertex AI Python SDK langchain.py](https://github.com/googleapis/python-aiplatform/blob/c8a38a085931b01f4d6071f0ab7a64cb42851829/agentplatform/agent_engines/templates/langchain.py#L642-L717).
+  ### 1. Langchain Template
+  * `query` (api_mode = "sync" or empty)
+  * `stream_query` (api_mode = "stream")
+  Example for Langchain:
+  ```hcl
+  class_methods = jsonencode([
+    {
+      name        = "query"
+      api_mode    = "sync"
+      description = "Queries the reasoning engine"
+      parameters  = {
+        type       = "object"
+        required   = ["input"]
+        properties = {
+          input = {
+            type        = "string"
+            description = "The input prompt"
+          }
+        }
+      }
+    },
+    {
+      name        = "stream_query"
+      api_mode    = "stream"
+      description = "Streams queries from the reasoning engine"
+      parameters  = {
+        type       = "object"
+        required   = ["input"]
+        properties = {
+          input = {
+            type        = "string"
+            description = "The input prompt"
+          }
+        }
+      }
+    }
+  ])
+  ```
+  ### 2. Google ADK Template (Standard - No A2A)
+  For standard Google ADK (Agent Development Kit) deployments, you must define the following 11 methods:
+  Example for Standard ADK:
+  ```hcl
+  class_methods = jsonencode([
+    {
+      name        = "get_session"
+      api_mode    = ""
+      description = "Retrieve session by ID"
+      parameters  = {
+        type     = "object"
+        required = ["user_id", "session_id"]
+        properties = {
+          user_id    = { type = "string" }
+          session_id = { type = "string" }
+        }
+      }
+    },
+    {
+      name        = "async_get_session"
+      api_mode    = "async"
+      description = "Retrieve session asynchronously by ID"
+      parameters  = {
+        type     = "object"
+        required = ["user_id", "session_id"]
+        properties = {
+          user_id    = { type = "string" }
+          session_id = { type = "string" }
+        }
+      }
+    },
+    {
+      name        = "list_sessions"
+      api_mode    = ""
+      description = "List all sessions for a user"
+      parameters  = {
+        type     = "object"
+        required = ["user_id"]
+        properties = {
+          user_id = { type = "string" }
+        }
+      }
+    },
+    {
+      name        = "async_list_sessions"
+      api_mode    = "async"
+      description = "List all sessions for a user asynchronously"
+      parameters  = {
+        type     = "object"
+        required = ["user_id"]
+        properties = {
+          user_id = { type = "string" }
+        }
+      }
+    },
+    {
+      name        = "create_session"
+      api_mode    = ""
+      description = "Create a new session"
+      parameters  = {
+        type     = "object"
+        required = ["user_id"]
+        properties = {
+          user_id    = { type = "string" }
+          session_id = { type = "string" }
+          state      = { type = "object" }
+        }
+      }
+    },
+    {
+      name        = "async_create_session"
+      api_mode    = "async"
+      description = "Create a new session asynchronously"
+      parameters  = {
+        type     = "object"
+        required = ["user_id"]
+        properties = {
+          user_id    = { type = "string" }
+          session_id = { type = "string" }
+          state      = { type = "object" }
+        }
+      }
+    },
+    {
+      name        = "delete_session"
+      api_mode    = ""
+      description = "Delete session by ID"
+      parameters  = {
+        type     = "object"
+        required = ["user_id", "session_id"]
+        properties = {
+          user_id    = { type = "string" }
+          session_id = { type = "string" }
+        }
+      }
+    },
+    {
+      name        = "async_delete_session"
+      api_mode    = "async"
+      description = "Delete session asynchronously by ID"
+      parameters  = {
+        type     = "object"
+        required = ["user_id", "session_id"]
+        properties = {
+          user_id    = { type = "string" }
+          session_id = { type = "string" }
+        }
+      }
+    },
+    {
+      name        = "stream_query"
+      api_mode    = "stream"
+      description = "Stream queries from the agent"
+      parameters  = {
+        type     = "object"
+        required = ["message", "user_id"]
+        properties = {
+          message    = { description = "Message string or object" }
+          user_id    = { type = "string" }
+          session_id = { type = "string" }
+          run_config = { type = "object" }
+        }
+      }
+    },
+    {
+      name        = "async_stream_query"
+      api_mode    = "async_stream"
+      description = "Stream queries asynchronously from the agent"
+      parameters  = {
+        type     = "object"
+        required = ["message", "user_id"]
+        properties = {
+          message        = { description = "Message string or object" }
+          user_id        = { type = "string" }
+          session_id     = { type = "string" }
+          session_events = { type = "array", items = { type = "object" } }
+          run_config     = { type = "object" }
+        }
+      }
+    },
+    {
+      name        = "streaming_agent_run_with_events"
+      api_mode    = "async_stream"
+      description = "Stream agent run with events asynchronously"
+      parameters  = {
+        type     = "object"
+        required = ["request_json"]
+        properties = {
+          request_json = { type = "string" }
+        }
+      }
+    }
+  ])
+  ```
+  ### 3. Google ADK Template (A2A-Enabled)
+  If the agent integrates with the Gemini Enterprise Agent Registry (A2A), you must inject the `a2a_agent_card` JSON metadata as a string **specifically inside the `async_create_session` method definition**:
+  Example for A2A-Enabled ADK:
+  ```hcl
+  locals {
+    # Construct the A2A endpoint URL
+    a2a_url = "https://us-central1-aiplatform.googleapis.com/v1/projects/my-project/locations/us-central1/reasoningEngines/my-agent/a2a"
+    agent_card = {
+      name                 = "my-agent"
+      description          = "A2A Agent"
+      version              = "1.0.0"
+      preferred_transport  = "HTTP_JSON"
+      supported_interfaces = [{ url = local.a2a_url, protocol_binding = "HTTP_JSON" }]
+      capabilities         = { streaming = true }
+    }
+  }
+  # In class_methods, append "a2a_agent_card" key ONLY to the "async_create_session" method:
+  class_methods = jsonencode([
+    # ... other 10 standard methods (same as Standard ADK) ...
+    {
+      name        = "async_create_session"
+      api_mode    = "async"
+      description = "Create a new session asynchronously"
+      parameters  = {
+        type     = "object"
+        required = ["user_id"]
+        properties = {
+          user_id    = { type = "string" }
+          session_id = { type = "string" }
+          state      = { type = "object" }
+        }
+      }
+      # Inject the serialized Agent Card here
+      a2a_agent_card = jsonencode(local.agent_card)
+    }
+  ])
+  ```
 
 * `deployment_spec` -
   (Optional)
@@ -667,6 +993,19 @@ When set to "DELETE", deleting the resource is permitted.
 * `effective_identity` -
   (Output)
   The identity to use for the Reasoning Engine.
+
+* `example_store` -
+  (Optional, [Beta](../guides/provider_versions.html.markdown))
+  Optional. The resource name of the linked ExampleStore.
+
+* `agent_card` -
+  (Optional, [Beta](../guides/provider_versions.html.markdown))
+  Optional. The A2A Agent Card for the agent (if available).
+
+* `build_spec` -
+  (Optional, [Beta](../guides/provider_versions.html.markdown))
+  Optional. Configuration for building container image.
+  Structure is [documented below](#nested_spec_build_spec).
 
 
 <a name="nested_spec_deployment_spec"></a>The `deployment_spec` block supports:
@@ -718,6 +1057,28 @@ When set to "DELETE", deleting the resource is permitted.
   (Optional)
   Optional. Concurrency for each container and agent server.
   Recommended value: 2 * cpu + 1. Defaults to 9.
+
+* `agent_server_mode` -
+  (Optional, [Beta](../guides/provider_versions.html.markdown))
+  Optional. The agent server mode specifies what features are used when deploy the agent to agent engine.
+  Possible values:
+  * `STABLE`: Stable agent server mode.
+  * `EXPERIMENTAL`: Experimental agent server mode.
+  Possible values are: `STABLE`, `EXPERIMENTAL`.
+
+* `agent_gateway_config` -
+  (Optional, [Beta](../guides/provider_versions.html.markdown))
+  Optional. Agent Gateway configuration for a Reasoning Engine deployment.
+  Structure is [documented below](#nested_spec_deployment_spec_agent_gateway_config).
+
+* `keep_alive_probe` -
+  (Optional, [Beta](../guides/provider_versions.html.markdown))
+  Optional. Specifies the configuration for keep-alive probe.
+  Structure is [documented below](#nested_spec_deployment_spec_keep_alive_probe).
+
+* `dedicated_ingress_endpoint_enabled` -
+  (Optional, [Beta](../guides/provider_versions.html.markdown))
+  Optional. Whether to enable dedicated ingress endpoint for the deployment. If true, the deployment will be accessible via a dedicated endpoint. This is required to enable GKE V2 runtime.
 
 
 <a name="nested_spec_deployment_spec_env"></a>The `env` block supports:
@@ -805,6 +1166,53 @@ When set to "DELETE", deleting the resource is permitted.
   Required. The VPC network name in the targetProject
   where the DNS zone specified by 'domain' is visible.
 
+<a name="nested_spec_deployment_spec_agent_gateway_config"></a>The `agent_gateway_config` block supports:
+
+* `client_to_agent_config` -
+  (Optional)
+  Optional. Configuration for traffic targeting the Reasoning Engine.
+  Structure is [documented below](#nested_spec_deployment_spec_agent_gateway_config_client_to_agent_config).
+
+* `agent_to_anywhere_config` -
+  (Optional)
+  Optional. Configuration for traffic originating from the Reasoning Engine.
+  Structure is [documented below](#nested_spec_deployment_spec_agent_gateway_config_agent_to_anywhere_config).
+
+
+<a name="nested_spec_deployment_spec_agent_gateway_config_client_to_agent_config"></a>The `client_to_agent_config` block supports:
+
+* `agent_gateway` -
+  (Required)
+  Required. The resource name of the Agent Gateway to use for inbound traffic.
+
+<a name="nested_spec_deployment_spec_agent_gateway_config_agent_to_anywhere_config"></a>The `agent_to_anywhere_config` block supports:
+
+* `agent_gateway` -
+  (Required)
+  Required. The resource name of the Agent Gateway for outbound traffic.
+
+<a name="nested_spec_deployment_spec_keep_alive_probe"></a>The `keep_alive_probe` block supports:
+
+* `http_get` -
+  (Optional)
+  Specifies the HTTP GET configuration for the probe.
+  Structure is [documented below](#nested_spec_deployment_spec_keep_alive_probe_http_get).
+
+* `max_seconds` -
+  (Optional)
+  Optional. Specifies the maximum duration (in seconds) to keep the instance alive via this probe. Can be a maximum of 3600 seconds (1 hour).
+
+
+<a name="nested_spec_deployment_spec_keep_alive_probe_http_get"></a>The `http_get` block supports:
+
+* `path` -
+  (Required)
+  Required. Specifies the path of the HTTP GET request (e.g., `"/is_busy"`).
+
+* `port` -
+  (Optional)
+  Optional. Specifies the port number on the container to which the request is sent.
+
 <a name="nested_spec_package_spec"></a>The `package_spec` block supports:
 
 * `dependency_files_gcs_uri` -
@@ -854,6 +1262,11 @@ When set to "DELETE", deleting the resource is permitted.
   (Optional)
   Specification for source code to be fetched from a Git repository managed through the Developer Connect service.
   Structure is [documented below](#nested_spec_source_code_spec_developer_connect_source).
+
+* `agent_config_source` -
+  (Optional, [Beta](../guides/provider_versions.html.markdown))
+  Optional. Specification for the deploying from agent config.
+  Structure is [documented below](#nested_spec_source_code_spec_agent_config_source).
 
 
 <a name="nested_spec_source_code_spec_inline_source"></a>The `inline_source` block supports:
@@ -919,12 +1332,48 @@ When set to "DELETE", deleting the resource is permitted.
   (Required)
   The revision to fetch from the Git repository such as a branch, a tag, a commit SHA, or any Git ref.
 
+<a name="nested_spec_source_code_spec_agent_config_source"></a>The `agent_config_source` block supports:
+
+* `adk_config` -
+  (Optional)
+  Required. Configuration for the Agent Development Kit (ADK).
+  Structure is [documented below](#nested_spec_source_code_spec_agent_config_source_adk_config).
+
+* `inline_source` -
+  (Optional)
+  Optional. Any additional files needed to interpret the config.
+  Structure is [documented below](#nested_spec_source_code_spec_agent_config_source_inline_source).
+
+
+<a name="nested_spec_source_code_spec_agent_config_source_adk_config"></a>The `adk_config` block supports:
+
+* `json_config` -
+  (Required)
+  Required. The value of the ADK config in JSON format.
+
+<a name="nested_spec_source_code_spec_agent_config_source_inline_source"></a>The `inline_source` block supports:
+
+* `source_archive` -
+  (Required)
+  Required. Input only. The application source code archive, provided as a compressed tarball (.tar.gz) file.
+
+<a name="nested_spec_build_spec"></a>The `build_spec` block supports:
+
+* `worker_pool` -
+  (Optional)
+  Optional. The resource name of the Cloud Build WorkerPool to use for the build.
+
 <a name="nested_context_spec"></a>The `context_spec` block supports:
 
 * `memory_bank_config` -
   (Optional)
   Specification for a Memory Bank, which manages memories for the Agent Engine.
   Structure is [documented below](#nested_context_spec_memory_bank_config).
+
+* `example_store_config` -
+  (Optional, [Beta](../guides/provider_versions.html.markdown))
+  Optional. Specification for an Example Store, which manages few-shot examples for the Agent Engine.
+  Structure is [documented below](#nested_context_spec_example_store_config).
 
 
 <a name="nested_context_spec_memory_bank_config"></a>The `memory_bank_config` block supports:
@@ -947,6 +1396,16 @@ When set to "DELETE", deleting the resource is permitted.
 * `disable_memory_revisions` -
   (Optional)
   If true, no memory revisions will be created for any requests to the Memory Bank.
+
+* `customization_configs` -
+  (Optional)
+  Optional. Customization configs for how Agent Engine sub-resources manage context at different scope levels.
+  Structure is [documented below](#nested_context_spec_memory_bank_config_customization_configs).
+
+* `structured_memory_configs` -
+  (Optional)
+  Optional. Structured memory configurations for Agent Engine sub-resources.
+  Structure is [documented below](#nested_context_spec_memory_bank_config_structured_memory_configs).
 
 
 <a name="nested_context_spec_memory_bank_config_generation_config"></a>The `generation_config` block supports:
@@ -991,6 +1450,131 @@ When set to "DELETE", deleting the resource is permitted.
   (Optional)
   The TTL duration for memories updated via GenerateMemories.
 
+<a name="nested_context_spec_memory_bank_config_customization_configs"></a>The `customization_configs` block supports:
+
+* `scope_keys` -
+  (Optional)
+  Optional. List of scope keys that this customization config applies to.
+
+* `memory_topics` -
+  (Optional)
+  Optional. List of topics that the memory should be associated with.
+  Structure is [documented below](#nested_context_spec_memory_bank_config_customization_configs_memory_topics).
+
+* `consolidation_config` -
+  (Optional)
+  Optional. Configuration for how many memory revisions Memory Bank considers when consolidating each memory candidate.
+  Structure is [documented below](#nested_context_spec_memory_bank_config_customization_configs_consolidation_config).
+
+* `enable_third_person_memories` -
+  (Optional)
+  Optional. Generate memories in the third person if set to true.
+
+
+<a name="nested_context_spec_memory_bank_config_customization_configs_memory_topics"></a>The `memory_topics` block supports:
+
+* `managed_memory_topic` -
+  (Optional)
+  Optional. Managed memory topic.
+  Structure is [documented below](#nested_context_spec_memory_bank_config_customization_configs_memory_topics_managed_memory_topic).
+
+* `custom_memory_topic` -
+  (Optional)
+  Optional. Custom memory topic.
+  Structure is [documented below](#nested_context_spec_memory_bank_config_customization_configs_memory_topics_custom_memory_topic).
+
+
+<a name="nested_context_spec_memory_bank_config_customization_configs_memory_topics_managed_memory_topic"></a>The `managed_memory_topic` block supports:
+
+* `managed_topic_enum` -
+  (Optional)
+  Managed topic enum (e.g. USER_PREFERENCES, EXPLICIT_INSTRUCTIONS).
+
+<a name="nested_context_spec_memory_bank_config_customization_configs_memory_topics_custom_memory_topic"></a>The `custom_memory_topic` block supports:
+
+* `label` -
+  (Optional)
+  Label of custom memory topic.
+
+* `description` -
+  (Optional)
+  Description of custom memory topic.
+
+<a name="nested_context_spec_memory_bank_config_customization_configs_consolidation_config"></a>The `consolidation_config` block supports:
+
+* `revisions_per_candidate_count` -
+  (Optional)
+  Number of revisions to consider per candidate count.
+
+<a name="nested_context_spec_memory_bank_config_structured_memory_configs"></a>The `structured_memory_configs` block supports:
+
+* `scope_keys` -
+  (Optional)
+  Optional. List of scope keys that this structured memory config applies to.
+
+* `schema_configs` -
+  (Optional)
+  Optional. List of schema configs that this structured memory config applies to.
+  Structure is [documented below](#nested_context_spec_memory_bank_config_structured_memory_configs_schema_configs).
+
+
+<a name="nested_context_spec_memory_bank_config_structured_memory_configs_schema_configs"></a>The `schema_configs` block supports:
+
+* `id` -
+  (Required)
+  Required. Unique ID identifying the memory schema.
+
+* `memory_schema` -
+  (Optional)
+  Optional. The memory schema defined as an OpenAPI Schema Object JSON string.
+
+<a name="nested_context_spec_example_store_config"></a>The `example_store_config` block supports:
+
+* `similarity_search_config` -
+  (Optional)
+  Optional. Configuration for how to perform similarity search on examples.
+  Structure is [documented below](#nested_context_spec_example_store_config_similarity_search_config).
+
+
+<a name="nested_context_spec_example_store_config_similarity_search_config"></a>The `similarity_search_config` block supports:
+
+* `embedding_model` -
+  (Required)
+  Required. The Gemini model used to generate embeddings to lookup similar examples.
+
+<a name="nested_traffic_config"></a>The `traffic_config` block supports:
+
+* `traffic_split_manual` -
+  (Optional)
+  Optional. Manual traffic distribution configuration, where the user specifies the
+  Runtime Revision IDs and the percentage of traffic to send to each.
+  Structure is [documented below](#nested_traffic_config_traffic_split_manual).
+
+* `traffic_split_always_latest` -
+  (Optional)
+  Optional. Traffic distribution configuration, where all traffic is sent to the
+  latest Runtime Revision.
+
+
+<a name="nested_traffic_config_traffic_split_manual"></a>The `traffic_split_manual` block supports:
+
+* `targets` -
+  (Optional)
+  Optional. A list of traffic targets for the Runtimes Revisions. The sum of
+  percentages must equal to 100.
+  Structure is [documented below](#nested_traffic_config_traffic_split_manual_targets).
+
+
+<a name="nested_traffic_config_traffic_split_manual_targets"></a>The `targets` block supports:
+
+* `runtime_revision_name` -
+  (Required)
+  Required. The Runtime Revision name to which to send this portion of traffic.
+
+* `percent` -
+  (Required)
+  Required. Specifies percent of the traffic to this Runtime Revision.
+
 ## Attributes Reference
 
 In addition to the arguments listed above, the following computed attributes are exported:
@@ -1008,6 +1592,10 @@ In addition to the arguments listed above, the following computed attributes are
 * `update_time` -
   The timestamp of when the Index was last updated in RFC3339 UTC "Zulu"
   format, with nanosecond resolution and up to nine fractional digits.
+
+* `url` -
+  ([Beta](../guides/provider_versions.html.markdown))
+  Output only. The URL of the reasoning engine.
 
 * `terraform_labels` -
   The combination of labels configured directly on the resource
@@ -1036,7 +1624,7 @@ ReasoningEngine can be imported using any of these accepted formats:
 * `{{region}}/{{name}}`
 * `{{name}}`
 
-In Terraform v1.12.0 and later, use an [`identity` block](https://developer.hashicorp.com/terraform/language/resources/identities) to import ReasoningEngine using identity values. For example:
+In Terraform v1.12.0 and later, use an [`identity` block](https://developer.hashicorp.com/terraform/language/block/import#identity) to import ReasoningEngine using identity values. For example:
 
 ```tf
 import {

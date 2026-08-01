@@ -710,6 +710,11 @@ The following arguments are supported:
   (Output)
   Service Attachment for SSH, resource is in the format of `projects/{project}/regions/{region}/serviceAttachments/{service_attachment}`.
 
+* `psc_allowed_projects` -
+  (Optional)
+  Optional. Additional allowed projects for setting up PSC connections.
+  Instance host project is automatically allowed and does not need to be included in this list.
+
 
 <a name="nested_private_config_custom_host_config"></a>The `custom_host_config` block supports:
 
@@ -805,7 +810,7 @@ Instance can be imported using any of these accepted formats:
 * `{{location}}/{{instance_id}}`
 * `{{instance_id}}`
 
-In Terraform v1.12.0 and later, use an [`identity` block](https://developer.hashicorp.com/terraform/language/resources/identities) to import Instance using identity values. For example:
+In Terraform v1.12.0 and later, use an [`identity` block](https://developer.hashicorp.com/terraform/language/block/import#identity) to import Instance using identity values. For example:
 
 ```tf
 import {

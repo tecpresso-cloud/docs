@@ -543,7 +543,9 @@ resource "google_dataplex_datascan" "documentation" {
     }
   }
 
-  data_documentation_spec {}
+  data_documentation_spec {
+    catalog_publishing_enabled = true
+  }
 
   project = "my-project-name"
 }
@@ -1188,6 +1190,7 @@ The following arguments are supported:
 * `data_documentation_spec` -
   (Optional)
   DataDocumentationScan related setting.
+  Structure is [documented below](#nested_data_documentation_spec).
 
 * `project` - (Optional) The ID of the project in which the resource belongs.
     If it is not provided, the provider project is used.
@@ -1697,6 +1700,12 @@ The following arguments are supported:
   (Optional)
   Whether to disable the inference of data types for JSON data. If true, all columns are registered as their primitive types (strings, number, or boolean).
 
+<a name="nested_data_documentation_spec"></a>The `data_documentation_spec` block supports:
+
+* `catalog_publishing_enabled` -
+  (Optional)
+  If set, the latest DataScan job result will be published to Knowledge Catalog.
+
 ## Attributes Reference
 
 In addition to the arguments listed above, the following computed attributes are exported:
@@ -1762,7 +1771,7 @@ Datascan can be imported using any of these accepted formats:
 * `{{location}}/{{data_scan_id}}`
 * `{{data_scan_id}}`
 
-In Terraform v1.12.0 and later, use an [`identity` block](https://developer.hashicorp.com/terraform/language/resources/identities) to import Datascan using identity values. For example:
+In Terraform v1.12.0 and later, use an [`identity` block](https://developer.hashicorp.com/terraform/language/block/import#identity) to import Datascan using identity values. For example:
 
 ```tf
 import {

@@ -26,7 +26,6 @@ OAuth brand data. Only "Organization Internal" brands can be created
 programmatically via API. To convert it into an external brands
 please use the GCP Console.
 
-
 ~> **Note:** Brands can only be created once for a Google Cloud
 project and the underlying Google API doesn't not support DELETE or PATCH methods.
 Destroying a Terraform-managed Brand will remove it from state
@@ -124,7 +123,7 @@ Brand can be imported using any of these accepted formats:
 * `projects/{{project_number}}/brands/{{brand_id}}`
 * `{{project_number}}/{{brand_id}}`
 
-In Terraform v1.12.0 and later, use an [`identity` block](https://developer.hashicorp.com/terraform/language/resources/identities) to import Brand using identity values. For example:
+In Terraform v1.12.0 and later, use an [`identity` block](https://developer.hashicorp.com/terraform/language/block/import#identity) to import Brand using identity values. For example:
 
 ```tf
 import {

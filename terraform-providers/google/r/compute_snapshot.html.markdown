@@ -242,6 +242,11 @@ The following arguments are supported:
   Indicates the type of the snapshot.
   Possible values are: `ARCHIVE`, `STANDARD`.
 
+* `params` -
+  (Optional)
+  Additional params passed with the request, but not persisted as part of resource payload
+  Structure is [documented below](#nested_params).
+
 * `zone` -
   (Optional)
   A reference to the zone where the disk is hosted.
@@ -277,6 +282,14 @@ The following arguments are supported:
 	management without updating or deleting the resource in the API.
 	When set to "DELETE", deleting the resource is allowed.
 
+
+<a name="nested_params"></a>The `params` block supports:
+
+* `resource_manager_tags` -
+  (Optional)
+  Resource manager tags to be bound to the snapshot. Tag keys and values have the
+  same definition as resource manager tags. Keys must be in the format tagKeys/{tag_key_id},
+  and values are in the format tagValues/456.
 
 <a name="nested_snapshot_encryption_key"></a>The `snapshot_encryption_key` block supports:
 
@@ -386,7 +399,7 @@ Snapshot can be imported using any of these accepted formats:
 * `{{project}}/{{name}}`
 * `{{name}}`
 
-In Terraform v1.12.0 and later, use an [`identity` block](https://developer.hashicorp.com/terraform/language/resources/identities) to import Snapshot using identity values. For example:
+In Terraform v1.12.0 and later, use an [`identity` block](https://developer.hashicorp.com/terraform/language/block/import#identity) to import Snapshot using identity values. For example:
 
 ```tf
 import {

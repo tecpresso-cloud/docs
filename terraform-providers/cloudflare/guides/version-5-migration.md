@@ -15,11 +15,11 @@ handle Terraform state migration transparently. Combined with the
 [tf-migrate] CLI tool for HCL configuration changes, the migration process is
 significantly simpler than previous approaches.
 
-~> **Grit-based migration is deprecated.** This guide supersedes the Grit-based
-migration instructions in the [version 5 upgrade guide]. You do **not** need
-Grit to migrate. Grit patterns are no longer supported and will be removed in
-a future release. The [version 5 upgrade guide] remains a useful reference for
-per-resource attribute change details if you prefer manual HCL changes.
+~> **Grit-based migration has been removed.** This guide supersedes the
+Grit-based migration instructions in the [version 5 upgrade guide]. You do
+**not** need Grit to migrate. Grit patterns are no longer supported. The
+[version 5 upgrade guide] remains a useful reference for per-resource
+attribute change details if you prefer manual HCL changes.
 
 ## Quick Reference
 
@@ -401,6 +401,46 @@ values to `null` for optional fields (`isolation_required`,
 `purpose_justification_required`, `approval_required`). This prevents drift
 since the API treats `false` and `null` as equivalent.
 
+#### Zero Trust Access Policy `session_duration`
+
+In v4, the API applied an implicit default of `24h` for `session_duration`, so
+most configurations omitted it. In v5, the provider schema defaults to `24h`,
+but some Cloudflare accounts enforce a maximum session duration shorter than
+`24h` (for example, `18h`) via account-level security policies. If your
+policies relied on the implicit default and your account enforces a shorter
+maximum, the first `terraform apply` after migration will fail at the API level
+even though `terraform plan` succeeds.
+
+To avoid this, add an explicit `session_duration` to every
+`cloudflare_zero_trust_access_policy` resource:
+
+```hcl
+resource "cloudflare_zero_trust_access_policy" "example" {
+  # ...existing attributes...
+  session_duration = "18h"  # or your organization's required maximum
+}
+```
+
+#### Zero Trust Access Policy `zone_id` removal
+
+In v4, `cloudflare_access_policy` could be scoped to a zone using `zone_id`.
+In v5, all access policies are account-level only -- `zone_id` is not a valid
+attribute on `cloudflare_zero_trust_access_policy`. `tf-migrate` removes
+`zone_id` during migration. If the resource already has `account_id`, no action
+is needed. If the resource only had `zone_id`, `tf-migrate` emits a
+**MIGRATION WARNING** and you must manually add `account_id`:
+
+```hcl
+resource "cloudflare_zero_trust_access_policy" "example" {
+  account_id = var.cloudflare_account_id  # add this — zone_id is no longer valid
+  # ...existing attributes...
+}
+```
+
+Note that a zone ID and an account ID are different values. You cannot simply
+rename the attribute; you must supply the correct account ID for the account
+that owns the zone.
+
 #### Load Balancer field renames
 
 `cloudflare_load_balancer` resources will show field renames:
@@ -563,7 +603,7 @@ automatic state transformation for the rename.
 | v4 Resource | v5 Resource | State |
 |---|---|---|
 | `cloudflare_access_application` | `cloudflare_zero_trust_access_application` | Auto |
-| `cloudflare_access_ca_certificate` | `cloudflare_zero_trust_access_short_lived_certificate` | Manual |
+| `cloudflare_access_ca_certificate` | `cloudflare_zero_trust_access_short_lived_certificate` | Auto |
 | `cloudflare_access_custom_page` | `cloudflare_zero_trust_access_custom_page` | Manual |
 | `cloudflare_access_group` | `cloudflare_zero_trust_access_group` | Auto |
 | `cloudflare_access_identity_provider` | `cloudflare_zero_trust_access_identity_provider` | Auto |
@@ -642,10 +682,10 @@ into the new resource type:
 
 ```bash
 # Remove the old resource from state
-terraform state rm cloudflare_access_ca_certificate.example
+terraform state rm cloudflare_access_custom_page.example
 
 # Import into the new resource type
-terraform import cloudflare_zero_trust_access_short_lived_certificate.example <account_id>/<certificate_id>
+terraform import cloudflare_zero_trust_access_custom_page.example <account_id>/<custom_page_id>
 ```
 
 Refer to the individual [resource documentation](https://registry.terraform.io/providers/cloudflare/cloudflare/latest/docs)
@@ -692,6 +732,17 @@ config migration.** `tf-migrate` can automatically generate a `removed` block
 to drop the old state entry without destroying the remote policy, but you still
 must rewrite the policy as inline `policies` on the application resource.
 
+!> **Applying tf-migrate output without adding inline policies is destructive.**
+`tf-migrate` removes the standalone `cloudflare_access_policy` resource and
+generates a `removed` block, but does **not** add `policies` to the parent
+`cloudflare_zero_trust_access_application` resource. If you run
+`terraform apply` in this intermediate state, Terraform sends an empty
+`policies` value to the API, which detaches all policies from the application.
+Cloudflare then garbage-collects the orphaned app-scoped policies (they have no
+independent lifecycle). You **must** add `policies = [...]` to the parent
+application resource before applying. Recovery without this step requires
+reconstructing all policies from git history or backups.
+
 In v4, `cloudflare_access_policy` could be used for both account-level policies
 and application-scoped policies (when `application_id` was set). These two types
 use different API endpoints:
@@ -703,8 +754,12 @@ In v5, application-scoped policies are no longer standalone resources. Instead,
 they are defined inline within the `cloudflare_zero_trust_access_application`
 resource using the `policies` attribute.
 
-Do not use a `moved` block for this scenario. Application-scoped policies must
-be dropped from standalone state and rewritten as inline application policies.
+Use a `removed` block rather than a `moved` block. v4 application-scoped
+`cloudflare_access_policy` and v5 inline
+`cloudflare_zero_trust_access_application.policies` are different schemas
+backed by different API endpoints, so Terraform cannot rename one into the
+other; the policy must be dropped from standalone state and re-expressed on
+the application.
 
 #### Migration Steps
 
@@ -778,6 +833,75 @@ resource "cloudflare_zero_trust_access_application" "my_app" {
 
 ~> **Account-level policies** (without `application_id`) migrate normally using
 `tf-migrate` and are renamed to `cloudflare_zero_trust_access_policy`.
+
+#### Keeping existing policies attached (in-place migration)
+
+If your v4 configuration referenced policies by ID on the application (for
+example, policies that are owned in the Zero Trust dashboard or in another
+Terraform stack), use the following two-step pattern so the application keeps
+pointing at the same policies the whole time.
+
+**Step 1 — drop the policy resources from state, keep `policies` populated
+with hardcoded UUIDs.**
+
+```hcl
+removed {
+  from = cloudflare_zero_trust_access_policy.app_policy
+  lifecycle {
+    destroy = false
+  }
+}
+
+resource "cloudflare_zero_trust_access_application" "my_app" {
+  account_id = "f037e56e89293a057740de681ac9abbe"
+  name       = "My Application"
+  domain     = "app.example.com"
+  type       = "self_hosted"
+
+  policies = [
+    {
+      id         = "1b33372b-5433-41bb-b333-59b122bbdaf0" # existing policy UUID
+      precedence = 1
+    },
+  ]
+}
+```
+
+The Step 1 plan should report `0 to add, 0 to change, 0 to destroy`, plus a
+`# ... will no longer be managed by Terraform` line for each removed policy.
+
+**Step 2 — recreate the policies as `cloudflare_zero_trust_access_policy`
+resources and switch the application to resource references in the same
+apply.**
+
+```hcl
+resource "cloudflare_zero_trust_access_policy" "app_policy" {
+  account_id = "f037e56e89293a057740de681ac9abbe"
+  name       = "Allow employees"
+  decision   = "allow"
+
+  include = [{ email_domain = { domain = "example.com" } }]
+}
+
+resource "cloudflare_zero_trust_access_application" "my_app" {
+  account_id = "f037e56e89293a057740de681ac9abbe"
+  name       = "My Application"
+  domain     = "app.example.com"
+  type       = "self_hosted"
+
+  policies = [
+    {
+      id         = cloudflare_zero_trust_access_policy.app_policy.id
+      precedence = 1
+    },
+  ]
+}
+```
+
+When both changes ship in the same apply, the application's `policies` list
+goes directly from `[{ id = "<hardcoded-uuid>", ... }]` to
+`[{ id = cloudflare_zero_trust_access_policy.app_policy.id, ... }]`. If you
+want to keep policies owned outside of Terraform, stop after Step 1.
 
 ### `cloudflare_zone_settings_override`
 
@@ -1213,6 +1337,7 @@ do not have automatic state migration and may require `terraform state rm` +
 | | `cloudflare_workers_route` |
 | **KV** | `cloudflare_workers_kv` |
 | | `cloudflare_workers_kv_namespace` |
+| **D1** | `cloudflare_d1_database` |
 | **Pages** | `cloudflare_pages_project` |
 | **Cache** | `cloudflare_tiered_cache` |
 | **Argo** | `cloudflare_argo_smart_routing` |
@@ -1522,9 +1647,9 @@ before retrying.
 
 **Do I still need Grit?**
 
-No. **Grit-based migration is deprecated and will be removed in a future
-release.** `tf-migrate` replaces the Grit patterns for HCL migration, and
-state upgraders handle state automatically. Do not use Grit for new migrations.
+No. **Grit-based migration has been removed.** `tf-migrate` replaces the
+Grit patterns for HCL migration, and state upgraders handle state
+automatically. Do not use Grit for new migrations.
 
 **Do I need to manually edit my state file?**
 
@@ -1633,12 +1758,12 @@ for details. If the diff is truly just cosmetic, you can safely ignore it.
 
 - [Version 5 Upgrade Guide][version 5 upgrade guide] -- Per-resource attribute
   change details and manual migration notes.
-- [Migrating Renamed Resources](migrating-renamed-resources) -- Detailed
+- [Migrating Renamed Resources](migrating-renamed-resources.md) -- Detailed
   guide for the import, state file, and two-phase swap approaches.
 - [tf-migrate] -- Source code and documentation for the HCL migration tool.
 - [Terraform moved blocks](https://developer.hashicorp.com/terraform/language/moved) --
   HashiCorp documentation on the `moved` block syntax.
 
-[version 5 upgrade guide]: version-5-upgrade
+[version 5 upgrade guide]: version-5-upgrade.md
 [tf-migrate]: https://github.com/cloudflare/tf-migrate
-[migrating renamed resources]: migrating-renamed-resources
+[migrating renamed resources]: migrating-renamed-resources.md

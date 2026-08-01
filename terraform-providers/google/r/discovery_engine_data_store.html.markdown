@@ -302,6 +302,14 @@ The following arguments are supported:
   (Optional)
   If true, the LLM based annotation is added to the image during parsing.
 
+* `enable_llm_layout_parsing` -
+  (Optional)
+  If true, the pdf layout will be refined using an LLM.
+
+* `enable_get_processed_document` -
+  (Optional)
+  If true, the processed document will be made available for the GetProcessedDocument API.
+
 * `structured_content_types` -
   (Optional)
   Contains the required structure types to extract from the document. Supported values: `shareholder-structure`.
@@ -352,6 +360,14 @@ The following arguments are supported:
 * `enable_image_annotation` -
   (Optional)
   If true, the LLM based annotation is added to the image during parsing.
+
+* `enable_llm_layout_parsing` -
+  (Optional)
+  If true, the pdf layout will be refined using an LLM.
+
+* `enable_get_processed_document` -
+  (Optional)
+  If true, the processed document will be made available for the GetProcessedDocument API.
 
 * `structured_content_types` -
   (Optional)
@@ -406,7 +422,7 @@ DataStore can be imported using any of these accepted formats:
 * `{{project}}/{{location}}/{{data_store_id}}`
 * `{{location}}/{{data_store_id}}`
 
-In Terraform v1.12.0 and later, use an [`identity` block](https://developer.hashicorp.com/terraform/language/resources/identities) to import DataStore using identity values. For example:
+In Terraform v1.12.0 and later, use an [`identity` block](https://developer.hashicorp.com/terraform/language/block/import#identity) to import DataStore using identity values. For example:
 
 ```tf
 import {

@@ -173,12 +173,10 @@ resource "google_compute_address" "static" {
   name = "wbi-test-default"
 }
 
-resource "google_service_account_iam_binding" "act_as_permission" {
+resource "google_service_account_iam_member" "act_as_permission" {
   service_account_id = "projects/my-project-name/serviceAccounts/my@service-account.com"
   role               = "roles/iam.serviceAccountUser"
-  members = [
-    "user:example@example.com",
-  ]
+  member             = "user:example@example.com"
 }
 
 resource "google_compute_reservation" "gpu_reservation" {
@@ -190,7 +188,8 @@ resource "google_compute_reservation" "gpu_reservation" {
     
     instance_properties {
       machine_type = "n1-standard-4"
-      
+      min_cpu_platform = "Intel Broadwell"
+
       guest_accelerators {
         accelerator_type  = "nvidia-tesla-t4"
         accelerator_count = 1
@@ -201,12 +200,28 @@ resource "google_compute_reservation" "gpu_reservation" {
   specific_reservation_required = true
 }
 
+resource "google_compute_resource_policy" "my_policy" {
+  name   = "wbi-policy"
+  region = "us-central1"
+  snapshot_schedule_policy {
+    schedule {
+      daily_schedule {
+        days_in_cycle = 1
+        start_time    = "04:00"
+      }
+    }
+  }
+}
+
 resource "google_workbench_instance" "instance" {
   name = "workbench-instance"
   location = "us-central1-a"
 
+  enable_deletion_protection = false
+
   gce_setup {
     machine_type = "n1-standard-4" // cant be e2 because of accelerator
+    min_cpu_platform = "Intel Broadwell"
     accelerator_configs {
       type         = "NVIDIA_TESLA_T4"
       core_count   = 1
@@ -236,6 +251,7 @@ resource "google_workbench_instance" "instance" {
       disk_type = "PD_SSD"
       disk_encryption = "CMEK"
       kms_key = "my-crypto-key"
+      resource_policies = [google_compute_resource_policy.my_policy.id]
     }
 
     network_interfaces {
@@ -281,8 +297,9 @@ resource "google_workbench_instance" "instance" {
     google_compute_network.my_network,
     google_compute_subnetwork.my_subnetwork,
     google_compute_address.static,
-    google_service_account_iam_binding.act_as_permission,
-    google_compute_reservation.gpu_reservation
+    google_service_account_iam_member.act_as_permission,
+    google_compute_reservation.gpu_reservation,
+    google_compute_resource_policy.my_policy
   ]
 }
 ```
@@ -401,6 +418,10 @@ The following arguments are supported:
   (Optional)
   Flag to enable managed end user credentials for the instance.
 
+* `enable_deletion_protection` -
+  (Optional)
+  Optional. If true, deletion protection will be enabled for this Workbench Instance.
+
 * `instance_id` -
   (Optional)
   Required. User-defined unique ID of this instance.
@@ -497,13 +518,17 @@ The following arguments are supported:
   Reservations that this instance can consume from.
   Structure is [documented below](#nested_gce_setup_reservation_affinity).
 
+* `min_cpu_platform` -
+  (Optional)
+  Optional. The minimum CPU platform to use for this instance.
+
 
 <a name="nested_gce_setup_accelerator_configs"></a>The `accelerator_configs` block supports:
 
 * `type` -
   (Optional)
   Optional. Type of this accelerator.
-  Possible values are: `NVIDIA_TESLA_P100`, `NVIDIA_TESLA_V100`, `NVIDIA_TESLA_P4`, `NVIDIA_TESLA_T4`, `NVIDIA_TESLA_A100`, `NVIDIA_A100_80GB`, `NVIDIA_L4`, `NVIDIA_H100_80GB`, `NVIDIA_H100_MEGA_80GB`, `NVIDIA_H200_141GB`, `NVIDIA_B200`, `NVIDIA_TESLA_T4_VWS`, `NVIDIA_TESLA_P100_VWS`, `NVIDIA_TESLA_P4_VWS`.
+  Possible values are: `NVIDIA_TESLA_P100`, `NVIDIA_TESLA_V100`, `NVIDIA_TESLA_P4`, `NVIDIA_TESLA_T4`, `NVIDIA_TESLA_A100`, `NVIDIA_A100_80GB`, `NVIDIA_L4`, `NVIDIA_H100_80GB`, `NVIDIA_H100_MEGA_80GB`, `NVIDIA_H200_141GB`, `NVIDIA_B200`, `NVIDIA_RTX6000`, `NVIDIA_TESLA_T4_VWS`, `NVIDIA_TESLA_P100_VWS`, `NVIDIA_TESLA_P4_VWS`.
 
 * `core_count` -
   (Optional)
@@ -618,6 +643,10 @@ The following arguments are supported:
   'Optional. The KMS key used to encrypt the disks,
   only applicable if disk_encryption is CMEK. Format: `projects/{project_id}/locations/{location}/keyRings/{key_ring_id}/cryptoKeys/{key_id}`
   Learn more about using your own encryption keys.'
+
+* `resource_policies` -
+  (Optional)
+  Optional. Resource policies applied to this disk.
 
 <a name="nested_gce_setup_network_interfaces"></a>The `network_interfaces` block supports:
 
@@ -782,7 +811,7 @@ Instance can be imported using any of these accepted formats:
 * `{{project}}/{{location}}/{{name}}`
 * `{{location}}/{{name}}`
 
-In Terraform v1.12.0 and later, use an [`identity` block](https://developer.hashicorp.com/terraform/language/resources/identities) to import Instance using identity values. For example:
+In Terraform v1.12.0 and later, use an [`identity` block](https://developer.hashicorp.com/terraform/language/block/import#identity) to import Instance using identity values. For example:
 
 ```tf
 import {

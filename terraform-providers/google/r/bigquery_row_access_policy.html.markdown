@@ -167,11 +167,14 @@ RowAccessPolicy can be imported using any of these accepted formats:
 * `{{project}}/{{dataset_id}}/{{table_id}}/{{policy_id}}`
 * `{{dataset_id}}/{{table_id}}/{{policy_id}}`
 
-In Terraform v1.12.0 and later, use an [`identity` block](https://developer.hashicorp.com/terraform/language/resources/identities) to import RowAccessPolicy using identity values. For example:
+In Terraform v1.12.0 and later, use an [`identity` block](https://developer.hashicorp.com/terraform/language/block/import#identity) to import RowAccessPolicy using identity values. For example:
 
 ```tf
 import {
   identity = {
+    datasetId = "<-required value->"
+    tableId = "<-required value->"
+    policyId = "<-required value->"
     project = "<-optional value->"
   }
   to = google_bigquery_row_access_policy.default

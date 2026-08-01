@@ -275,8 +275,9 @@ The following arguments are supported:
 
 * `ip_collection` -
   (Optional)
-  Reference to the source of external IPv4 addresses, like a PublicDelegatedPrefix(PDP) for BYOIP.
-  The PDP must support enhanced IPv4 allocations.
+  Reference to the source of external IPv4/IPv6 addresses, like a PublicDelegatedPrefix(PDP) for BYOIP.
+  If an IPv4 PDP is used, the PDP must support enhanced IPv4 allocations.
+  If an IPv6 PDP is used, the PDP must be in EXTERNAL_IPV6_FORWARDING_RULE_CREATION mode.
   Use one of the following formats to specify a PDP when reserving an external IPv4 address using BYOIP.
   Full resource URL, as in:
     * `https://www.googleapis.com/compute/v1/projects/{{projectId}}/regions/{{region}}/publicDelegatedPrefixes/{{pdp-name}}`
@@ -347,7 +348,7 @@ Address can be imported using any of these accepted formats:
 * `{{region}}/{{name}}`
 * `{{name}}`
 
-In Terraform v1.12.0 and later, use an [`identity` block](https://developer.hashicorp.com/terraform/language/resources/identities) to import Address using identity values. For example:
+In Terraform v1.12.0 and later, use an [`identity` block](https://developer.hashicorp.com/terraform/language/block/import#identity) to import Address using identity values. For example:
 
 ```tf
 import {

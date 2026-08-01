@@ -145,6 +145,10 @@ The following arguments are supported:
    expiration schedule defined by the associated backup plan is shorter than the minimum
    retention set by the backup vault.
 
+* `force_update_access_restriction` -
+  (Optional)
+  If set to true, we will force update access restriction even if some non compliant data sources are present.
+
 * `force_delete` -
   (Optional, Deprecated)
   If set, the following restrictions against deletion of the backup vault instance can be overridden:
@@ -213,6 +217,7 @@ In addition to the arguments listed above, the following computed attributes are
    ACTIVE
    DELETING
    ERROR
+   UPDATING
 
 * `backup_count` -
   Output only. The number of backups in this backup vault.
@@ -255,7 +260,7 @@ BackupVault can be imported using any of these accepted formats:
 * `{{project}}/{{location}}/{{backup_vault_id}}`
 * `{{location}}/{{backup_vault_id}}`
 
-In Terraform v1.12.0 and later, use an [`identity` block](https://developer.hashicorp.com/terraform/language/resources/identities) to import BackupVault using identity values. For example:
+In Terraform v1.12.0 and later, use an [`identity` block](https://developer.hashicorp.com/terraform/language/block/import#identity) to import BackupVault using identity values. For example:
 
 ```tf
 import {

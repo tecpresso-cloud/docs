@@ -73,7 +73,7 @@ resource "google_compute_node_template" "soletenant-tmpl" {
 resource "google_compute_node_group" "nodes" {
   provider    = google-beta
   name        = "soletenant-group"
-  zone        = "us-central1-f"
+  zone        = "us-central1-c"
   description = "example google_compute_node_group for Terraform Google Provider"
 
   initial_size          = 1
@@ -296,7 +296,7 @@ NodeGroup can be imported using any of these accepted formats:
 * `{{zone}}/{{name}}`
 * `{{name}}`
 
-In Terraform v1.12.0 and later, use an [`identity` block](https://developer.hashicorp.com/terraform/language/resources/identities) to import NodeGroup using identity values. For example:
+In Terraform v1.12.0 and later, use an [`identity` block](https://developer.hashicorp.com/terraform/language/block/import#identity) to import NodeGroup using identity values. For example:
 
 ```tf
 import {

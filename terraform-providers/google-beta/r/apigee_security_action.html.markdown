@@ -283,6 +283,7 @@ This resource provides the following
 [Timeouts](https://developer.hashicorp.com/terraform/plugin/sdkv2/resources/retries-and-customizable-timeouts) configuration options:
 
 - `create` - Default is 20 minutes.
+- `update` - Default is 20 minutes.
 - `delete` - Default is 20 minutes.
 
 ## Import
@@ -293,7 +294,7 @@ SecurityAction can be imported using any of these accepted formats:
 * `organizations/{{org_id}}/environments/{{env_id}}/securityActions/{{security_action_id}}`
 * `{{org_id}}/{{env_id}}/{{security_action_id}}`
 
-In Terraform v1.12.0 and later, use an [`identity` block](https://developer.hashicorp.com/terraform/language/resources/identities) to import SecurityAction using identity values. For example:
+In Terraform v1.12.0 and later, use an [`identity` block](https://developer.hashicorp.com/terraform/language/block/import#identity) to import SecurityAction using identity values. For example:
 
 ```tf
 import {

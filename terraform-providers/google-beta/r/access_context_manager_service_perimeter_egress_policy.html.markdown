@@ -30,9 +30,6 @@ within the ServicePerimeter to access a defined set of projects outside the
 perimeter in certain contexts (e.g. to read data from a Cloud Storage bucket
 or query against a BigQuery dataset).
 
-~> **Note:** By default, updates to this resource will remove the EgressPolicy from the
-from the perimeter and add it back in a non-atomic manner. To ensure that the new EgressPolicy
-is added before the old one is removed, add a `lifecycle` block with `create_before_destroy = true` to this resource.
 ~> **Note:** If this resource is used alongside a `google_access_context_manager_service_perimeter` resource,
 the service perimeter resource must have a `lifecycle` block with `ignore_changes = [status[0].egress_policies]` so
 they don't fight over which egress rules should be in the policy.
@@ -202,6 +199,20 @@ The following arguments are supported:
   organization that the perimeter is defined in. `*` is not allowed, the
   case of allowing all Google Cloud resources only is not supported.
 
+* `psc_endpoint` -
+  (Optional)
+  A Private Service Connect endpoint that is allowed to access data outside the perimeter.
+  The Private Service Connect endpoint may be in any organization, not just the organization that the perimeter is defined in.
+  Structure is [documented below](#nested_egress_from_sources_psc_endpoint).
+
+
+<a name="nested_egress_from_sources_psc_endpoint"></a>The `psc_endpoint` block supports:
+
+* `forwarding_rule` -
+  (Optional)
+  The full resource name of the global forwarding rule that identifies a Private Service Connect endpoint.
+  Forwarding rule format: `//compute.googleapis.com/projects/{PROJECT_ID}/global/forwardingRules/{FORWARDING_RULE_ID}`.
+
 <a name="nested_egress_to"></a>The `egress_to` block supports:
 
 * `resources` -
@@ -280,6 +291,7 @@ This resource provides the following
 [Timeouts](https://developer.hashicorp.com/terraform/plugin/sdkv2/resources/retries-and-customizable-timeouts) configuration options:
 
 - `create` - Default is 20 minutes.
+- `update` - Default is 20 minutes.
 - `delete` - Default is 20 minutes.
 
 ## Import

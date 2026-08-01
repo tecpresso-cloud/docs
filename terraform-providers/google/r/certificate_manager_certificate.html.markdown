@@ -405,6 +405,9 @@ The following arguments are supported:
   Certificate data for a SelfManaged Certificate.
   SelfManaged Certificates are uploaded by the user. Updating such
   certificates before they expire remains the user's responsibility.
+  The certificate data can be updated in place; changes to `pem_certificate`
+  and `pem_private_key` are applied via the API's PATCH method instead of
+  forcing recreation of the certificate.
   Structure is [documented below](#nested_self_managed).
 
 * `managed` -
@@ -556,7 +559,7 @@ Certificate can be imported using any of these accepted formats:
 * `{{project}}/{{location}}/{{name}}`
 * `{{location}}/{{name}}`
 
-In Terraform v1.12.0 and later, use an [`identity` block](https://developer.hashicorp.com/terraform/language/resources/identities) to import Certificate using identity values. For example:
+In Terraform v1.12.0 and later, use an [`identity` block](https://developer.hashicorp.com/terraform/language/block/import#identity) to import Certificate using identity values. For example:
 
 ```tf
 import {

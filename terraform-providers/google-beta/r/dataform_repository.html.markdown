@@ -190,6 +190,10 @@ Possible values: `DELETE`, `FORCE`, 'PREVENT', 'ABANDON'. Defaults to `DELETE`.
   Authentication fields for remote uris using SSH protocol.
   Structure is [documented below](#nested_git_remote_settings_ssh_authentication_config).
 
+* `git_repository_link` -
+  (Optional)
+  The name of the Developer Connect GitRepositoryLink to use for machine credentials. Must be in the format projects/*/locations/*/connections/*/gitRepositoryLinks/*.
+
 * `token_status` -
   (Output)
   Indicates the status of the Git access token. https://cloud.google.com/dataform/reference/rest/v1beta1/projects.locations.repositories#TokenStatus
@@ -252,7 +256,7 @@ Repository can be imported using any of these accepted formats:
 * `{{region}}/{{name}}`
 * `{{name}}`
 
-In Terraform v1.12.0 and later, use an [`identity` block](https://developer.hashicorp.com/terraform/language/resources/identities) to import Repository using identity values. For example:
+In Terraform v1.12.0 and later, use an [`identity` block](https://developer.hashicorp.com/terraform/language/block/import#identity) to import Repository using identity values. For example:
 
 ```tf
 import {

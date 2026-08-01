@@ -1,10 +1,10 @@
 # Google Terraform Provider - Synced Docs
 
 **Provider:** `hashicorp/terraform-provider-google`
-**Version:** v7.34.0
-**Synced:** 2026-05-28 00:02 UTC
-**Source:** https://github.com/hashicorp/terraform-provider-google/releases/tag/v7.34.0
-**Doc files:** 1583
+**Version:** v7.42.0
+**Synced:** 2026-07-28 23:15 UTC
+**Source:** https://github.com/hashicorp/terraform-provider-google/releases/tag/v7.42.0
+**Doc files:** 1740
 
 ## Directory Structure
 

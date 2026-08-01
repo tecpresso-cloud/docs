@@ -115,6 +115,39 @@ resource "google_bigquery_routine" "sproc" {
 }
 ```
 <div class = "oics-button" style="float: right; margin: 0 0 -15px">
+  <a href="https://console.cloud.google.com/cloudshell/open?cloudshell_git_repo=https%3A%2F%2Fgithub.com%2Fterraform-google-modules%2Fdocs-examples.git&cloudshell_image=gcr.io%2Fcloudshell-images%2Fcloudshell%3Alatest&cloudshell_print=.%2Fmotd&cloudshell_tutorial=.%2Ftutorial.md&cloudshell_working_dir=bigquery_routine_table_type&open_in_editor=main.tf" target="_blank">
+    <img alt="Open in Cloud Shell" src="//gstatic.com/cloudssh/images/open-btn.svg" style="max-height: 44px; margin: 32px auto; max-width: 100%;">
+  </a>
+</div>
+## Example Usage - Bigquery Routine Table Type
+
+
+```hcl
+resource "google_bigquery_dataset" "test" {
+  dataset_id = "dataset_id"
+}
+
+resource "google_bigquery_routine" "sproc" {
+  dataset_id      = google_bigquery_dataset.test.dataset_id
+  routine_id      = "routine_id"
+  routine_type    = "TABLE_VALUED_FUNCTION"
+  language        = "SQL"
+  description     = "Gets every row from a table."
+  definition_body = "SELECT * FROM t1"
+
+  arguments {
+    name          = "t1"
+    argument_kind = "FIXED_TABLE"
+    table_type {
+      columns {
+        name = "year"
+        type = jsonencode({ "typeKind" : "INT64" })
+      }
+    }
+  }
+}
+```
+<div class = "oics-button" style="float: right; margin: 0 0 -15px">
   <a href="https://console.cloud.google.com/cloudshell/open?cloudshell_git_repo=https%3A%2F%2Fgithub.com%2Fterraform-google-modules%2Fdocs-examples.git&cloudshell_image=gcr.io%2Fcloudshell-images%2Fcloudshell%3Alatest&cloudshell_print=.%2Fmotd&cloudshell_tutorial=.%2Ftutorial.md&cloudshell_working_dir=bigquery_routine_pyspark&open_in_editor=main.tf" target="_blank">
     <img alt="Open in Cloud Shell" src="//gstatic.com/cloudssh/images/open-btn.svg" style="max-height: 44px; margin: 32px auto; max-width: 100%;">
   </a>
@@ -338,6 +371,7 @@ resource "google_bigquery_routine" "python_function" {
     container_memory = "512Mi"
     container_cpu = 0.5
     runtime_version = "python-3.11"
+    container_request_concurrency = "1"
   }
 
 }
@@ -462,7 +496,7 @@ The following arguments are supported:
   (Optional)
   Defaults to FIXED_TYPE.
   Default value is `FIXED_TYPE`.
-  Possible values are: `FIXED_TYPE`, `ANY_TYPE`.
+  Possible values are: `FIXED_TYPE`, `ANY_TYPE`, `FIXED_TABLE`.
 
 * `mode` -
   (Optional)
@@ -472,6 +506,36 @@ The following arguments are supported:
 * `data_type` -
   (Optional)
   A JSON schema for the data type. Required unless argumentKind = ANY_TYPE.
+  ~>**NOTE**: Because this field expects a JSON string, any changes to the string
+  will create a diff, even if the JSON itself hasn't changed. If the API returns
+  a different value for the same schema, e.g. it switched the order of values
+  or replaced STRUCT field type with RECORD field type, we currently cannot
+  suppress the recurring diff this causes. As a workaround, we recommend using
+  the schema as returned by the API.
+
+* `table_type` -
+  (Optional)
+  If argumentKind is FIXED_TABLE, a schema for the table type.
+  Structure is [documented below](#nested_arguments_table_type).
+
+
+<a name="nested_arguments_table_type"></a>The `table_type` block supports:
+
+* `columns` -
+  (Optional)
+  The columns in the table type.
+  Structure is [documented below](#nested_arguments_table_type_columns).
+
+
+<a name="nested_arguments_table_type_columns"></a>The `columns` block supports:
+
+* `name` -
+  (Optional)
+  The name of the column.
+
+* `type` -
+  (Optional)
+  A JSON schema for the data type of the column. Required unless argumentKind = ANY_TYPE.
   ~>**NOTE**: Because this field expects a JSON string, any changes to the string
   will create a diff, even if the JSON itself hasn't changed. If the API returns
   a different value for the same schema, e.g. it switched the order of values
@@ -598,6 +662,12 @@ The following arguments are supported:
   (Optional)
   Language runtime version. Example: `python-3.11`.
 
+* `container_request_concurrency` -
+  (Optional)
+  Maximum number of concurrent requests per Python UDF container instance. For more
+  information, see [Configure container limits for Python
+  UDFs](https://cloud.google.com/bigquery/docs/user-defined-functions-python#configure-container-limits)
+
 ## Attributes Reference
 
 In addition to the arguments listed above, the following computed attributes are exported:
@@ -631,11 +701,13 @@ Routine can be imported using any of these accepted formats:
 * `{{project}}/{{dataset_id}}/{{routine_id}}`
 * `{{dataset_id}}/{{routine_id}}`
 
-In Terraform v1.12.0 and later, use an [`identity` block](https://developer.hashicorp.com/terraform/language/resources/identities) to import Routine using identity values. For example:
+In Terraform v1.12.0 and later, use an [`identity` block](https://developer.hashicorp.com/terraform/language/block/import#identity) to import Routine using identity values. For example:
 
 ```tf
 import {
   identity = {
+    datasetId = "<-required value->"
+    routineId = "<-required value->"
     project = "<-optional value->"
   }
   to = google_bigquery_routine.default

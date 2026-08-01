@@ -71,10 +71,13 @@ The following arguments are supported:
 
 
 * `admission_policy` -
-  (Optional)
+  (Optional, Deprecated)
   The cache admission policy dictates whether a block should be inserted upon a cache miss.
+  Note: "admit-on-second-miss" is deprecated and will fallback to "admit-on-first-miss".
   Default value is `admit-on-first-miss`.
   Possible values are: `admit-on-first-miss`, `admit-on-second-miss`.
+
+  ~> **Warning:** `admit-on-second-miss` is deprecated and will be removed in a future major release. The backend will ignore this attribute and treat it as `admit-on-first-miss`.
 
 * `ttl` -
   (Optional)
@@ -131,7 +134,7 @@ AnywhereCache can be imported using any of these accepted formats:
 * `b/{{bucket}}/anywhereCaches/{{anywhere_cache_id}}`
 * `{{bucket}}/{{anywhere_cache_id}}`
 
-In Terraform v1.12.0 and later, use an [`identity` block](https://developer.hashicorp.com/terraform/language/resources/identities) to import AnywhereCache using identity values. For example:
+In Terraform v1.12.0 and later, use an [`identity` block](https://developer.hashicorp.com/terraform/language/block/import#identity) to import AnywhereCache using identity values. For example:
 
 ```tf
 import {

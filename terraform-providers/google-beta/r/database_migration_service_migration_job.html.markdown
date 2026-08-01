@@ -530,6 +530,15 @@ The following arguments are supported:
   **Note**: This field is non-authoritative, and will only manage the labels present in your configuration.
   Please refer to the field `effective_labels` for all of the labels present on the resource.
 
+* `stop_on_warnings` -
+  (Optional)
+  If set to true, will stop the Terraform apply if there are validation warnings.
+
+* `desired_state` -
+  (Optional)
+  The desired state of the migration job. If set to `RUNNING`, the migration job will be started.
+  Possible values are: `NOT_STARTED`, `RUNNING`.
+
 * `dump_flags` -
   (Optional)
   The initial dump flags.
@@ -775,7 +784,7 @@ MigrationJob can be imported using any of these accepted formats:
 * `{{project}}/{{location}}/{{migration_job_id}}`
 * `{{location}}/{{migration_job_id}}`
 
-In Terraform v1.12.0 and later, use an [`identity` block](https://developer.hashicorp.com/terraform/language/resources/identities) to import MigrationJob using identity values. For example:
+In Terraform v1.12.0 and later, use an [`identity` block](https://developer.hashicorp.com/terraform/language/block/import#identity) to import MigrationJob using identity values. For example:
 
 ```tf
 import {

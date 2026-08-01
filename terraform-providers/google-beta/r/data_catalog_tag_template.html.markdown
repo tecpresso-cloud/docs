@@ -161,7 +161,7 @@ The following arguments are supported:
   (Optional)
   Represents primitive types - string, bool etc.
    Exactly one of `primitive_type` or `enum_type` must be set
-  Possible values are: `DOUBLE`, `STRING`, `BOOL`, `TIMESTAMP`.
+  Possible values are: `DOUBLE`, `STRING`, `BOOL`, `TIMESTAMP`, `RICHTEXT`.
 
 * `enum_type` -
   (Optional)
@@ -214,7 +214,7 @@ TagTemplate can be imported using any of these accepted formats:
 
 * `{{name}}`
 
-In Terraform v1.12.0 and later, use an [`identity` block](https://developer.hashicorp.com/terraform/language/resources/identities) to import TagTemplate using identity values. For example:
+In Terraform v1.12.0 and later, use an [`identity` block](https://developer.hashicorp.com/terraform/language/block/import#identity) to import TagTemplate using identity values. For example:
 
 ```tf
 import {

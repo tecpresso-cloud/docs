@@ -640,6 +640,11 @@ The following arguments are supported:
   server.
   Structure is [documented below](#nested_mcp_toolset).
 
+* `tool_fake_config` -
+  (Optional)
+  Configuration for tools behavior in fake mode.
+  Structure is [documented below](#nested_tool_fake_config).
+
 * `project` - (Optional) The ID of the project in which the resource belongs.
     If it is not provided, the provider project is used.
 
@@ -1009,6 +1014,24 @@ The following arguments are supported:
   The name of the allowed custom CA certificates. This
   can be used to disambiguate the custom CA certificates.
 
+<a name="nested_tool_fake_config"></a>The `tool_fake_config` block supports:
+
+* `enable_fake_mode` -
+  (Optional)
+  Whether the tool is using fake mode.
+
+* `code_block` -
+  (Optional)
+  Code block which will be executed instead of a real tool call.
+  Structure is [documented below](#nested_tool_fake_config_code_block).
+
+
+<a name="nested_tool_fake_config_code_block"></a>The `code_block` block supports:
+
+* `python_code` -
+  (Required)
+  Python code which will be invoked in tool fake mode.
+
 ## Attributes Reference
 
 In addition to the arguments listed above, the following computed attributes are exported:
@@ -1050,7 +1073,7 @@ Toolset can be imported using any of these accepted formats:
 * `{{project}}/{{location}}/{{app}}/{{toolset_id}}`
 * `{{location}}/{{app}}/{{toolset_id}}`
 
-In Terraform v1.12.0 and later, use an [`identity` block](https://developer.hashicorp.com/terraform/language/resources/identities) to import Toolset using identity values. For example:
+In Terraform v1.12.0 and later, use an [`identity` block](https://developer.hashicorp.com/terraform/language/block/import#identity) to import Toolset using identity values. For example:
 
 ```tf
 import {

@@ -167,10 +167,11 @@ The following arguments are supported:
   with the type of `GCE_VM_IP`
 
 * `ip_address` -
-  (Required)
+  (Optional)
   IPv4 address of network endpoint. The IP address must belong
   to a VM in GCE (either the primary IP or as part of an aliased IP
   range).
+  **Note** `ip_address` is required unless the Network Endpoint Group is created with the type of `GCE_VM_IP_DEDICATED_BACKEND`
 
 ## Attributes Reference
 
@@ -198,7 +199,7 @@ NetworkEndpoints can be imported using any of these accepted formats:
 * `{{zone}}/{{network_endpoint_group}}`
 * `{{network_endpoint_group}}`
 
-In Terraform v1.12.0 and later, use an [`identity` block](https://developer.hashicorp.com/terraform/language/resources/identities) to import NetworkEndpoints using identity values. For example:
+In Terraform v1.12.0 and later, use an [`identity` block](https://developer.hashicorp.com/terraform/language/block/import#identity) to import NetworkEndpoints using identity values. For example:
 
 ```tf
 import {

@@ -41,6 +41,10 @@ data "cloudflare_workers_scripts" "example_workers_scripts" {
 
 Read-Only:
 
+- `cache_options` (Attributes) Global CacheW configuration for the Worker. When caching is on,
+the platform provisions a `cloudflare.app` zone for the Worker.
+A `type: worker` entry in the `exports` map can override this
+value for a single entrypoint. (see [below for nested schema](#nestedatt--result--cache_options))
 - `compatibility_date` (String) Date indicating targeted support in the Workers runtime. Backwards incompatible fixes to the runtime following this date will not affect this Worker.
 - `compatibility_flags` (Set of String) Flags that enable or disable certain features in the Workers runtime. Used to enable upcoming features or opt in or out of specific changes not included in a `compatibility_date`.
 - `created_on` (String) When the script was created.
@@ -64,6 +68,18 @@ Read-Only:
 - `tail_consumers` (Attributes Set) List of Workers that will consume logs from the attached Worker. (see [below for nested schema](#nestedatt--result--tail_consumers))
 - `usage_model` (String) Usage model for the Worker invocations.
 Available values: "standard", "bundled", "unbound".
+
+<a id="nestedatt--result--cache_options"></a>
+### Nested Schema for `result.cache_options`
+
+Read-Only:
+
+- `cross_version_cache` (Boolean) Whether cached responses are shared across Worker version
+uploads. This is independent of `enabled`. It can stay true
+while caching is off, so the preference survives turning
+caching off and back on.
+- `enabled` (Boolean) Whether caching is enabled for this Worker.
+
 
 <a id="nestedatt--result--named_handlers"></a>
 ### Nested Schema for `result.named_handlers`
@@ -105,6 +121,8 @@ Read-Only:
 - `enabled` (Boolean) Whether traces are enabled for the Worker.
 - `head_sampling_rate` (Number) The sampling rate for traces. From 0 to 1 (1 = 100%, 0.1 = 10%). Default is 1.
 - `persist` (Boolean) Whether trace persistence is enabled for the Worker.
+- `propagation_policy` (String) Controls how inbound trace context (traceparent/tracestate) headers on incoming requests are handled. "authenticated" (default) honors inbound trace context only when accompanied by a valid trace auth token. "accept" unconditionally accepts inbound trace context. Requires the trace propagation feature to be enabled.
+Available values: "authenticated", "accept".
 
 
 

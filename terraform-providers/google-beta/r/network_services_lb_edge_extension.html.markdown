@@ -99,6 +99,7 @@ resource "google_network_services_lb_edge_extension" "default" {
       fail_open = false
       supported_events = ["REQUEST_HEADERS"]
       forward_headers  = ["custom-header"]
+      forward_attributes = ["request.host", "request.path"]
     }
   }
 
@@ -249,6 +250,15 @@ The following arguments are supported:
   List of the HTTP headers to forward to the extension (from the client or backend).
   If omitted, all headers are sent. Each element is a string indicating the header name.
 
+* `forward_attributes` -
+  (Optional)
+  List of the Envoy attributes to forward to the extension server. The attributes
+  provided here are included as part of the `ProcessingRequest.attributes` field
+  (of type `map`), where the keys are the attribute names. Refer to the
+  [documentation](https://docs.cloud.google.com/service-extensions/docs/attributes)
+  for the names of attributes that can be forwarded. If omitted, no attributes
+  are sent. Each element is a string indicating the attribute name.
+
 ## Attributes Reference
 
 In addition to the arguments listed above, the following computed attributes are exported:
@@ -281,7 +291,7 @@ LbEdgeExtension can be imported using any of these accepted formats:
 * `{{project}}/{{location}}/{{name}}`
 * `{{location}}/{{name}}`
 
-In Terraform v1.12.0 and later, use an [`identity` block](https://developer.hashicorp.com/terraform/language/resources/identities) to import LbEdgeExtension using identity values. For example:
+In Terraform v1.12.0 and later, use an [`identity` block](https://developer.hashicorp.com/terraform/language/block/import#identity) to import LbEdgeExtension using identity values. For example:
 
 ```tf
 import {

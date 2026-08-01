@@ -25,7 +25,6 @@ description: |-
 `ProjectAutokeyConfig` is a singleton resource used to configure the auto-provisioning
 flow of CryptoKeys for CMEK.
 
-
 ~> **Note:** ProjectAutokeyConfigs cannot be deleted from Google Cloud Platform.
 Destroying a Terraform-managed ProjectAutokeyConfigs will remove it from state but
 *will not delete the resource from the project.*
@@ -152,7 +151,7 @@ ProjectAutokeyConfig can be imported using any of these accepted formats:
 * `projects/{{project}}/autokeyConfig`
 * `{{project}}`
 
-In Terraform v1.12.0 and later, use an [`identity` block](https://developer.hashicorp.com/terraform/language/resources/identities) to import ProjectAutokeyConfig using identity values. For example:
+In Terraform v1.12.0 and later, use an [`identity` block](https://developer.hashicorp.com/terraform/language/block/import#identity) to import ProjectAutokeyConfig using identity values. For example:
 
 ```tf
 import {

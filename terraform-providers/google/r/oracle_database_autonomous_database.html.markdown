@@ -78,8 +78,8 @@ resource "google_oracle_database_autonomous_database" "myADB"{
   display_name = "autonomousDatabase displayname"
   database = "mydatabase"
   admin_password = "123Abpassword"
-  network = data.google_compute_network.default.id
-  cidr = "10.5.0.0/24"
+  odb_network = "projects/my-project/locations/us-east4/odbNetworks/my-odbnetwork"
+  odb_subnet = "projects/my-project/locations/us-east4/odbNetworks/my-odbnetwork/odbSubnets/my-odbsubnet"
   labels = {
     "label-one" = "value-one"
   }
@@ -990,7 +990,7 @@ AutonomousDatabase can be imported using any of these accepted formats:
 * `{{project}}/{{location}}/{{autonomous_database_id}}`
 * `{{location}}/{{autonomous_database_id}}`
 
-In Terraform v1.12.0 and later, use an [`identity` block](https://developer.hashicorp.com/terraform/language/resources/identities) to import AutonomousDatabase using identity values. For example:
+In Terraform v1.12.0 and later, use an [`identity` block](https://developer.hashicorp.com/terraform/language/block/import#identity) to import AutonomousDatabase using identity values. For example:
 
 ```tf
 import {

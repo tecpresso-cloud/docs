@@ -59,7 +59,7 @@ Available values: "asc", "desc".
 - `hostname` (Attributes) (see [below for nested schema](#nestedatt--filter--hostname))
 - `hostname_status` (String) Filter by the hostname's activation status.
 Available values: "active", "pending", "active_redeploying", "moved", "pending_deletion", "deleted", "pending_blocked", "pending_migration", "pending_provisioned", "test_pending", "test_active", "test_active_apex", "test_blocked", "test_failed", "provisioned", "blocked".
-- `id` (String) Hostname ID to match against. This ID was generated and returned during the initial custom_hostname creation. This parameter cannot be used with the 'hostname' parameter.
+- `id` (String) Hostname ID to match against. This ID was generated and returned during the initial custom_hostname creation. This parameter cannot be used with the 'hostname', 'hostname.exact', 'hostname.contain', or 'hostname.startsWith' parameters.
 - `order` (String) Field to order hostnames by.
 Available values: "ssl", "ssl_status".
 - `ssl` (Number) Whether to filter hostnames based on if they have SSL enabled.
@@ -73,7 +73,9 @@ Available values: "initializing", "pending_validation", "deleted", "pending_issu
 
 Optional:
 
-- `contain` (String) Filters hostnames by a substring match on the hostname value. This parameter cannot be used with the 'id' parameter.
+- `contain` (String) Filters hostnames by a substring match on the hostname value. This parameter cannot be used with the 'id', 'hostname', 'hostname.exact', or 'hostname.startsWith' parameters.
+- `exact` (String) Fully qualified domain name to match against. This parameter cannot be used with the 'id', 'hostname', 'hostname.contain', or 'hostname.startsWith' parameters.
+- `starts_with` (String) Filters hostnames by a prefix match on the hostname value. This parameter cannot be used with the 'id', 'hostname', 'hostname.exact', or 'hostname.contain' parameters.
 
 
 
@@ -104,7 +106,7 @@ Read-Only:
 
 - `bundle_method` (String) A ubiquitous bundle has the highest probability of being verified everywhere, even by clients using outdated or unusual trust stores. An optimal bundle uses the shortest chain and newest intermediates. And the force bundle verifies the chain, but does not otherwise modify it.
 Available values: "ubiquitous", "optimal", "force".
-- `certificate_authority` (String) The Certificate Authority that will issue the certificate
+- `certificate_authority` (String) The Certificate Authority that will issue the certificate.
 Available values: "digicert", "google", "lets_encrypt", "ssl_com".
 - `custom_certificate` (String) If a custom uploaded certificate is used.
 - `custom_csr_id` (String) The identifier for the Custom CSR that was used.

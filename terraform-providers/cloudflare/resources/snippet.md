@@ -53,6 +53,7 @@ resource "cloudflare_snippet" "example_snippet" {
 ### Read-Only
 
 - `created_on` (String) Indicates when the snippet was created.
+- `id` (String) Identify the snippet.
 - `modified_on` (String) Indicates when the snippet was last modified.
 
 <a id="nestedatt--files"></a>
@@ -73,5 +74,10 @@ Required:
 
 ## Import
 
+Import is supported using the following syntax:
 
-~> This resource does not currently support `terraform import`.
+```shell
+$ terraform import cloudflare_snippet.example '<zone_id>/<snippet_name>'
+```
+
+

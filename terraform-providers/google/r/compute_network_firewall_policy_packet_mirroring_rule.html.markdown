@@ -57,7 +57,7 @@ resource "google_compute_network_firewall_policy_packet_mirroring_rule" "primary
   description             = "This is a simple packet mirroring rule description"
   direction               = "INGRESS"
   disabled                = false
-  firewall_policy         = google_compute_network_firewall_policy.basic_network_firewall_policy.name
+  firewall_policy         = google_compute_network_firewall_policy.basic_network_firewall_policy.id
   priority                = 1000
   rule_name               = "test-rule"
 
@@ -273,7 +273,7 @@ NetworkFirewallPolicyPacketMirroringRule can be imported using any of these acce
 * `{{project}}/{{firewall_policy}}/{{priority}}`
 * `{{firewall_policy}}/{{priority}}`
 
-In Terraform v1.12.0 and later, use an [`identity` block](https://developer.hashicorp.com/terraform/language/resources/identities) to import NetworkFirewallPolicyPacketMirroringRule using identity values. For example:
+In Terraform v1.12.0 and later, use an [`identity` block](https://developer.hashicorp.com/terraform/language/block/import#identity) to import NetworkFirewallPolicyPacketMirroringRule using identity values. For example:
 
 ```tf
 import {

@@ -45,6 +45,23 @@ resource "google_securityposture_posture" "posture1"{
   state       = "ACTIVE"
   description = "a new posture"
   policy_sets {
+    policy_set_id = "list_constraint_policy_set"
+    description   = "set of org policies with a list constraint"
+    policies {
+      policy_id = "resource_locations_policy"
+      constraint {
+        org_policy_constraint {
+          canned_constraint_id = "gcp.resourceLocations"
+          policy_rules {
+            values {
+              allowed_values = ["in:us-locations"]
+            }
+          }
+        }
+      }
+    }
+  }
+  policy_sets {
     policy_set_id = "org_policy_set"
     description   = "set of org policies"
     policies {
@@ -130,6 +147,7 @@ resource "google_securityposture_posture" "posture1"{
       }
     }
   }
+
 }
 ```
 
@@ -589,7 +607,7 @@ Posture can be imported using any of these accepted formats:
 
 * `{{parent}}/locations/{{location}}/postures/{{posture_id}}`
 
-In Terraform v1.12.0 and later, use an [`identity` block](https://developer.hashicorp.com/terraform/language/resources/identities) to import Posture using identity values. For example:
+In Terraform v1.12.0 and later, use an [`identity` block](https://developer.hashicorp.com/terraform/language/block/import#identity) to import Posture using identity values. For example:
 
 ```tf
 import {

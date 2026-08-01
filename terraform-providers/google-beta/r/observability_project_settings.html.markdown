@@ -168,8 +168,8 @@ In addition to the arguments listed above, the following computed attributes are
 This resource provides the following
 [Timeouts](https://developer.hashicorp.com/terraform/plugin/sdkv2/resources/retries-and-customizable-timeouts) configuration options:
 
-- `create` - Default is 20 minutes.
-- `update` - Default is 20 minutes.
+- `create` - Default is 10 minutes.
+- `update` - Default is 10 minutes.
 - `delete` - Default is 20 minutes.
 
 ## Import
@@ -181,7 +181,7 @@ ProjectSettings can be imported using any of these accepted formats:
 * `{{project}}/{{location}}`
 * `{{location}}`
 
-In Terraform v1.12.0 and later, use an [`identity` block](https://developer.hashicorp.com/terraform/language/resources/identities) to import ProjectSettings using identity values. For example:
+In Terraform v1.12.0 and later, use an [`identity` block](https://developer.hashicorp.com/terraform/language/block/import#identity) to import ProjectSettings using identity values. For example:
 
 ```tf
 import {

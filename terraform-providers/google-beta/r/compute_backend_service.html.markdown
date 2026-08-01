@@ -1746,6 +1746,29 @@ The following arguments are supported:
   For example: serverInstance, serverGkeDetails.cluster, serverGkeDetails.pod.podNamespace
   For example: orca_load_report, tls.protocol
 
+* `request_headers` -
+  (Optional)
+  This field can only be specified if logging is enabled for this backend service and if the BackendService protocol is one of HTTP, HTTPS, HTTP2 and GRPC. Contains a list of request headers to be logged.
+  Structure is [documented below](#nested_log_config_request_headers).
+
+* `response_headers` -
+  (Optional)
+  This field can only be specified if logging is enabled for this backend service and if the BackendService protocol is one of HTTP, HTTPS, HTTP2 and GRPC. Contains a list of response headers to be logged.
+  Structure is [documented below](#nested_log_config_response_headers).
+
+
+<a name="nested_log_config_request_headers"></a>The `request_headers` block supports:
+
+* `header_name` -
+  (Required)
+  The header name to match on for logging.
+
+<a name="nested_log_config_response_headers"></a>The `response_headers` block supports:
+
+* `header_name` -
+  (Required)
+  The header name to match on for logging.
+
 <a name="nested_tls_settings"></a>The `tls_settings` block supports:
 
 * `sni` -
@@ -1875,7 +1898,7 @@ BackendService can be imported using any of these accepted formats:
 * `{{project}}/{{name}}`
 * `{{name}}`
 
-In Terraform v1.12.0 and later, use an [`identity` block](https://developer.hashicorp.com/terraform/language/resources/identities) to import BackendService using identity values. For example:
+In Terraform v1.12.0 and later, use an [`identity` block](https://developer.hashicorp.com/terraform/language/block/import#identity) to import BackendService using identity values. For example:
 
 ```tf
 import {

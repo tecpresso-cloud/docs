@@ -23,7 +23,6 @@ description: |-
 
 A `CryptoKey` represents a logical key that can be used for cryptographic operations.
 
-
 ~> **Note:** CryptoKeys cannot be deleted from Google Cloud Platform.
 Destroying a Terraform-managed CryptoKey will remove it from state
 and delete all CryptoKeyVersions, rendering the key unusable, but *will
@@ -230,7 +229,7 @@ CryptoKey can be imported using any of these accepted formats:
 * `{{key_ring}}/cryptoKeys/{{name}}`
 * `{{key_ring}}/{{name}}`
 
-In Terraform v1.12.0 and later, use an [`identity` block](https://developer.hashicorp.com/terraform/language/resources/identities) to import CryptoKey using identity values. For example:
+In Terraform v1.12.0 and later, use an [`identity` block](https://developer.hashicorp.com/terraform/language/block/import#identity) to import CryptoKey using identity values. For example:
 
 ```tf
 import {

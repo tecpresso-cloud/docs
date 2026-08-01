@@ -213,13 +213,6 @@ resource "google_datastream_connection_profile" "default" {
 		bucket    = "my-bucket"
 		root_path = "/path"
 	}
-
-	forward_ssh_connectivity {
-		hostname = "google.com"
-		username = "my-user"
-		port     = 8022
-		password = "swordfish"
-	}
 	labels = {
 		key = "value"
 	}
@@ -519,9 +512,13 @@ resource "google_datastream_connection_profile" "default" {
         replica_set = "myReplicaSet"
         username    = "mongoUser"
         password    = "mongoPassword"
-        database    = "myDatabase"
 
-        standard_connection_format = {}
+        standard_connection_format {}
+
+        additional_options = {
+          readPreference     = "secondary"
+          readPreferenceTags = "nodeType:ANALYTICS"
+        }
     }
 }
 ```
@@ -926,6 +923,12 @@ The following arguments are supported:
   SSL configuration for the MongoDB connection.
   Structure is [documented below](#nested_mongodb_profile_ssl_config).
 
+* `additional_options` -
+  (Optional)
+  A map of additional options for the MongoDB connection.
+  Keys are case-sensitive and should match the official
+  MongoDB connection string options: https://www.mongodb.com/docs/manual/reference/connection-string-options/
+
 * `srv_connection_format` -
   (Optional)
   Srv connection format. Mutually exclusive with
@@ -1061,7 +1064,7 @@ ConnectionProfile can be imported using any of these accepted formats:
 * `{{project}}/{{location}}/{{connection_profile_id}}`
 * `{{location}}/{{connection_profile_id}}`
 
-In Terraform v1.12.0 and later, use an [`identity` block](https://developer.hashicorp.com/terraform/language/resources/identities) to import ConnectionProfile using identity values. For example:
+In Terraform v1.12.0 and later, use an [`identity` block](https://developer.hashicorp.com/terraform/language/block/import#identity) to import ConnectionProfile using identity values. For example:
 
 ```tf
 import {

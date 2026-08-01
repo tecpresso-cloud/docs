@@ -23,7 +23,6 @@ description: |-
 
 A Certificate corresponds to a signed X.509 certificate issued by a Certificate.
 
-
 ~> **Note:** The Certificate Authority that is referenced by this resource **must** be
 `tier = "ENTERPRISE"`
 
@@ -1400,7 +1399,7 @@ Certificate can be imported using any of these accepted formats:
 * `{{project}}/{{location}}/{{pool}}/{{name}}`
 * `{{location}}/{{pool}}/{{name}}`
 
-In Terraform v1.12.0 and later, use an [`identity` block](https://developer.hashicorp.com/terraform/language/resources/identities) to import Certificate using identity values. For example:
+In Terraform v1.12.0 and later, use an [`identity` block](https://developer.hashicorp.com/terraform/language/block/import#identity) to import Certificate using identity values. For example:
 
 ```tf
 import {

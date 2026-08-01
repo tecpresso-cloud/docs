@@ -223,6 +223,8 @@ resource "google_vmwareengine_datastore" "test_fs_datastore" {
   }
 }
 
+# Mount NFS datastore on vSphere cluster
+# This code block is required to mount the datastore on ESXi hosts
 resource "google_vmwareengine_cluster" "vmw-ext-cluster" {
   name     = "ext-cluster"
   parent   = google_vmwareengine_private_cloud.cluster-pc.id
@@ -354,6 +356,8 @@ resource "google_vmwareengine_datastore" "test_fs_datastore" {
   }
 }
 
+# Mount NFS datastore on vSphere cluster
+# This code block is required to mount the datastore on ESXi hosts
 resource "google_vmwareengine_cluster" "vmw-ext-cluster" {
   name     = "ext-cluster"
   parent   = google_vmwareengine_private_cloud.cluster-pc.id
@@ -651,7 +655,7 @@ Cluster can be imported using any of these accepted formats:
 
 * `{{parent}}/clusters/{{name}}`
 
-In Terraform v1.12.0 and later, use an [`identity` block](https://developer.hashicorp.com/terraform/language/resources/identities) to import Cluster using identity values. For example:
+In Terraform v1.12.0 and later, use an [`identity` block](https://developer.hashicorp.com/terraform/language/block/import#identity) to import Cluster using identity values. For example:
 
 ```tf
 import {

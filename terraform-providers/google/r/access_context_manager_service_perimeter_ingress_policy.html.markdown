@@ -31,9 +31,6 @@ For access from private networks, using the project of the hosting network is re
 Individual ingress policies can be limited by restricting which services and/
 or actions they match using the ingressTo field.
 
-~> **Note:** By default, updates to this resource will remove the IngressPolicy from the
-from the perimeter and add it back in a non-atomic manner. To ensure that the new IngressPolicy
-is added before the old one is removed, add a `lifecycle` block with `create_before_destroy = true` to this resource.
 ~> **Note:** If this resource is used alongside a `google_access_context_manager_service_perimeter` resource,
 the service perimeter resource must have a `lifecycle` block with `ignore_changes = [status[0].ingress_policies]` so
 they don't fight over which ingress rules should be in the policy.
@@ -215,6 +212,20 @@ The following arguments are supported:
   organization that the perimeter is defined in. `*` is not allowed, the case
   of allowing all Google Cloud resources only is not supported.
 
+* `psc_endpoint` -
+  (Optional)
+  A Private Service Connect endpoint that is allowed to access the perimeter.
+  The Private Service Connect endpoint may be in any organization, not just the organization that the perimeter is defined in.
+  Structure is [documented below](#nested_ingress_from_sources_psc_endpoint).
+
+
+<a name="nested_ingress_from_sources_psc_endpoint"></a>The `psc_endpoint` block supports:
+
+* `forwarding_rule` -
+  (Optional)
+  The full resource name of the global forwarding rule that identifies a Private Service Connect endpoint.
+  Forwarding rule format: `//compute.googleapis.com/projects/{PROJECT_ID}/global/forwardingRules/{FORWARDING_RULE_ID}`.
+
 <a name="nested_ingress_to"></a>The `ingress_to` block supports:
 
 * `resources` -
@@ -290,6 +301,7 @@ This resource provides the following
 [Timeouts](https://developer.hashicorp.com/terraform/plugin/sdkv2/resources/retries-and-customizable-timeouts) configuration options:
 
 - `create` - Default is 20 minutes.
+- `update` - Default is 20 minutes.
 - `delete` - Default is 20 minutes.
 
 ## Import

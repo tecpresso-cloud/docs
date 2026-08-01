@@ -103,7 +103,6 @@ The following arguments are supported:
   * contain only lowercase alphanumeric characters or `-`
   * start with an alphanumeric character
   * end with an alphanumeric character
-  
   The prefix `gcp-` will be reserved for future uses.
 
 * `workload_identity_pool_managed_identity_id` -
@@ -113,7 +112,6 @@ The following arguments are supported:
   * contain only lowercase alphanumeric characters or `-`
   * start with an alphanumeric character
   * end with an alphanumeric character
-  
   The prefix `gcp-` will be reserved for future uses.
 
 
@@ -188,7 +186,7 @@ WorkloadIdentityPoolManagedIdentity can be imported using any of these accepted 
 * `{{project}}/{{workload_identity_pool_id}}/{{workload_identity_pool_namespace_id}}/{{workload_identity_pool_managed_identity_id}}`
 * `{{workload_identity_pool_id}}/{{workload_identity_pool_namespace_id}}/{{workload_identity_pool_managed_identity_id}}`
 
-In Terraform v1.12.0 and later, use an [`identity` block](https://developer.hashicorp.com/terraform/language/resources/identities) to import WorkloadIdentityPoolManagedIdentity using identity values. For example:
+In Terraform v1.12.0 and later, use an [`identity` block](https://developer.hashicorp.com/terraform/language/block/import#identity) to import WorkloadIdentityPoolManagedIdentity using identity values. For example:
 
 ```tf
 import {

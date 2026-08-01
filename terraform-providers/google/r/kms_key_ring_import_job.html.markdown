@@ -27,7 +27,6 @@ key material, generated outside of Cloud KMS. A `KeyRingImportJob` expires 3 day
 Once expired, Cloud KMS will no longer be able to import or unwrap any key material that
 was wrapped with the `KeyRingImportJob`'s public key.
 
-
 ~> **Note:** KeyRingImportJobs cannot be deleted from Google Cloud Platform.
 Destroying a Terraform-managed KeyRingImportJob will remove it from state but
 *will not delete the resource from the project.*
@@ -157,7 +156,7 @@ KeyRingImportJob can be imported using any of these accepted formats:
 
 * `{{name}}`
 
-In Terraform v1.12.0 and later, use an [`identity` block](https://developer.hashicorp.com/terraform/language/resources/identities) to import KeyRingImportJob using identity values. For example:
+In Terraform v1.12.0 and later, use an [`identity` block](https://developer.hashicorp.com/terraform/language/block/import#identity) to import KeyRingImportJob using identity values. For example:
 
 ```tf
 import {

@@ -116,6 +116,7 @@ resource "google_backup_dr_backup_plan" "my-csql-backup-plan-1" {
   backup_plan_id = "backup-plan-csql-test"
   resource_type  = "sqladmin.googleapis.com/Instance"
   backup_vault   = google_backup_dr_backup_vault.my_backup_vault.id
+  max_custom_on_demand_retention_days = 30
 
   backup_rules {
     rule_id                = "rule-1"
@@ -368,7 +369,7 @@ BackupPlan can be imported using any of these accepted formats:
 * `{{project}}/{{location}}/{{backup_plan_id}}`
 * `{{location}}/{{backup_plan_id}}`
 
-In Terraform v1.12.0 and later, use an [`identity` block](https://developer.hashicorp.com/terraform/language/resources/identities) to import BackupPlan using identity values. For example:
+In Terraform v1.12.0 and later, use an [`identity` block](https://developer.hashicorp.com/terraform/language/block/import#identity) to import BackupPlan using identity values. For example:
 
 ```tf
 import {

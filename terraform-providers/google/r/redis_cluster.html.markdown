@@ -52,7 +52,6 @@ To keep the Terraform configuration and state in sync for such settings, please 
       * Manually edit the Terraform configuration file(s) for the secondary cluster(s) to update the setting with the latest value from the state.
       * Execute `terraform plan` once again. This should not generate any diff, confirming the configuration is in sync with the infrastructure.
 
-
 **Switchover**
 
 To perform a [switchover](https://cloud.google.com/memorystore/docs/cluster/working-with-cross-region-replication#perform_a_switchover), please follow the below steps:
@@ -1353,7 +1352,7 @@ Cluster can be imported using any of these accepted formats:
 * `{{region}}/{{name}}`
 * `{{name}}`
 
-In Terraform v1.12.0 and later, use an [`identity` block](https://developer.hashicorp.com/terraform/language/resources/identities) to import Cluster using identity values. For example:
+In Terraform v1.12.0 and later, use an [`identity` block](https://developer.hashicorp.com/terraform/language/block/import#identity) to import Cluster using identity values. For example:
 
 ```tf
 import {
