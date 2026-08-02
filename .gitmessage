@@ -1,0 +1,46 @@
+# Commit Message Guidelines - docs (Mintlify KB + synced Terraform provider docs)
+# Auto-ignored lines begin with "#"
+# -----------------------------------------------------------------------------
+# Summary (Required):
+# - Concise, imperative summary (e.g., Sync AWS provider docs to v6.57.1)
+# - No issue numbers or PR refs here
+#
+# Type(scope): common types - feat, fix, docs, chore, refactor, test
+# Scopes (docs repo): infra, runbooks, references, providers, mintlify
+#   - use 'providers' for terraform-providers/ syncs (e.g., chore(providers): ...)
+
+# Body (Optional):
+# - Context, motivation, implementation details; bullets OK
+
+# Tags (Optional) - add at bottom if relevant:
+#   BREAKING CHANGE / SECURITY / BUGFIX / DOCS / REFACTOR / INFRA / COMPLIANCE
+
+# -----------------------------------------------------------------------------
+# If found, reset the commit with:
+#   git reset HEAD~ && git commit --edit
+
+# -----------------------------------------------------------------------------
+# RECON DISCIPLINE - apply at composition time (checklist; not auto-enforced)
+# -----------------------------------------------------------------------------
+#
+# NEVER include in the commit message:
+#   - Cloud account IDs (use first-2/last-2 redaction if context is required)
+#   - Cloud project IDs (specific GCP/AWS/Azure resource identifiers)
+#   - Service account emails
+#   - 1Password vault names, item names, or op:// paths
+#   - Specific IAM principal names (users, roles, policies)
+#   - Specific secret names (Secret Manager IDs, KMS key aliases)
+#   - Internal hostnames (server names not visible to customers)
+#   - Local file paths (absolute paths to operator workstations)
+#   - AI reviewer / assistant names (Codex, Gemini, Claude, etc.)
+#   - Co-authored-by: <AI> trailers
+#   - Session-tag enumeration or other architecture-mapping recon
+#
+# DO include:
+#   - WHAT changed (feature, scope, behavior)
+#   - WHY it changed (constraint, upstream release, breaking-change driver)
+#   - Pattern references when relevant
+#   - Operational properties when relevant
+#
+# Team attribution: Team TECPRESSO. Never AI-specific attribution.
+# Full conventions: ~/workspace/CLAUDE.md + ~/workspace/CLAUDE/conventions.md
