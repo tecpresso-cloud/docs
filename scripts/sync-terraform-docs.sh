@@ -34,6 +34,7 @@ declare -A PROVIDERS=(
   [cloudflare]="cloudflare/terraform-provider-cloudflare|docs"
   [vultr]="vultr/terraform-provider-vultr|website/docs"
   [linode]="linode/terraform-provider-linode|docs"
+  [pagerduty]="PagerDuty/terraform-provider-pagerduty|website/docs"
 )
 
 # Display names for output
@@ -46,6 +47,7 @@ declare -A DISPLAY_NAMES=(
   [cloudflare]="Cloudflare"
   [vultr]="Vultr"
   [linode]="Linode"
+  [pagerduty]="PagerDuty"
 )
 
 cleanup() {
@@ -214,7 +216,7 @@ fi
 SYNC_COUNT=0
 FAIL_COUNT=0
 
-for provider in google google-beta aws azurerm sakuracloud cloudflare vultr linode; do
+for provider in google google-beta aws azurerm sakuracloud cloudflare vultr linode pagerduty; do
   if sync_provider "$provider" ""; then
     SYNC_COUNT=$((SYNC_COUNT + 1))
   else

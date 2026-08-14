@@ -1,0 +1,71 @@
+---
+layout: "pagerduty"
+page_title: "PagerDuty: pagerduty_service_dependency"
+sidebar_current: "docs-pagerduty-resource-service-dependency"
+description: |-
+  Creates and manages a business service dependency in PagerDuty.
+---
+
+# pagerduty\_service\_dependency
+
+A [service dependency](https://developer.pagerduty.com/api-reference/b3A6Mjc0ODE5Mg-associate-service-dependencies) is a relationship between two services that this service uses, or that are used by this service, and are critical for successful operation.
+
+
+## Example Usage
+
+```hcl
+resource "pagerduty_service_dependency" "foo" {
+	dependency {
+		dependent_service {
+			id = pagerduty_business_service.foo.id
+			type = pagerduty_business_service.foo.type
+		}
+		supporting_service {
+			id = pagerduty_service.foo.id
+			type = pagerduty_service.foo.type
+		}
+	}
+}
+
+resource "pagerduty_service_dependency" "bar" {
+	dependency {
+		dependent_service {
+			id = pagerduty_business_service.foo.id
+			type = pagerduty_business_service.foo.type
+		}
+		supporting_service {
+			id = pagerduty_service.two.id
+			type = pagerduty_service.two.type
+		}
+	}
+}
+```
+
+## Argument Reference
+
+The following arguments are supported:
+
+  * `dependency` - (Required) The relationship between the `supporting_service` and `dependent_service`. One and only one dependency block must be defined.
+  * `supporting_service` - (Required) The service that supports the dependent service. Dependency supporting service documented below. One and only one `supporting_service` dependency block must be defined.
+  * `dependent_service` - (Required) The service that dependents on the supporting service. Dependency dependent service documented below. One and only one `dependent_service` dependency block must be defined.
+
+Dependency supporting and dependent service supports the following:
+
+* `id` - (Required) The ID of the service dependency.
+* `type` - (Required) Can be `business_service`,  `service`, `business_service_reference` or `technical_service_reference`.
+
+## Attributes Reference
+
+The following attributes are exported:
+
+  * `id` - The ID of the service dependency.
+
+***NOTE: Due to the API supporting this resource, it does not support updating. To make changes to a `service_dependency` you'll need to destroy and then create a new one.***
+
+## Import
+
+Service dependencies can be imported using the related supporting service id, supporting service type (`business_service` or `service`) and the dependency id separated by a dot, e.g.
+
+```
+$ terraform import pagerduty_service_dependency.main P4B2Z7G.business_service.D5RTHKRNGU4PYE90PJ
+```
