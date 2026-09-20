@@ -5,3 +5,6 @@ node_modules/
 
 # Terraform doc sync temp files (script cleans up, but just in case)
 /tmp/tf-docs-sync-*
+
+# Sentry docs sparse checkout (refresh with git -C sentry-docs pull)
+/sentry-docs/
