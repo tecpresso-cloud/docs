@@ -1,10 +1,10 @@
 # AWS Terraform Provider - Synced Docs
 
 **Provider:** `hashicorp/terraform-provider-aws`
-**Version:** v6.61.0
-**Synced:** 2026-08-21 23:37 UTC
-**Source:** https://github.com/hashicorp/terraform-provider-aws/releases/tag/v6.61.0
-**Doc files:** 2621
+**Version:** v6.66.0
+**Synced:** 2026-09-27 03:22 UTC
+**Source:** https://github.com/hashicorp/terraform-provider-aws/releases/tag/v6.66.0
+**Doc files:** 2678
 
 ## Directory Structure
 

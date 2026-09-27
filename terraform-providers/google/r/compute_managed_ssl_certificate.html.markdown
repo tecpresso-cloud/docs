@@ -94,10 +94,11 @@ resource "google_compute_url_map" "default" {
 }
 
 resource "google_compute_backend_service" "default" {
-  name        = "backend-service"
-  port_name   = "http"
-  protocol    = "HTTP"
-  timeout_sec = 10
+  name                  = "backend-service"
+  port_name             = "http"
+  protocol              = "HTTP"
+  timeout_sec           = 10
+  load_balancing_scheme = "EXTERNAL"
 
   health_checks = [google_compute_http_health_check.default.id]
 }
@@ -110,9 +111,10 @@ resource "google_compute_http_health_check" "default" {
 }
 
 resource "google_compute_global_forwarding_rule" "default" {
-  name       = "forwarding-rule"
-  target     = google_compute_target_https_proxy.default.id
-  port_range = 443
+  name                  = "forwarding-rule"
+  target                = google_compute_target_https_proxy.default.id
+  port_range            = 443
+  load_balancing_scheme = "EXTERNAL"
 }
 ```
 <div class = "oics-button" style="float: right; margin: 0 0 -15px">
@@ -128,7 +130,7 @@ resource "google_compute_global_forwarding_rule" "default" {
 // recreate the ssl certificate and update the target https proxy correctly
 
 resource "google_compute_target_https_proxy" "default" {
-  name             = "test-proxy"
+  name             = "https-proxy"
   url_map          = google_compute_url_map.default.id
   ssl_certificates = [google_compute_managed_ssl_certificate.cert.id]
 }
@@ -177,11 +179,12 @@ resource "google_compute_url_map" "default" {
 }
 
 resource "google_compute_backend_service" "default" {
-  name          = "backend-service"
-  port_name     = "http"
-  protocol      = "HTTP"
-  timeout_sec   = 10
-  health_checks = [google_compute_http_health_check.default.id]
+  name                  = "backend-service"
+  port_name             = "http"
+  protocol              = "HTTP"
+  timeout_sec           = 10
+  load_balancing_scheme = "EXTERNAL"
+  health_checks         = [google_compute_http_health_check.default.id]
 }
 
 resource "google_compute_http_health_check" "default" {

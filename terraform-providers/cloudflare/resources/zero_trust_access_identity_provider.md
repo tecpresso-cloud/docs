@@ -93,21 +93,27 @@ To enable encryption:
 3. Configure the public certificate in your external Identity Provider
 
 Note: Requires `saml_certificate_set_id` to be set when `true`.
+- `force_authn` (Boolean) Asks the IdP to reauthenticate the user for each SAML authentication request.
 - `header_attributes` (Attributes List) Add a list of attribute names that will be returned in the response header from the Access callback. (see [below for nested schema](#nestedatt--config--header_attributes))
 - `idp_public_certs` (List of String) X509 certificate to verify the signature in the SAML authentication response
 - `issuer_url` (String) IdP Entity ID or Issuer URL
+- `max_sso_url_length` (Number) The maximum URL length the IdP accepts for the SSO redirect URL.
+When the constructed SSO URL would exceed this length, the RelayState
+is stored server-side and a short nonce is passed to the IdP instead.
+Set this if your IdP enforces a URL length limit.
 - `okta_account` (String) Your okta account url
 - `onelogin_account` (String) Your OneLogin account url
 - `ping_env_id` (String) Your PingOne environment identifier
 - `pkce_enabled` (Boolean) Enable Proof Key for Code Exchange (PKCE)
 - `prompt` (String) Indicates the type of user interaction that is required. prompt=login forces the user to enter their credentials on that request, negating single-sign on. prompt=none is the opposite. It ensures that the user isn't presented with any interactive prompt. If the request can't be completed silently by using single-sign on, the Microsoft identity platform returns an interaction_required error. prompt=select_account interrupts single sign-on providing account selection experience listing all the accounts either in session or any remembered account or an option to choose to use a different account altogether.
-Available values: "login", "select_account", "none".
+Available values: "login", "select_account", "none", "consent".
 - `restrict_to_account_members` (Boolean) When enabled, only users who are members of your Cloudflare account can authenticate through this identity provider. When disabled, any user with a Cloudflare account can authenticate, subject to your Access policies.
 - `scopes` (List of String) OAuth scopes
 - `sign_request` (Boolean) Sign the SAML authentication request with Access credentials. To verify the signature, use the public key from the Access certs endpoints.
 - `sso_target_url` (String) URL to send the SAML authentication requests to
 - `support_groups` (Boolean) Should Cloudflare try to load groups from your account
 - `token_url` (String) The token_endpoint URL of your IdP
+- `use_login_hint` (Boolean) Whether to use a previously authenticated Access email as a Google login hint when exactly one email matches the Workspace domain.
 
 Read-Only:
 

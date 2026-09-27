@@ -244,7 +244,7 @@ resource "google_monitoring_group" "check" {
 
 ```hcl
 resource "google_storage_bucket" "bucket" {
-  name     = "my-project-name-gcf-source"  # Every bucket name must be globally unique
+  name     = "gcf-source-my-project-name"  # Every bucket name must be globally unique
   location = "US"
   uniform_bucket_level_access = true
 }
@@ -478,6 +478,10 @@ The following arguments are supported:
   The password to authenticate.
   **Note**: This property is sensitive and will not be displayed in the plan.
 
+* `username` -
+  (Required)
+  The username to authenticate.
+
 * `password_wo` -
   (Optional, Write-Only)
   The password to authenticate.
@@ -487,11 +491,7 @@ The following arguments are supported:
 
 * `password_wo_version` -
   (Optional)
-  The password write-only version.
-
-* `username` -
-  (Required)
-  The username to authenticate.
+  Triggers update of `password_wo` write-only. Increment this value when an update to `password_wo` is needed. For more info see [updating write-only arguments](/docs/providers/google/guides/using_write_only_arguments.html#updating-write-only-arguments)
 
 <a name="nested_http_check_service_agent_authentication"></a>The `service_agent_authentication` block supports:
 

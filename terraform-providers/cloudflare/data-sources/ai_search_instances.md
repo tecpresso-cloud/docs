@@ -101,6 +101,7 @@ Read-Only:
 
 - `keyword_tokenizer` (String) Tokenizer used for keyword search indexing. porter provides word-level tokenization with Porter stemming (good for natural language queries). trigram enables character-level substring matching (good for partial matches, code, identifiers). Changing this triggers a full re-index. Defaults to porter.
 Available values: "porter", "trigram".
+- `use_ocr` (Boolean)
 
 
 <a id="nestedatt--result--metadata"></a>
@@ -198,9 +199,23 @@ Read-Only:
 
 Read-Only:
 
+- `discover_options` (Attributes) (see [below for nested schema](#nestedatt--result--source_params--web_crawler--discover_options))
 - `parse_options` (Attributes) (see [below for nested schema](#nestedatt--result--source_params--web_crawler--parse_options))
 - `parse_type` (String) Available values: "sitemap", "feed-rss", "crawl".
 - `store_options` (Attributes) (see [below for nested schema](#nestedatt--result--source_params--web_crawler--store_options))
+
+<a id="nestedatt--result--source_params--web_crawler--discover_options"></a>
+### Nested Schema for `result.source_params.web_crawler.discover_options`
+
+Read-Only:
+
+- `depth` (Number)
+- `include_external_links` (Boolean)
+- `include_subdomains` (Boolean)
+- `limit` (Number) Maximum number of pages to crawl. New values are capped at 100000; instances configured before that cap may report a higher stored value, which the crawler clamps at run time.
+- `max_age` (Number)
+- `source` (String) Available values: "all", "sitemaps", "links".
+
 
 <a id="nestedatt--result--source_params--web_crawler--parse_options"></a>
 ### Nested Schema for `result.source_params.web_crawler.parse_options`

@@ -42,18 +42,19 @@ resource "cloudflare_zero_trust_organization" "example_zero_trust_organization" 
     required_aaguids = "2fc0579f-8113-47ea-b116-bb5a8db9202a"
     session_duration = "24h"
   }
-  mfa_required_for_all_apps = false
-  mfa_ssh_piv_key_requirements = {
+  mfa_piv_key_requirements = {
     pin_policy = "always"
     require_fips_device = true
     ssh_key_size = [256, 2048]
     ssh_key_type = ["ecdsa", "rsa"]
     touch_policy = "always"
   }
+  mfa_required_for_all_apps = false
   name = "Widget Corps Internal Applications"
   session_duration = "24h"
   ui_read_only_toggle_reason = "Temporarily turn off the UI read only lock to make a change via the UI"
   user_seat_expiration_inactive_time = "730h"
+  warp_auth_non_browser_401 = false
   warp_auth_session_duration = "24h"
 }
 ```
@@ -74,14 +75,20 @@ resource "cloudflare_zero_trust_organization" "example_zero_trust_organization" 
 - `login_design` (Attributes) (see [below for nested schema](#nestedatt--login_design))
 - `mfa_config` (Attributes) Configures multi-factor authentication (MFA) settings for an organization. (see [below for nested schema](#nestedatt--mfa_config))
 - `mfa_configuration_allowed` (Boolean) Indicates if this organization can enforce multi-factor authentication (MFA) requirements at the application and policy level.
-- `mfa_required_for_all_apps` (Boolean) Determines whether global MFA settings apply to applications by default. The organization must have MFA enabled with at least one authentication method and a session duration configured. Note: 'allowed_authenticators' cannot only contain 'ssh_piv_key' if the organization has any non-infrastructure applications because PIV keys are only compatible with infrastructure apps.
+- `mfa_required_for_all_apps` (Boolean) Determines whether global MFA settings apply to applications by default. The organization must have MFA enabled with at least one authentication method and a session duration configured. Note: 'allowed_authenticators' cannot contain only the infrastructure SSH authenticators ('piv_key' and 'ssh_fido2_key') if the organization has any non-infrastructure applications.
 - `mfa_ssh_piv_key_requirements` (Attributes) Configures SSH PIV key requirements for MFA using hardware security keys. (see [below for nested schema](#nestedatt--mfa_ssh_piv_key_requirements))
 - `name` (String) The name of your Zero Trust organization.
+- `service_token_inactivity` (Attributes) Configures automatic enforcement for inactive service tokens. A service token is inactive if no policy references it, and it has not successfully authenticated with an Access application during the selected inactivity period. This setting applies to every service token in your Zero Trust account. (see [below for nested schema](#nestedatt--service_token_inactivity))
 - `session_duration` (String) The amount of time that tokens issued for applications will be valid. Must be in the format `300ms` or `2h45m`. Valid time units are: ns, us (or µs), ms, s, m, h.
 - `ui_read_only_toggle_reason` (String) A description of the reason why the UI read only field is being toggled.
 - `user_seat_expiration_inactive_time` (String) The amount of time a user seat is inactive before it expires. When the user seat exceeds the set time of inactivity, the user is removed as an active seat and no longer counts against your Teams seat count.  Minimum value for this setting is 1 month (730h). Must be in the format `300ms` or `2h45m`. Valid time units are: `ns`, `us` (or `µs`), `ms`, `s`, `m`, `h`.
+- `warp_auth_non_browser_401` (Boolean) When enabled, unsuccessful WARP authentication requests with a non-HTML Accept header return a 401 response instead of redirecting to the login page.
 - `warp_auth_session_duration` (String) The amount of time that tokens issued for applications will be valid. Must be in the format `30m` or `2h45m`. Valid time units are: m, h.
 - `zone_id` (String) The Zone ID to use for this endpoint. Mutually exclusive with the Account ID.
+
+### Read-Only
+
+- `trusted_accounts` (List of String) The account tags of organizations trusted by this organization for policy and device posture sharing.
 
 <a id="nestedatt--custom_pages"></a>
 ### Nested Schema for `custom_pages`
@@ -109,7 +116,7 @@ Optional:
 
 Optional:
 
-- `allowed_authenticators` (List of String) Lists the MFA methods that users can authenticate with. `ssh_piv_key` is only relevant for infrastructure applications.
+- `allowed_authenticators` (List of String) Lists the MFA methods that users can authenticate with. The `piv_key` and `ssh_fido2_key` values are supported only for infrastructure applications.
 - `amr_matching_session_duration` (String) Allows a user to skip MFA via Authentication Method Reference (AMR) matching when the AMR claim provided by the IdP the user used to authenticate contains "mfa". Must be in minutes (m) or hours (h). Minimum: 0m. Maximum: 720h (30 days).
 - `required_aaguids` (String) Specifies a Cloudflare List of required FIDO2 authenticator device AAGUIDs.
 - `session_duration` (String) Defines the duration of an MFA session. Must be in minutes (m) or hours (h). Minimum: 0m. Maximum: 720h (30 days). Examples:`5m` or `24h`.
@@ -127,6 +134,17 @@ Available values: "never", "once", "always".
 - `ssh_key_type` (List of String) Specifies the allowed SSH key types. Valid values are `ecdsa`, `ed25519`, and `rsa`.
 - `touch_policy` (String) Defines when physical touch is required to use the SSH key. Valid values: `never` (no touch required), `always` (touch required for each use), `cached` (touch cached for 15 seconds).
 Available values: "never", "always", "cached".
+
+
+<a id="nestedatt--service_token_inactivity"></a>
+### Nested Schema for `service_token_inactivity`
+
+Required:
+
+- `action` (String) The action applied to an inactive service token.
+Available values: "disable", "delete".
+- `enabled` (Boolean) Whether automatic enforcement for inactive service tokens is enabled.
+- `inactivity_threshold_days` (Number) The number of days a service token must be inactive before the configured action is applied.
 
 ## Import
 

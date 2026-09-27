@@ -45,6 +45,7 @@ data "cloudflare_zero_trust_dlp_custom_profile" "example_zero_trust_dlp_custom_p
 - `description` (String) The description of the profile.
 - `entries` (Attributes List, Deprecated) (see [below for nested schema](#nestedatt--entries))
 - `id` (String) The ID of this resource.
+- `integration_id` (String)
 - `name` (String) The name of the profile.
 - `ocr_enabled` (Boolean)
 - `open_access` (Boolean) Whether this profile can be accessed by anyone.
@@ -80,6 +81,8 @@ Determines if the words should be matched in a case-sensitive manner
 Cannot be set to false if secret is true
 - `confidence` (Attributes) (see [below for nested schema](#nestedatt--entries--confidence))
 - `created_at` (String)
+- `deprecated` (Boolean) Whether this entry is deprecated for new use. This is computed from the static catalog and
+emitted only when true.
 - `description` (String)
 - `enabled` (Boolean)
 - `id` (String)
@@ -140,6 +143,8 @@ Determines if the words should be matched in a case-sensitive manner
 Cannot be set to false if secret is true
 - `confidence` (Attributes) (see [below for nested schema](#nestedatt--shared_entries--confidence))
 - `created_at` (String)
+- `deprecated` (Boolean) Whether this entry is deprecated for new use. This is computed from the static catalog and
+emitted only when true.
 - `description` (String)
 - `enabled` (Boolean)
 - `id` (String)

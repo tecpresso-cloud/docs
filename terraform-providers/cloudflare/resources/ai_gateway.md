@@ -25,6 +25,7 @@ resource "cloudflare_ai_gateway" "example_ai_gateway" {
   rate_limiting_interval = 0
   rate_limiting_limit = 0
   authentication = true
+  byok_only = true
   log_management = 10000
   log_management_strategy = "STOP_INSERTING"
   logpush = true
@@ -33,6 +34,7 @@ resource "cloudflare_ai_gateway" "example_ai_gateway" {
   retry_backoff = "constant"
   retry_delay = 0
   retry_max_attempts = 1
+  store_id = "store_id"
   workers_ai_billing_mode = "postpaid"
   zdr = true
 }
@@ -54,8 +56,10 @@ resource "cloudflare_ai_gateway" "example_ai_gateway" {
 ### Optional
 
 - `authentication` (Boolean)
+- `byok_only` (Boolean) Requires customer-provided provider credentials and prevents fallback to Unified Billing.
 - `dlp` (Attributes) (see [below for nested schema](#nestedatt--dlp))
 - `guardrails` (Attributes) (see [below for nested schema](#nestedatt--guardrails))
+- `log_classification` (Boolean)
 - `log_management` (Number)
 - `log_management_strategy` (String) Available values: "STOP_INSERTING", "DELETE_OLDEST".
 - `logpush` (Boolean)
@@ -64,13 +68,13 @@ resource "cloudflare_ai_gateway" "example_ai_gateway" {
 - `rate_limiting_technique` (String) Available values: "fixed", "sliding".
 - `retry_backoff` (String) Backoff strategy for retry delays
 Available values: "constant", "linear", "exponential".
-- `retry_delay` (Number) Delay between retry attempts in milliseconds (0-5000)
+- `retry_delay` (Number) Delay between retry attempts in milliseconds (0-60000)
 - `retry_max_attempts` (Number) Maximum number of retry attempts for failed requests (1-5)
 - `spend_limits` (Attributes) (see [below for nested schema](#nestedatt--spend_limits))
 - `store_id` (String)
 - `stripe` (Attributes) (see [below for nested schema](#nestedatt--stripe))
-- `workers_ai_billing_mode` (String) Controls how Workers AI inference calls routed through this gateway are billed. Only 'postpaid' is currently supported.
-Available values: "postpaid".
+- `workers_ai_billing_mode` (String) Controls how Workers AI inference calls routed through this gateway are billed. 'postpaid' bills the account directly through Workers AI; 'unified' deducts credits via AI Gateway using neuron-based pricing and delegates billing to AI Gateway.
+Available values: "postpaid", "unified".
 - `zdr` (Boolean)
 
 ### Read-Only

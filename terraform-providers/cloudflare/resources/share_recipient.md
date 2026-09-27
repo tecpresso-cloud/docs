@@ -30,12 +30,26 @@ resource "cloudflare_share_recipient" "example_share_recipient" {
 
 ### Optional
 
+- `include_resources` (Boolean) Include resources in the response.
 - `organization_id` (String) Organization identifier.
 - `recipient_account_id` (String) The account that will receive the share.
 
 ### Read-Only
 
-- `association_status` (String) Share Recipient association status.
+- `association_status` (String) The current state of the recipient relative to the share. The
+`desired_association_status` (not exposed in the response) tracks the
+target state set by the API; the background reconciliation workflow
+drives `current_association_status` toward it.
+
+- `associating` — The recipient was recently added; the workflow is
+  pushing shared resources into the recipient account.
+- `associated` — Shared resources have been successfully applied to
+  the recipient account.
+- `disassociating` — The recipient was removed (via DELETE or PUT
+  replacement); the workflow is removing shared resources from the
+  recipient account.
+- `disassociated` — Shared resources have been removed from the
+  recipient account. The recipient record remains in the database.
 Available values: "associating", "associated", "disassociating", "disassociated".
 - `created` (String) When the share was created.
 - `id` (String) Share Recipient identifier tag.

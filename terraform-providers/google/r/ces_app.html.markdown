@@ -121,6 +121,10 @@ resource "google_ces_app" "ces_app_basic" {
     conversation_logging_settings {
       disable_conversation_logging = true
     }
+
+    metric_analysis_settings {
+      llm_metrics_opted_out = false
+    }
   }
 
   model_settings {
@@ -133,11 +137,17 @@ resource "google_ces_app" "ces_app_basic" {
       turn_level_metrics_thresholds {
         semantic_similarity_success_threshold        = 3
         overall_tool_invocation_correctness_threshold = 1.0
+        semantic_similarity_channel                   = "TEXT"
       }
       expectation_level_metrics_thresholds {
         tool_invocation_parameter_correctness_threshold = 1.0
       }
+      tool_matching_settings {
+        extra_tool_call_behavior = "ALLOW"
+      }
     }
+    golden_hallucination_metric_behavior   = "ENABLED"
+    scenario_hallucination_metric_behavior = "ENABLED"
   }
 
 variable_declarations {
@@ -202,6 +212,12 @@ variable_declarations {
       modality = "CHAT_ONLY"
       theme    = "LIGHT"
       web_widget_title = "Help Assistant"
+      security_settings {
+        enable_public_access = true
+        enable_origin_check  = false
+        enable_recaptcha     = false
+        allowed_origins      = ["https://example.com"]
+      }
     }
   }
 
@@ -216,6 +232,23 @@ variable_declarations {
   client_certificate_settings {
     tls_certificate = file("test-fixtures/cert.pem")
     private_key = google_secret_manager_secret_version.fake_secret_version.name
+  }
+
+  vpc_sc_settings {
+    allowed_origins = ["https://example.com"]
+  }
+
+  error_handling_settings {
+    error_handling_strategy = "FALLBACK_RESPONSE"
+    fallback_response_config {
+      custom_fallback_messages = {
+        "en-US" = "An error occurred, please try again."
+      }
+      max_fallback_attempts = 3
+    }
+    end_session_config {
+      escalate_session = true
+    }
   }
 
   # Root agent should not be specified when creating an app
@@ -459,6 +492,11 @@ The following arguments are supported:
   Settings to describe the logging behaviors for the app.
   Structure is [documented below](#nested_logging_settings).
 
+* `locked` -
+  (Optional)
+  Indicates whether the app is locked for changes. If the app is locked,
+  modifications to the app resources will be rejected.
+
 * `metadata` -
   (Optional)
   Metadata about the app. This field can be used to store additional
@@ -493,6 +531,16 @@ The following arguments are supported:
   (Optional)
   The default client certificate settings for the app.
   Structure is [documented below](#nested_client_certificate_settings).
+
+* `vpc_sc_settings` -
+  (Optional)
+  VPC-SC settings for the app.
+  Structure is [documented below](#nested_vpc_sc_settings).
+
+* `error_handling_settings` -
+  (Optional)
+  Settings to describe how errors should be handled in the app.
+  Structure is [documented below](#nested_error_handling_settings).
 
 * `project` - (Optional) The ID of the project in which the resource belongs.
     If it is not provided, the provider project is used.
@@ -651,6 +699,11 @@ The following arguments are supported:
   Message for configuration for the web widget.
   Structure is [documented below](#nested_default_channel_profile_web_widget_config).
 
+* `whatsapp_config` -
+  (Optional)
+  Configuration specific to WhatsApp deployments.
+  Structure is [documented below](#nested_default_channel_profile_whatsapp_config).
+
 
 <a name="nested_default_channel_profile_persona_property"></a>The `persona_property` block supports:
 
@@ -685,12 +738,82 @@ The following arguments are supported:
   (Optional)
   The title of the web widget.
 
+* `security_settings` -
+  (Optional)
+  The security settings of the web widget.
+  Structure is [documented below](#nested_default_channel_profile_web_widget_config_security_settings).
+
+
+<a name="nested_default_channel_profile_web_widget_config_security_settings"></a>The `security_settings` block supports:
+
+* `allowed_origins` -
+  (Optional)
+  The origins that are allowed to host the web widget. An origin is
+  defined by RFC 6454. If empty, all origins are allowed.
+  A maximum of 100 origins is allowed.
+  Example: "https://example.com"
+
+* `enable_origin_check` -
+  (Optional)
+  Indicates whether origin check for the web widget is enabled.
+  If `true`, the web widget will check the origin of the website that
+  loads the web widget and only allow it to be loaded in the same origin
+  or any of the allowed origins.
+
+* `enable_public_access` -
+  (Optional)
+  Indicates whether public access to the web widget is enabled.
+  If `true`, the web widget will be publicly accessible.
+  If `false`, the web widget must be integrated with your own
+  authentication and authorization system to return valid credentials for
+  accessing the CES agent.
+
+* `enable_recaptcha` -
+  (Optional)
+  Indicates whether reCAPTCHA verification for the web widget is enabled.
+
+<a name="nested_default_channel_profile_whatsapp_config"></a>The `whatsapp_config` block supports:
+
+* `waba_id` -
+  (Required)
+  The WhatsApp Business Account ID.
+
+* `phone_number_id` -
+  (Required)
+  The Meta phone number ID.
+
+* `phone_number` -
+  (Optional)
+  The phone number in E.164 format.
+
+* `display_name` -
+  (Output)
+  The fetched Meta business page name.
+
+* `thumbnail_url` -
+  (Output)
+  The fetched Meta business profile thumbnail URL.
+
+* `description` -
+  (Output)
+  The description of the Meta business page or profile.
+
 <a name="nested_evaluation_metrics_thresholds"></a>The `evaluation_metrics_thresholds` block supports:
 
 * `golden_evaluation_metrics_thresholds` -
   (Optional)
   Settings for golden evaluations.
   Structure is [documented below](#nested_evaluation_metrics_thresholds_golden_evaluation_metrics_thresholds).
+
+* `golden_hallucination_metric_behavior` -
+  (Optional)
+  The hallucination metric behavior for golden evaluations.
+  Possible values are: `DISABLED`, `ENABLED`.
+
+* `scenario_hallucination_metric_behavior` -
+  (Optional)
+  The hallucination metric behavior for scenario evaluations.
+  Possible values are: `DISABLED`, `ENABLED`.
 
 
 <a name="nested_evaluation_metrics_thresholds_golden_evaluation_metrics_thresholds"></a>The `golden_evaluation_metrics_thresholds` block supports:
@@ -704,6 +827,13 @@ The following arguments are supported:
   (Optional)
   Turn level metrics thresholds.
   Structure is [documented below](#nested_evaluation_metrics_thresholds_golden_evaluation_metrics_thresholds_turn_level_metrics_thresholds).
+
+* `tool_matching_settings` -
+  (Optional)
+  The tool matching settings. An extra tool call is a tool call that is
+  present in the execution but does not match any tool call in the golden
+  expectation.
+  Structure is [documented below](#nested_evaluation_metrics_thresholds_golden_evaluation_metrics_thresholds_tool_matching_settings).
 
 
 <a name="nested_evaluation_metrics_thresholds_golden_evaluation_metrics_thresholds_expectation_level_metrics_thresholds"></a>The `expectation_level_metrics_thresholds` block supports:
@@ -724,6 +854,23 @@ The following arguments are supported:
   (Optional)
   The success threshold for semantic similarity. Must be an integer
   between 0 and 4. Default is >= 3.
+
+* `semantic_similarity_channel` -
+  (Optional)
+  The semantic similarity channel to use for evaluation.
+  Possible values:
+  SEMANTIC_SIMILARITY_CHANNEL_UNSPECIFIED
+  TEXT
+  AUDIO
+
+<a name="nested_evaluation_metrics_thresholds_golden_evaluation_metrics_thresholds_tool_matching_settings"></a>The `tool_matching_settings` block supports:
+
+* `extra_tool_call_behavior` -
+  (Optional)
+  Defines the behavior when an extra tool call is encountered. An extra
+  tool call is a tool call that is present in the execution but does
+  not match any tool call in the golden expectation.
+  Possible values are: `FAIL`, `ALLOW`.
 
 <a name="nested_language_settings"></a>The `language_settings` block supports:
 
@@ -773,6 +920,12 @@ The following arguments are supported:
   (Optional)
   Settings to describe the conversation logging behaviors for the app.
   Structure is [documented below](#nested_logging_settings_conversation_logging_settings).
+
+* `metric_analysis_settings` -
+  (Optional)
+  Settings to describe the conversation data collection behaviors for the LLM
+  analysis pipeline for the app.
+  Structure is [documented below](#nested_logging_settings_metric_analysis_settings).
 
 * `redaction_config` -
   (Optional)
@@ -831,6 +984,19 @@ The following arguments are supported:
 * `disable_conversation_logging` -
   (Optional)
   Whether to disable conversation logging for the sessions.
+
+* `retention_window` -
+  (Optional)
+  Controls the retention window for the conversation.
+  If not set, the conversation will be retained for 365 days.
+
+<a name="nested_logging_settings_metric_analysis_settings"></a>The `metric_analysis_settings` block supports:
+
+* `llm_metrics_opted_out` -
+  (Optional)
+  Whether to collect conversation data for llm analysis metrics. If true,
+  conversation data will not be collected for llm analysis metrics;
+  otherwise, conversation data will be collected.
 
 <a name="nested_logging_settings_redaction_config"></a>The `redaction_config` block supports:
 
@@ -1003,6 +1169,58 @@ The following arguments are supported:
   (Optional)
   The passphrase to decrypt the private key.
   Should be left unset if the private key is not encrypted.
+
+<a name="nested_vpc_sc_settings"></a>The `vpc_sc_settings` block supports:
+
+* `allowed_origins` -
+  (Optional)
+  The allowed HTTP(s) origins that OpenAPI tools in the App are
+  able to directly call when VPC Service Controls are enabled. These strings
+  must match the origin exactly, including the port if specified. For
+  example, "https://example.com" or "https://example.com:443". This list does
+  not yet apply to Python tools that may make direct HTTP calls.
+
+<a name="nested_error_handling_settings"></a>The `error_handling_settings` block supports:
+
+* `error_handling_strategy` -
+  (Optional)
+  The strategy to use for error handling.
+  Possible values:
+  NONE
+  FALLBACK_RESPONSE
+  END_SESSION
+
+* `fallback_response_config` -
+  (Optional)
+  Configuration for handling fallback responses.
+  Structure is [documented below](#nested_error_handling_settings_fallback_response_config).
+
+* `end_session_config` -
+  (Optional)
+  Configuration for ending the session in case of system errors (e.g. LLM
+  errors).
+  Structure is [documented below](#nested_error_handling_settings_end_session_config).
+
+
+<a name="nested_error_handling_settings_fallback_response_config"></a>The `fallback_response_config` block supports:
+
+* `custom_fallback_messages` -
+  (Optional)
+  The fallback messages in case of system errors (e.g. LLM errors),
+  mapped by supported language code
+  (https://docs.cloud.google.com/customer-engagement-ai/conversational-agents/ps/reference/language).
+
+* `max_fallback_attempts` -
+  (Optional)
+  The maximum number of fallback attempts to make before the agent
+  emitting EndSession Signal.
+
+<a name="nested_error_handling_settings_end_session_config"></a>The `end_session_config` block supports:
+
+* `escalate_session` -
+  (Optional)
+  Whether to escalate the session in EndSession. If session is escalated,
+  metadata in EndSession will contain session_escalated = true.
 
 ## Attributes Reference
 

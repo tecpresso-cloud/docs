@@ -37,6 +37,11 @@ resource "cloudflare_api_shield_operation" "example_api_shield_operation" {
 Available values: "GET", "POST", "HEAD", "OPTIONS", "PUT", "DELETE", "CONNECT", "PATCH", "TRACE".
 - `zone_id` (String) Identifier.
 
+### Optional
+
+- `feature` (List of String) Add feature(s) to the results. The feature name that is given here corresponds to the resulting feature object. Have a look at the top-level object description for more details on the specific meaning.
+- `with_schemas` (Boolean) When true, includes OpenAPI schemas (both uploaded and learned) for the operation in the response. Due to the conversion overhead, this parameter is only supported on single-operation retrieval.
+
 ### Read-Only
 
 - `features` (Attributes) (see [below for nested schema](#nestedatt--features))
@@ -144,7 +149,6 @@ Read-Only:
 Read-Only:
 
 - `active_schema` (Attributes) Schema active on endpoint. (see [below for nested schema](#nestedatt--features--schema_info--active_schema))
-- `learned_available` (Boolean) Deprecated. Always false.
 - `mitigation_action` (String) Action taken on requests failing validation.
 Available values: "none", "log", "block".
 
@@ -155,7 +159,6 @@ Read-Only:
 
 - `created_at` (String)
 - `id` (String) UUID.
-- `is_learned` (Boolean) True if schema is Cloudflare-provided.
 - `name` (String) Schema file name.
 
 

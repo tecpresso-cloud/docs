@@ -16,7 +16,7 @@ A service is the primary building block in Resilience Hub. It comprises AWS reso
 
 ### Basic Usage
 
-```hcl
+```terraform
 resource "aws_resiliencehubv2_service" "example" {
   name    = "example-service"
   regions = ["us-west-2"]
@@ -29,7 +29,7 @@ resource "aws_resiliencehubv2_service" "example" {
 
 ### With Policy
 
-```hcl
+```terraform
 resource "aws_resiliencehubv2_policy" "example" {
   name = "example-policy"
 
@@ -56,7 +56,7 @@ resource "aws_resiliencehubv2_service" "example" {
 
 ### With Associated Systems
 
-```hcl
+```terraform
 resource "aws_resiliencehubv2_system" "example" {
   name = "example-system"
 }
@@ -98,6 +98,7 @@ The following arguments are optional:
 The `associated_system` block supports:
 
 * `system_arn` - (Required) ARN of the system to associate with the service.
+* `user_journey_ids` - (Optional) List of user journey identifiers that associate the system with the service.
 
 ### `permission_model` Block
 
@@ -141,7 +142,7 @@ resource "aws_resiliencehubv2_service" "example" {
 
 #### Required
 
-- `arn` (String) Amazon Resource Name (ARN) of the Resilience Hub V2 Service.
+- `arn` (String) ARN of the Resilience Hub V2 Service.
 
 In Terraform v1.5.0 and later, use an [`import` block](https://developer.hashicorp.com/terraform/language/import) to import Resilience Hub V2 Service using the `arn`. For example:
 

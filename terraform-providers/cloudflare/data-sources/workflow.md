@@ -37,10 +37,11 @@ data "cloudflare_workflow" "example_workflow" {
 - `class_name` (String)
 - `created_on` (String)
 - `id` (String) The ID of this resource.
-- `instances` (Attributes) (see [below for nested schema](#nestedatt--instances))
+- `instances` (Map of Number)
 - `modified_on` (String)
 - `name` (String)
 - `schedules` (Attributes List) (see [below for nested schema](#nestedatt--schedules))
+- `script_deleted` (Boolean) Whether the bound Worker was deleted, leaving this Workflow inactive.
 - `script_name` (String)
 - `triggered_on` (String)
 
@@ -50,22 +51,6 @@ data "cloudflare_workflow" "example_workflow" {
 Optional:
 
 - `search` (String) Allows filtering workflows` name.
-
-
-<a id="nestedatt--instances"></a>
-### Nested Schema for `instances`
-
-Read-Only:
-
-- `complete` (Number)
-- `errored` (Number)
-- `paused` (Number)
-- `queued` (Number)
-- `rolling_back` (Number)
-- `running` (Number)
-- `terminated` (Number)
-- `waiting` (Number)
-- `waiting_for_pause` (Number)
 
 
 <a id="nestedatt--schedules"></a>

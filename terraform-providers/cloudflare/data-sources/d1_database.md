@@ -40,9 +40,9 @@ all fields are returned.
 - `file_size` (Number) The D1 database's size, in bytes.
 - `id` (String) D1 database identifier (UUID).
 - `jurisdiction` (String) Specify the location to restrict the D1 database to run and store data. If this option is present, the location hint is ignored.
-Available values: "eu", "fedramp".
+Available values: "eu", "fedramp", "us".
 - `name` (String) D1 database name.
-- `num_tables` (Number)
+- `num_tables` (Number, Deprecated) The number of tables in the D1 database. This count is no longer accurate and should not be relied upon.
 - `read_replication` (Attributes) Configuration for D1 read replication. (see [below for nested schema](#nestedatt--read_replication))
 - `uuid` (String) D1 database identifier (UUID).
 - `version` (String)

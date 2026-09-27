@@ -40,8 +40,11 @@ To get more information about BackendService, see:
     * [Official Documentation](https://cloud.google.com/compute/docs/load-balancing/http/backend-service)
 
 ~> **Warning:** All arguments including the following potentially sensitive
-values will be stored in the raw state as plain text: `iap.oauth2_client_secret`, `iap.oauth2_client_secret_sha256`, `security_settings.aws_v4_authentication.access_key`.
+values will be stored in the raw state as plain text: `iap.oauth2_client_id`, `iap.oauth2_client_secret`, `iap.oauth2_client_secret_sha256`, `security_settings.aws_v4_authentication.access_key`.
 [Read more about sensitive data in state](https://developer.hashicorp.com/terraform/language/manage-sensitive-data).
+
+~> **Note:**  All arguments marked as write-only values will not be stored in the state: `iap.oauth2_client_id_wo`, `iap.oauth2_client_secret_wo`.
+[Read more about Write-only Arguments](https://developer.hashicorp.com/terraform/plugin/sdkv2/resources/write-only-arguments).
 
 <div class = "oics-button" style="float: right; margin: 0 0 -15px">
   <a href="https://console.cloud.google.com/cloudshell/open?cloudshell_git_repo=https%3A%2F%2Fgithub.com%2Fterraform-google-modules%2Fdocs-examples.git&cloudshell_image=gcr.io%2Fcloudshell-images%2Fcloudshell%3Alatest&cloudshell_print=.%2Fmotd&cloudshell_tutorial=.%2Ftutorial.md&cloudshell_working_dir=backend_service_basic&open_in_editor=main.tf" target="_blank">
@@ -54,14 +57,17 @@ values will be stored in the raw state as plain text: `iap.oauth2_client_secret`
 ```hcl
 resource "google_compute_backend_service" "default" {
   name          = "backend-service"
-  health_checks = [google_compute_http_health_check.default.id]
+  health_checks = [google_compute_health_check.default.id]
 }
 
-resource "google_compute_http_health_check" "default" {
+resource "google_compute_health_check" "default" {
   name               = "health-check"
-  request_path       = "/"
   check_interval_sec = 1
   timeout_sec        = 1
+  http_health_check {
+    port         = 80
+    request_path = "/"
+  }
 }
 ```
 <div class = "oics-button" style="float: right; margin: 0 0 -15px">
@@ -95,18 +101,21 @@ resource "google_compute_backend_service" "default" {
 ```hcl
 resource "google_compute_backend_service" "default" {
   name          = "backend-service"
-  health_checks = [google_compute_http_health_check.default.id]
+  health_checks = [google_compute_health_check.default.id]
   enable_cdn  = true
   cdn_policy {
     signed_url_cache_max_age_sec = 7200
   }
 }
 
-resource "google_compute_http_health_check" "default" {
+resource "google_compute_health_check" "default" {
   name               = "health-check"
-  request_path       = "/"
   check_interval_sec = 1
   timeout_sec        = 1
+  http_health_check {
+    port         = 80
+    request_path = "/"
+  }
 }
 ```
 <div class = "oics-button" style="float: right; margin: 0 0 -15px">
@@ -169,7 +178,7 @@ resource "google_compute_backend_service" "default" {
 ```hcl
 resource "google_compute_backend_service" "default" {
   name          = "backend-service"
-  health_checks = [google_compute_http_health_check.default.id]
+  health_checks = [google_compute_health_check.default.id]
   enable_cdn  = true
   cdn_policy {
     cache_mode = "CACHE_ALL_STATIC"
@@ -181,11 +190,14 @@ resource "google_compute_backend_service" "default" {
   }
 }
 
-resource "google_compute_http_health_check" "default" {
+resource "google_compute_health_check" "default" {
   name               = "health-check"
-  request_path       = "/"
   check_interval_sec = 1
   timeout_sec        = 1
+  http_health_check {
+    port         = 80
+    request_path = "/"
+  }
 }
 ```
 <div class = "oics-button" style="float: right; margin: 0 0 -15px">
@@ -199,7 +211,7 @@ resource "google_compute_http_health_check" "default" {
 ```hcl
 resource "google_compute_backend_service" "default" {
   name          = "backend-service"
-  health_checks = [google_compute_http_health_check.default.id]
+  health_checks = [google_compute_health_check.default.id]
   enable_cdn  = true
   cdn_policy {
     cache_mode = "CACHE_ALL_STATIC"
@@ -219,11 +231,14 @@ resource "google_compute_backend_service" "default" {
   }
 }
 
-resource "google_compute_http_health_check" "default" {
+resource "google_compute_health_check" "default" {
   name               = "health-check"
-  request_path       = "/"
   check_interval_sec = 1
   timeout_sec        = 1
+  http_health_check {
+    port         = 80
+    request_path = "/"
+  }
 }
 ```
 <div class = "oics-button" style="float: right; margin: 0 0 -15px">
@@ -407,7 +422,7 @@ resource "google_compute_instance_template" "default" {
   machine_type          = "e2-micro"
 
   disk {
-    source_image = "debian-cloud/debian-11"
+    source_image = "debian-cloud/debian-13"
     auto_delete  = true
     boot         = true
   }
@@ -628,7 +643,7 @@ locals {
 }
 
 data "google_compute_image" "my_image" {
-  family  = "debian-11"
+  family  = "debian-13"
   project = "debian-cloud"
 }
 
@@ -684,16 +699,19 @@ resource "google_compute_backend_service" "default" {
     group = google_compute_instance_group.default[each.key].self_link
   }
 
-  health_checks = [google_compute_http_health_check.default[each.key].self_link]
+  health_checks = [google_compute_health_check.default[each.key].self_link]
   port_name     = "http"
 }
 
-resource "google_compute_http_health_check" "default" {
+resource "google_compute_health_check" "default" {
   for_each           = local.instances
   name               = "${each.key}-hc"
-  request_path       = "/"
   check_interval_sec = 1
   timeout_sec        = 1
+  http_health_check {
+    port         = 80
+    request_path = "/"
+  }
 }
 
 
@@ -849,7 +867,7 @@ The following arguments are supported:
   external load balancing. A backend service created for one type of
   load balancing cannot be used with the other. For more information, refer to
   [Choosing a load balancer](https://cloud.google.com/load-balancing/docs/backend-service).
-  Default value is `EXTERNAL`.
+  Default value is `EXTERNAL_MANAGED`.
   Possible values are: `EXTERNAL`, `INTERNAL_SELF_MANAGED`, `INTERNAL_MANAGED`, `EXTERNAL_MANAGED`.
 
 * `external_managed_migration_state` -
@@ -1455,6 +1473,7 @@ The following arguments are supported:
 * `oauth2_client_id` -
   (Optional)
   OAuth2 Client ID for IAP
+  **Note**: This property is sensitive and will not be displayed in the plan.
 
 * `oauth2_client_secret` -
   (Optional)
@@ -1465,6 +1484,28 @@ The following arguments are supported:
   (Output)
   OAuth2 Client Secret SHA-256 for IAP
   **Note**: This property is sensitive and will not be displayed in the plan.
+
+* `oauth2_client_id_wo` -
+  (Optional, Write-Only)
+  OAuth2 Client ID for IAP
+  **Note**: This property is write-only and will not be read from the API.
+
+  ~> **Note:** One of `oauth2_client_id` or `oauth2_client_id_wo` can only be set.
+
+* `oauth2_client_id_wo_version` -
+  (Optional)
+  Triggers update of `oauth2_client_id_wo` write-only. Increment this value when an update to `oauth2_client_id_wo` is needed. For more info see [updating write-only arguments](/docs/providers/google/guides/using_write_only_arguments.html#updating-write-only-arguments)
+
+* `oauth2_client_secret_wo` -
+  (Optional, Write-Only)
+  OAuth2 Client Secret for IAP
+  **Note**: This property is write-only and will not be read from the API.
+
+  ~> **Note:** One of `oauth2_client_secret` or `oauth2_client_secret_wo` can only be set.
+
+* `oauth2_client_secret_wo_version` -
+  (Optional)
+  Triggers update of `oauth2_client_secret_wo` write-only. Increment this value when an update to `oauth2_client_secret_wo` is needed. For more info see [updating write-only arguments](/docs/providers/google/guides/using_write_only_arguments.html#updating-write-only-arguments)
 
 <a name="nested_locality_lb_policies"></a>The `locality_lb_policies` block supports:
 

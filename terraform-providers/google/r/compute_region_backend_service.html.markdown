@@ -272,7 +272,7 @@ resource "google_compute_region_backend_service" "default" {
 }
 
 data "google_compute_image" "debian_image" {
-  family   = "debian-11"
+  family   = "debian-13"
   project  = "debian-cloud"
 }
 
@@ -288,7 +288,7 @@ resource "google_compute_region_instance_group_manager" "rigm" {
 }
 
 resource "google_compute_instance_template" "instance_template" {
-  name         = "template-region-service"
+  name         = "region-service-template"
   machine_type = "e2-medium"
 
   network_interface {

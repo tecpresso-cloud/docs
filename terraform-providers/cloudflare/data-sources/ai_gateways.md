@@ -41,6 +41,7 @@ data "cloudflare_ai_gateways" "example_ai_gateways" {
 Read-Only:
 
 - `authentication` (Boolean)
+- `byok_only` (Boolean) Requires customer-provided provider credentials and prevents fallback to Unified Billing.
 - `cache_invalidate_on_update` (Boolean)
 - `cache_ttl` (Number)
 - `collect_logs` (Boolean)
@@ -49,6 +50,7 @@ Read-Only:
 - `guardrails` (Attributes) (see [below for nested schema](#nestedatt--result--guardrails))
 - `id` (String) gateway id
 - `is_default` (Boolean)
+- `log_classification` (Boolean)
 - `log_management` (Number)
 - `log_management_strategy` (String) Available values: "STOP_INSERTING", "DELETE_OLDEST".
 - `logpush` (Boolean)
@@ -60,13 +62,13 @@ Read-Only:
 - `rate_limiting_technique` (String) Available values: "fixed", "sliding".
 - `retry_backoff` (String) Backoff strategy for retry delays
 Available values: "constant", "linear", "exponential".
-- `retry_delay` (Number) Delay between retry attempts in milliseconds (0-5000)
+- `retry_delay` (Number) Delay between retry attempts in milliseconds (0-60000)
 - `retry_max_attempts` (Number) Maximum number of retry attempts for failed requests (1-5)
 - `spend_limits` (Attributes) (see [below for nested schema](#nestedatt--result--spend_limits))
 - `store_id` (String)
 - `stripe` (Attributes) (see [below for nested schema](#nestedatt--result--stripe))
-- `workers_ai_billing_mode` (String) Controls how Workers AI inference calls routed through this gateway are billed. Only 'postpaid' is currently supported.
-Available values: "postpaid".
+- `workers_ai_billing_mode` (String) Controls how Workers AI inference calls routed through this gateway are billed. 'postpaid' bills the account directly through Workers AI; 'unified' deducts credits via AI Gateway using neuron-based pricing and delegates billing to AI Gateway.
+Available values: "postpaid", "unified".
 - `zdr` (Boolean)
 
 <a id="nestedatt--result--dlp"></a>

@@ -40,6 +40,11 @@ resource "cloudflare_share" "example_share" {
 - `recipients` (Attributes List) (see [below for nested schema](#nestedatt--recipients))
 - `resources` (Attributes List) (see [below for nested schema](#nestedatt--resources))
 
+### Optional
+
+- `include_recipient_counts` (Boolean) Include recipient counts in the response.
+- `include_resources` (Boolean) Include resources in the response.
+
 ### Read-Only
 
 - `account_name` (String) The display name of an account.
@@ -73,7 +78,7 @@ Required:
 - `resource_account_id` (String) Account identifier.
 - `resource_id` (String) Share Resource identifier.
 - `resource_type` (String) Resource Type.
-Available values: "custom-ruleset", "gateway-policy", "gateway-destination-ip", "gateway-block-page-settings", "gateway-extended-email-matching", "idp-federation-grant".
+Available values: "custom-ruleset", "gateway-policy", "gateway-destination-ip", "gateway-block-page-settings", "gateway-extended-email-matching", "idp-federation-grant", "trust-grant".
 
 ## Import
 

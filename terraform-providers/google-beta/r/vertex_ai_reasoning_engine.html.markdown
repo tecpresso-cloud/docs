@@ -26,9 +26,9 @@ ReasoningEngine provides a customizable runtime for models to determine which ac
 
 To get more information about ReasoningEngine, see:
 
-* [API documentation](https://cloud.google.com/vertex-ai/docs/reference/rest/v1/projects.locations.reasoningEngines/)
+* [API documentation](https://docs.cloud.google.com/gemini-enterprise-agent-platform/reference/rest/v1/projects.locations.reasoningEngines)
 * How-to Guides
-    * [Develop and deploy agents on Vertex AI Agent Engine](https://cloud.google.com/vertex-ai/generative-ai/docs/agent-engine/quickstart)
+    * [Scale your agents](https://docs.cloud.google.com/gemini-enterprise-agent-platform/scale)
 
 <div class = "oics-button" style="float: right; margin: 0 0 -15px">
   <a href="https://console.cloud.google.com/cloudshell/open?cloudshell_git_repo=https%3A%2F%2Fgithub.com%2Fterraform-google-modules%2Fdocs-examples.git&cloudshell_image=gcr.io%2Fcloudshell-images%2Fcloudshell%3Alatest&cloudshell_print=.%2Fmotd&cloudshell_tutorial=.%2Ftutorial.md&cloudshell_working_dir=vertex_ai_reasoning_engine_source_based_deployment&open_in_editor=main.tf" target="_blank">
@@ -336,6 +336,10 @@ resource "google_vertex_ai_reasoning_engine" "reasoning_engine" {
     class_methods   = jsonencode(local.class_methods)
     service_account = google_service_account.service_account.email
 
+    build_spec {
+      service_account = google_service_account.service_account.email
+    }
+
     deployment_spec {
       min_instances         = 1
       max_instances         = 3
@@ -492,7 +496,7 @@ resource "google_vertex_ai_reasoning_engine" "reasoning_engine" {
   context_spec {
     memory_bank_config {
       generation_config {
-        model = "projects/${data.google_project.project.project_id}/locations/us-central1/publishers/google/models/gemini-2.5-flash"
+        model = "projects/${data.google_project.project.project_id}/locations/us-central1/publishers/google/models/gemini-3.5-flash"
         generation_trigger_config {
           generation_rule {
             idle_duration       = "300s"
@@ -515,6 +519,67 @@ resource "google_vertex_ai_reasoning_engine" "reasoning_engine" {
         memory_topics {
           managed_memory_topic {
             managed_topic_enum = "USER_PREFERENCES"
+          }
+        }
+        generate_memories_examples {
+          conversation_source {
+            events {
+              content {
+                role = "user"
+                parts {
+                  text = "I like pepperoni pizza"
+                }
+                parts {
+                  function_call {
+                    id   = "fn-call-1"
+                    name = "order_pizza"
+                    args = jsonencode({
+                      type = "pepperoni"
+                    })
+                  }
+                }
+                parts {
+                  function_response {
+                    id   = "fn-resp-1"
+                    name = "order_pizza"
+                    response = jsonencode({
+                      status = "ordered"
+                    })
+                  }
+                }
+                parts {
+                  executable_code {
+                    id       = "exec-code-1"
+                    language = "PYTHON"
+                    code     = "print('pizza')"
+                  }
+                }
+                parts {
+                  code_execution_result {
+                    id      = "exec-result-1"
+                    outcome = "OUTCOME_OK"
+                    output  = "pizza"
+                  }
+                }
+                parts {
+                  audio_transcription {
+                    speaker_label = "spk_1"
+                    text          = "I like pepperoni pizza"
+                    words {
+                      start_offset = "0.5s"
+                      end_offset   = "1.5s"
+                      word         = "pepperoni"
+                    }
+                  }
+                }
+              }
+            }
+          }
+          generated_memories {
+            fact = "User likes pepperoni pizza."
+            topics {
+              managed_memory_topic = "USER_PREFERENCES"
+            }
           }
         }
       }
@@ -610,12 +675,11 @@ resource "google_vertex_ai_reasoning_engine" "reasoning_engine" {
   display_name = "re-gran-ttl"
   description  = "Reasoning engine with granular ttl"
   region       = "us-central1"
-  provider     = google-beta
 
   context_spec {
     memory_bank_config {
       generation_config {
-        model = "projects/${data.google_project.project.project_id}/locations/us-central1/publishers/google/models/gemini-2.5-flash"
+        model = "projects/${data.google_project.project.project_id}/locations/us-central1/publishers/google/models/gemini-3.5-flash"
       }
       similarity_search_config {
         embedding_model = "projects/${data.google_project.project.project_id}/locations/us-central1/publishers/google/models/text-embedding-005"
@@ -633,9 +697,7 @@ resource "google_vertex_ai_reasoning_engine" "reasoning_engine" {
   }
 }
 
-data "google_project" "project" {
-  provider = google-beta
-}
+data "google_project" "project" {}
 ```
 <div class = "oics-button" style="float: right; margin: 0 0 -15px">
   <a href="https://console.cloud.google.com/cloudshell/open?cloudshell_git_repo=https%3A%2F%2Fgithub.com%2Fterraform-google-modules%2Fdocs-examples.git&cloudshell_image=gcr.io%2Fcloudshell-images%2Fcloudshell%3Alatest&cloudshell_print=.%2Fmotd&cloudshell_tutorial=.%2Ftutorial.md&cloudshell_working_dir=vertex_ai_reasoning_engine_traffic_config&open_in_editor=main.tf" target="_blank">
@@ -697,7 +759,7 @@ The following arguments are supported:
   Structure is [documented below](#nested_spec).
 
 * `context_spec` -
-  (Optional, [Beta](../guides/provider_versions.html.markdown))
+  (Optional)
   Optional. Configuration for how Agent Engine sub-resources should manage context.
   Structure is [documented below](#nested_context_spec).
 
@@ -1035,7 +1097,7 @@ When set to "DELETE", deleting the resource is permitted.
   Optional. The A2A Agent Card for the agent (if available).
 
 * `build_spec` -
-  (Optional, [Beta](../guides/provider_versions.html.markdown))
+  (Optional)
   Optional. Configuration for building container image.
   Structure is [documented below](#nested_spec_build_spec).
 
@@ -1099,7 +1161,7 @@ When set to "DELETE", deleting the resource is permitted.
   Possible values are: `STABLE`, `EXPERIMENTAL`.
 
 * `agent_gateway_config` -
-  (Optional, [Beta](../guides/provider_versions.html.markdown))
+  (Optional)
   Optional. Agent Gateway configuration for a Reasoning Engine deployment.
   Structure is [documented below](#nested_spec_deployment_spec_agent_gateway_config).
 
@@ -1300,7 +1362,7 @@ When set to "DELETE", deleting the resource is permitted.
   Structure is [documented below](#nested_spec_source_code_spec_developer_connect_source).
 
 * `agent_config_source` -
-  (Optional, [Beta](../guides/provider_versions.html.markdown))
+  (Optional)
   Optional. Specification for the deploying from agent config.
   Structure is [documented below](#nested_spec_source_code_spec_agent_config_source).
 
@@ -1398,6 +1460,10 @@ When set to "DELETE", deleting the resource is permitted.
 * `worker_pool` -
   (Optional)
   Optional. The resource name of the Cloud Build WorkerPool to use for the build.
+
+* `service_account` -
+  (Optional)
+  Optional. The service account that the Cloud Build builder runs as.
 
 <a name="nested_context_spec"></a>The `context_spec` block supports:
 
@@ -1542,6 +1608,15 @@ When set to "DELETE", deleting the resource is permitted.
   (Optional)
   Optional. Generate memories in the third person if set to true.
 
+* `disable_natural_language_memories` -
+  (Optional)
+  Indicates whether natural language memory generation should be disabled.
+
+* `generate_memories_examples` -
+  (Optional)
+  Provides examples of how to generate memories for a particular scope.
+  Structure is [documented below](#nested_context_spec_memory_bank_config_customization_configs_generate_memories_examples).
+
 
 <a name="nested_context_spec_memory_bank_config_customization_configs_memory_topics"></a>The `memory_topics` block supports:
 
@@ -1577,6 +1652,236 @@ When set to "DELETE", deleting the resource is permitted.
 * `revisions_per_candidate_count` -
   (Optional)
   Number of revisions to consider per candidate count.
+
+<a name="nested_context_spec_memory_bank_config_customization_configs_generate_memories_examples"></a>The `generate_memories_examples` block supports:
+
+* `conversation_source` -
+  (Optional)
+  A conversation source for the example.
+  Structure is [documented below](#nested_context_spec_memory_bank_config_customization_configs_generate_memories_examples_conversation_source).
+
+* `generated_memories` -
+  (Optional)
+  Represents the memories that are expected to be generated from the input conversation.
+  Structure is [documented below](#nested_context_spec_memory_bank_config_customization_configs_generate_memories_examples_generated_memories).
+
+
+<a name="nested_context_spec_memory_bank_config_customization_configs_generate_memories_examples_conversation_source"></a>The `conversation_source` block supports:
+
+* `events` -
+  (Optional)
+  Represents the input conversation events for the example.
+  Structure is [documented below](#nested_context_spec_memory_bank_config_customization_configs_generate_memories_examples_conversation_source_events).
+
+
+<a name="nested_context_spec_memory_bank_config_customization_configs_generate_memories_examples_conversation_source_events"></a>The `events` block supports:
+
+* `content` -
+  (Required)
+  Represents the content of the event.
+  Structure is [documented below](#nested_context_spec_memory_bank_config_customization_configs_generate_memories_examples_conversation_source_events_content).
+
+
+<a name="nested_context_spec_memory_bank_config_customization_configs_generate_memories_examples_conversation_source_events_content"></a>The `content` block supports:
+
+* `role` -
+  (Optional)
+  The producer of the content. Must be either 'user' or 'model'. If not set, the service will default to 'user'.
+
+* `parts` -
+  (Required)
+  A list of Part objects that make up a single message.
+  Structure is [documented below](#nested_context_spec_memory_bank_config_customization_configs_generate_memories_examples_conversation_source_events_content_parts).
+
+
+<a name="nested_context_spec_memory_bank_config_customization_configs_generate_memories_examples_conversation_source_events_content_parts"></a>The `parts` block supports:
+
+* `text` -
+  (Optional)
+  The text content of the part.
+
+* `thought` -
+  (Optional)
+  Indicates whether the part represents the model's thought process or reasoning.
+
+* `inline_data` -
+  (Optional)
+  The inline data content of the part.
+  Structure is [documented below](#nested_context_spec_memory_bank_config_customization_configs_generate_memories_examples_conversation_source_events_content_parts_inline_data).
+
+* `file_data` -
+  (Optional)
+  URI based data.
+  Structure is [documented below](#nested_context_spec_memory_bank_config_customization_configs_generate_memories_examples_conversation_source_events_content_parts_file_data).
+
+* `function_call` -
+  (Optional)
+  A predicted function call returned from the model.
+  Structure is [documented below](#nested_context_spec_memory_bank_config_customization_configs_generate_memories_examples_conversation_source_events_content_parts_function_call).
+
+* `function_response` -
+  (Optional)
+  The result of a function call.
+  Structure is [documented below](#nested_context_spec_memory_bank_config_customization_configs_generate_memories_examples_conversation_source_events_content_parts_function_response).
+
+* `executable_code` -
+  (Optional)
+  Code generated by the model that is intended to be executed.
+  Structure is [documented below](#nested_context_spec_memory_bank_config_customization_configs_generate_memories_examples_conversation_source_events_content_parts_executable_code).
+
+* `code_execution_result` -
+  (Optional)
+  Result of executing the ExecutableCode.
+  Structure is [documented below](#nested_context_spec_memory_bank_config_customization_configs_generate_memories_examples_conversation_source_events_content_parts_code_execution_result).
+
+* `video_metadata` -
+  (Optional)
+  Video metadata.
+  Structure is [documented below](#nested_context_spec_memory_bank_config_customization_configs_generate_memories_examples_conversation_source_events_content_parts_video_metadata).
+
+* `audio_transcription` -
+  (Optional)
+  Audio (input or output) transcription. This is only set when this Part contains audio data.
+  Structure is [documented below](#nested_context_spec_memory_bank_config_customization_configs_generate_memories_examples_conversation_source_events_content_parts_audio_transcription).
+
+
+<a name="nested_context_spec_memory_bank_config_customization_configs_generate_memories_examples_conversation_source_events_content_parts_inline_data"></a>The `inline_data` block supports:
+
+* `mime_type` -
+  (Required)
+  The IANA standard MIME type of the source data.
+
+* `data` -
+  (Required)
+  Raw bytes, which should be base64-encoded.
+
+<a name="nested_context_spec_memory_bank_config_customization_configs_generate_memories_examples_conversation_source_events_content_parts_file_data"></a>The `file_data` block supports:
+
+* `mime_type` -
+  (Required)
+  The IANA standard MIME type of the source data.
+
+* `file_uri` -
+  (Required)
+  The URI of the file in Google Cloud Storage.
+
+<a name="nested_context_spec_memory_bank_config_customization_configs_generate_memories_examples_conversation_source_events_content_parts_function_call"></a>The `function_call` block supports:
+
+* `id` -
+  (Optional)
+  The unique id of the function call.
+
+* `name` -
+  (Optional)
+  The name of the function to call.
+
+* `args` -
+  (Optional)
+  The function parameters and values in JSON object format.
+
+<a name="nested_context_spec_memory_bank_config_customization_configs_generate_memories_examples_conversation_source_events_content_parts_function_response"></a>The `function_response` block supports:
+
+* `id` -
+  (Optional)
+  The id of the function call this response is for.
+
+* `name` -
+  (Required)
+  The name of the function to call.
+
+* `response` -
+  (Optional)
+  The function response in JSON object format.
+
+<a name="nested_context_spec_memory_bank_config_customization_configs_generate_memories_examples_conversation_source_events_content_parts_executable_code"></a>The `executable_code` block supports:
+
+* `id` -
+  (Optional)
+  Unique identifier of the ExecutableCode part.
+
+* `language` -
+  (Required)
+  Supported programming languages for the generated code. Possible values: ["LANGUAGE_UNSPECIFIED", "PYTHON", "BASH"]
+
+* `code` -
+  (Required)
+  The code to be executed.
+
+<a name="nested_context_spec_memory_bank_config_customization_configs_generate_memories_examples_conversation_source_events_content_parts_code_execution_result"></a>The `code_execution_result` block supports:
+
+* `id` -
+  (Optional)
+  The identifier of the ExecutableCode part this result is for.
+
+* `outcome` -
+  (Required)
+  Outcome of the code execution. Possible values: ["OUTCOME_UNSPECIFIED", "OUTCOME_OK", "OUTCOME_FAILED", "OUTCOME_DEADLINE_EXCEEDED"]
+
+* `output` -
+  (Optional)
+  Contains stdout when code execution is successful, stderr or other description otherwise.
+
+<a name="nested_context_spec_memory_bank_config_customization_configs_generate_memories_examples_conversation_source_events_content_parts_video_metadata"></a>The `video_metadata` block supports:
+
+* `start_offset` -
+  (Optional)
+  The start offset of the video.
+
+* `end_offset` -
+  (Optional)
+  The end offset of the video.
+
+<a name="nested_context_spec_memory_bank_config_customization_configs_generate_memories_examples_conversation_source_events_content_parts_audio_transcription"></a>The `audio_transcription` block supports:
+
+* `speaker_label` -
+  (Optional)
+  A label identifying the speaker of this audio segment (e.g. spk_1, spk_2). Present when diarization is set.
+
+* `text` -
+  (Required)
+  The transcription text of this audio segment.
+
+* `words` -
+  (Optional)
+  Detailed word-level transcriptions and timing details. Present when word_timestamp is set.
+  Structure is [documented below](#nested_context_spec_memory_bank_config_customization_configs_generate_memories_examples_conversation_source_events_content_parts_audio_transcription_words).
+
+
+<a name="nested_context_spec_memory_bank_config_customization_configs_generate_memories_examples_conversation_source_events_content_parts_audio_transcription_words"></a>The `words` block supports:
+
+* `end_offset` -
+  (Optional)
+  End offset in time of the word relative to the start of the audio.
+
+* `start_offset` -
+  (Optional)
+  Start offset in time of the word relative to the start of the audio.
+
+* `word` -
+  (Required)
+  Transcript of the word.
+
+<a name="nested_context_spec_memory_bank_config_customization_configs_generate_memories_examples_generated_memories"></a>The `generated_memories` block supports:
+
+* `fact` -
+  (Required)
+  Represents the fact to generate a memory from.
+
+* `topics` -
+  (Optional)
+  Represents the list of topics that the memory should be associated with.
+  Structure is [documented below](#nested_context_spec_memory_bank_config_customization_configs_generate_memories_examples_generated_memories_topics).
+
+
+<a name="nested_context_spec_memory_bank_config_customization_configs_generate_memories_examples_generated_memories_topics"></a>The `topics` block supports:
+
+* `custom_memory_topic_label` -
+  (Optional)
+  Represents the custom memory topic label.
+
+* `managed_memory_topic` -
+  (Optional)
+  Represents the managed memory topic. Possible values: ["USER_PERSONAL_INFO", "USER_PREFERENCES", "KEY_CONVERSATION_DETAILS", "EXPLICIT_INSTRUCTIONS"]
 
 <a name="nested_context_spec_memory_bank_config_structured_memory_configs"></a>The `structured_memory_configs` block supports:
 

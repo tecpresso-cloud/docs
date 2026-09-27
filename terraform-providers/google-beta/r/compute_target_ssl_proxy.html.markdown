@@ -57,9 +57,10 @@ resource "google_compute_ssl_certificate" "default" {
 }
 
 resource "google_compute_backend_service" "default" {
-  name          = "backend-service"
-  protocol      = "SSL"
-  health_checks = [google_compute_health_check.default.id]
+  name                  = "backend-service"
+  protocol              = "SSL"
+  load_balancing_scheme = "EXTERNAL"
+  health_checks         = [google_compute_health_check.default.id]
 }
 
 resource "google_compute_health_check" "default" {
@@ -72,7 +73,7 @@ resource "google_compute_health_check" "default" {
 }
 
 resource "google_certificate_manager_certificate_map" "default" {
-  name        = "certificate-map-test"
+  name        = "certificate-map"
   description = "My acceptance test certificate map"
 }
 ```

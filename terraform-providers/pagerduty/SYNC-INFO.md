@@ -1,9 +1,9 @@
 # PagerDuty Terraform Provider - Synced Docs
 
 **Provider:** `PagerDuty/terraform-provider-pagerduty`
-**Version:** v3.35.0
-**Synced:** 2026-08-14 02:20 UTC
-**Source:** https://github.com/PagerDuty/terraform-provider-pagerduty/releases/tag/v3.35.0
+**Version:** v3.36.0
+**Synced:** 2026-09-27 03:23 UTC
+**Source:** https://github.com/PagerDuty/terraform-provider-pagerduty/releases/tag/v3.36.0
 **Doc files:** 89
 
 ## Directory Structure

@@ -1,10 +1,10 @@
 # Linode Terraform Provider - Synced Docs
 
 **Provider:** `linode/terraform-provider-linode`
-**Version:** v4.3.0
-**Synced:** 2026-08-21 23:38 UTC
-**Source:** https://github.com/linode/terraform-provider-linode/releases/tag/v4.3.0
-**Doc files:** 153
+**Version:** v4.5.0
+**Synced:** 2026-09-27 03:23 UTC
+**Source:** https://github.com/linode/terraform-provider-linode/releases/tag/v4.5.0
+**Doc files:** 154
 
 ## Directory Structure
 

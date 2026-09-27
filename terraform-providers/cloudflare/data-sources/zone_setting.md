@@ -48,7 +48,7 @@ The following table lists all valid `setting_id` values. Some settings may requi
 | `image_resizing` | `"on"`, `"off"`, `"open"` | Image Transformations provides on-demand resizing, conversion and optimizatio... |
 | `ip_geolocation` | `"on"` / `"off"` | Enable IP Geolocation to have Cloudflare geolocate visitors to your website a... |
 | `ipv6` | `"on"` / `"off"` | Enable IPv6 on all subdomains that are Cloudflare enabled.  (https://support.... |
-| `max_upload` | Number (18 values) | Maximum size of an allowable upload. |
+| `max_upload` | Number (26 values) | Maximum size of an allowable upload. |
 | `min_tls_version` | `"1.0"`, `"1.1"`, `"1.2"`, `"1.3"` | Only accepts HTTPS requests that use at least the TLS protocol version specif... |
 | `mirage` | `"on"` / `"off"` | Automatically optimize image loading for website visitors on mobile devices. ... |
 | `nel` | Object | Enable Network Error Logging reporting on your zone. (Beta) |
@@ -59,6 +59,7 @@ The following table lists all valid `setting_id` values. Some settings may requi
 | `origin_h2_max_streams` | Number | Origin H2 Max Streams configures the max number of concurrent requests that C... |
 | `origin_max_http_version` | `"2"`, `"1"` | Origin Max HTTP Setting Version sets the highest HTTP version Cloudflare will... |
 | `polish` | `"off"`, `"lossless"`, `"lossy"` | Removes metadata and compresses your images for faster page load times. Basic... |
+| `pre_render` | `"on"` / `"off"` | When enabled, Cloudflare serves pre-rendered HTML to eligible search and AI c... |
 | `prefetch_preload` | `"on"` / `"off"` | Cloudflare will prefetch any URLs that are included in the response headers. ... |
 | `privacy_pass` | `"on"` / `"off"` | Privacy Pass v1 was a browser extension developed by the Privacy Pass Team to... |
 | `proxy_read_timeout` | Number | Maximum time between two read operations from origin. |
@@ -82,6 +83,8 @@ The following table lists all valid `setting_id` values. Some settings may requi
 | `transformations_allowed_origins` | String | Media Transformations Allowed Origins restricts transformations for images an... |
 | `true_client_ip_header` | `"on"` / `"off"` | Allows customer to continue to use True Client IP (Akamai feature) in the hea... |
 | `waf` | `"on"` / `"off"` | The WAF examines HTTP requests to your website.  It inspects both GET and POS... |
+| `webmcp_enabled` | `"on"` / `"off"` | When enabled, Cloudflare injects the WebMCP bridge (bridge.js) into HTML resp... |
+| `webmcp_packs` | String | Optional per-zone override of which bundled WebMCP tool packs the injected br... |
 | `webp` | `"on"` / `"off"` | When the client requesting the image supports the WebP image codec, and WebP ... |
 | `websockets` | `"on"` / `"off"` | WebSockets are open connections sustained between the client and the origin s... |
 
