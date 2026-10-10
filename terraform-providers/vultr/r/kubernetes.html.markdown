@@ -75,10 +75,12 @@ The follow arguments are supported:
 * `node_quantity` - (Required) The number of nodes in this node pool.
 * `plan` - (Required) The plan to be used in this node pool. [See plans list](https://www.vultr.com/api/#operation/list-plans) Note the minimum plan requirements must have at least 1 core and 2 gbs of memory.
 * `label` - (Required) The label to be used as a prefix for nodes in this node pool.
-* `auto_scaler` - (Optional, Default to False) Enable the auto scaler for the default node pool.
+* `auto_scaler` - (Optional, Default to false) Enable the auto scaler for the default node pool.
 * `min_nodes` - (Optional, Default to 1) The minimum number of nodes to use with the auto scaler.
 * `max_nodes` - (Optional, Default to 1) The maximum number of nodes to use with the auto scaler.
 * `user_data` - (Optional) A base64 encoded string containing the user data to apply to nodes in the node pool.
+* `vpc_only` - (Optional, Default to false) Enable private-only VPC connectivity for nodes. If true, nodes can only access the internet via the NAT Gateway attached to the VPC.
+* `node_recycle` - (Optional, update only, write only) A list of node IDs to recycle. This will increase the node pool size with new nodes and automatically remove the recycled nodes.
 
 `labels` - (Optional) A list of labels to apply to the nodes in the node pool with these fields:
 
@@ -106,10 +108,6 @@ The following attributes are exported:
 * `endpoint` - Domain for your Kubernetes clusters control plane.
 * `ip` - IP address of VKE cluster control plane.
 * `date_created` - Date of VKE cluster creation.
-* `kube_config` - Base64 encoded Kubeconfig for this VKE cluster.
-* `cluster_ca_certificate` - The base64 encoded public certificate for the cluster's certificate authority.
-* `client_key` - The base64 encoded private key used by clients to access the cluster.
-* `client_certificate` - The base64 encoded public certificate used by clients to access the cluster.
 * `oidc_issuer_url` - The URL of the OIDC provider that issues authentication tokens.
 * `oidc_client_id` - The unique identifier assigned to your application by the OIDC provider.
 * `oidc_username_claim` - The claim in the OIDC token that identifies the end user's username.
@@ -127,6 +125,7 @@ The following attributes are exported:
 * `min_nodes` - The minimum number of nodes used by the auto scaler.
 * `max_nodes` - The maximum number of nodes used by the auto scaler.
 * `user_data` - The base64 encoded user data for nodes in the node pool.
+* `vpc_only` -  Private-only VPC connectivity for nodes.
 * `status` - Status of node pool.
 * `tag` - Tag for node pool.
 * `date_created` - Date of node pool creation.

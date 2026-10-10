@@ -1,10 +1,10 @@
 # Azure Terraform Provider - Synced Docs
 
 **Provider:** `hashicorp/terraform-provider-azurerm`
-**Version:** v5.7.0
-**Synced:** 2026-09-27 03:23 UTC
-**Source:** https://github.com/hashicorp/terraform-provider-azurerm/releases/tag/v5.7.0
-**Doc files:** 1635
+**Version:** v5.9.0
+**Synced:** 2026-10-10 01:37 UTC
+**Source:** https://github.com/hashicorp/terraform-provider-azurerm/releases/tag/v5.9.0
+**Doc files:** 1649
 
 ## Directory Structure
 

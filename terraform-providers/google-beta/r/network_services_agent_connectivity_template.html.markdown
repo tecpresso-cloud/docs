@@ -36,7 +36,7 @@ data "google_project" "project" {}
 
 resource "google_network_services_agent_connectivity_template" "default" {
   agent_connectivity_template_id = "my-connectivity-template"
-  location                       = "us-central1"
+  location                       = "us-west2"
   description                    = "A basic configuration for Agent Connectivity Template"
   labels = {
     env  = "test"
@@ -59,14 +59,14 @@ resource "google_compute_network" "default" {
 
 resource "google_compute_subnetwork" "default" {
   name          = "my-subnetwork"
-  region        = "us-central1"
+  region        = "us-west2"
   network       = google_compute_network.default.id
   ip_cidr_range = "10.0.0.0/16"
 }
 
 resource "google_compute_network_attachment" "default" {
   name                  = "my-attachment"
-  region                = "us-central1"
+  region                = "us-west2"
   connection_preference = "ACCEPT_AUTOMATIC"
   subnetworks           = [google_compute_subnetwork.default.id]
 }
@@ -84,9 +84,23 @@ resource "google_dns_managed_zone" "default" {
   }
 }
 
+resource "google_certificate_manager_trust_config" "default" {
+  name        = "my-trust-config"
+  location    = "us-west2"
+
+  trust_stores {
+    trust_anchors { 
+      pem_certificate = file("test-fixtures/cert.pem")
+    }
+    intermediate_cas { 
+      pem_certificate = file("test-fixtures/cert.pem")
+    }
+  }
+}
+
 resource "google_network_services_agent_connectivity_template" "default" {
   agent_connectivity_template_id = "my-connectivity-template"
-  location                       = "us-central1"
+  location                       = "us-west2"
   description                    = "An advanced configuration for Agent Connectivity Template"
 
   access_types = ["PRIVATE"]
@@ -96,8 +110,12 @@ resource "google_network_services_agent_connectivity_template" "default" {
     vpc_egress = "ALL_TRAFFIC"
     network_attachment = google_compute_network_attachment.default.id
     dns_peering_config {
-      domain         = google_dns_managed_zone.default.dns_name
+      domains        = [google_dns_managed_zone.default.dns_name]
       target_network = google_compute_network.default.id
+    }
+    tls_config {
+      trust_config = "projects/${data.google_project.project.number}/locations/us-west2/trustConfigs/${google_certificate_manager_trust_config.default.name}"
+      additional_roots = "NO_ADDITIONAL_ROOTS"
     }
   }
 }
@@ -167,7 +185,7 @@ The following arguments are supported:
   (Optional)
   DNS peering configuration for the AgentConnectivityTemplate.
   When set, the gateway will resolve queries for the configured
-  `domain` via Cloud DNS in the specified `targetNetwork`.
+  `domains` via Cloud DNS in the specified `targetNetwork`.
   Structure is [documented below](#nested_egress_network_config_dns_peering_config).
 
 * `vpc_egress` -
@@ -175,18 +193,44 @@ The following arguments are supported:
   The VPC egress setting.
   Possible values are: `ALL_TRAFFIC`, `PRIVATE_RANGES_ONLY`.
 
+* `tls_config` -
+  (Optional)
+  The TLS configuration for the egress traffic.
+  Structure is [documented below](#nested_egress_network_config_tls_config).
+
 
 <a name="nested_egress_network_config_dns_peering_config"></a>The `dns_peering_config` block supports:
 
 * `domain` -
-  (Required)
+  (Optional, Deprecated)
   The domain name to peer for DNS resolution. Must be a fully
   qualified domain name ending with a dot (for example, `example.com.`).
+
+  ~> **Warning:** `domain` is deprecated and will be removed in a future major release. Use `domains` instead.
+
+* `domains` -
+  (Optional)
+  The list of domain names to peer for DNS resolution. Each entry
+  must be a fully qualified domain name ending with a dot
+  (for example, `example.com.`). At least one domain must be
+  specified between `domain` and `domains`.
 
 * `target_network` -
   (Required)
   The URI of the target VPC network for DNS peering. Must be of the
   form `projects/{project}/global/networks/{network}`.
+
+<a name="nested_egress_network_config_tls_config"></a>The `tls_config` block supports:
+
+* `trust_config` -
+  (Optional)
+  The trust config resource name.
+  Format: projects/{project}/locations/{location}/trustConfigs/{trust_config}
+
+* `additional_roots` -
+  (Required)
+  Defines whether additional roots should be trusted.
+  Possible values are: `NO_ADDITIONAL_ROOTS`, `PUBLICLY_TRUSTED_ROOTS`.
 
 ## Attributes Reference
 
