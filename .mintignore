@@ -5,3 +5,10 @@
 # Draft content
 drafts/
 *.draft.mdx
+
+# Not site content: synced vendor references and working files
+terraform-providers/
+ansible/
+scripts/
+TASKS.md
+*-session-prompt.md
