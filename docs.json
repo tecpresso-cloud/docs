@@ -94,6 +94,11 @@
   "feedback": {
     "thumbsRating": true
   },
+  "integrations": {
+    "gtm": {
+      "tagId": "GTM-PFX72JJQ"
+    }
+  },
   "seo": {
     "metatags": {
       "robots": "noindex, nofollow"
